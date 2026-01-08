@@ -105,12 +105,32 @@ export default function ReportsPage() {
     toast.success('Rapor metin dosyası olarak indirildi.')
   }
 
-  const handleDownloadPDF = (report: Report) => {
+  const handleDownloadPDF = async (report: Report) => {
     const doc = new jsPDF()
 
-    // Font ayarı (Türkçe karakterler için varsayılan font sorun olabilir,
-    // basic çözüm olarak latin karakterleri kullanıyoruz veya font eklemek gerekir.
-    // Şimdilik standart font ile devam ediyoruz, Türkçe karakterler bozuk çıkarsa font eklenmeli.)
+    try {
+        // Türkçe karakter desteği için Roboto fontunu yüklüyoruz
+        const fontUrl = '/fonts/Roboto-Regular.ttf'
+        const response = await fetch(fontUrl)
+        const blob = await response.blob()
+
+        const reader = new FileReader()
+        await new Promise((resolve, reject) => {
+            reader.onload = resolve
+            reader.onerror = reject
+            reader.readAsDataURL(blob)
+        })
+
+        if (reader.result && typeof reader.result === 'string') {
+            const base64 = reader.result.split(',')[1]
+            doc.addFileToVFS('Roboto-Regular.ttf', base64)
+            doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal')
+            doc.setFont('Roboto')
+        }
+    } catch (error) {
+        console.error('Font yüklenirken hata oluştu:', error)
+        toast.error('Türkçe font yüklenemedi, standart font kullanılacak.')
+    }
 
     doc.setFontSize(16)
     doc.text(report.title, 10, 10)
