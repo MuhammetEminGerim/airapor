@@ -1,0 +1,232 @@
+## İSG DENETİM RAPORU
+
+**Rapor No:** İSG-DENETİM-2024-001
+**Tarih:** 07.01.2025 (Veriler 2024 ve 05.01.2025 tarihlerini kapsadığı için raporun genel bir analiz olduğu anlaşılmıştır.)
+**Konu:** İş Sağlığı ve Güvenliği Denetim Sonuçları ve Uygunsuzluk Tespiti
+**Dağıtım:** İşletme Yönetimi, İSG Kurulu Üyeleri, İlgili Departman Amirleri
+
+### 1. Amaç
+
+Bu rapor, işletme genelinde farklı lokasyonlarda ve zamanlarda yapılan saha gözlemleri, ramak kala olay bildirimleri ve raporlamalar neticesinde tespit edilen iş sağlığı ve güvenliği uygunsuzluklarını, iyileştirme gerektiren durumları ve iyi uygulamaları belirlemek amacıyla hazırlanmıştır. Tespit edilen uygunsuzlukların ilgili mevzuat kapsamında değerlendirilerek gerekli düzeltici ve önleyici faaliyetlerin başlatılması hedeflenmektedir.
+
+### 2. Referans Mevzuat
+
+*   6331 Sayılı İş Sağlığı ve Güvenliği Kanunu
+*   Yapı İşlerinde İş Sağlığı ve Güvenliği Yönetmeliği (Ek-1 ve ilgili maddeleri)
+
+### 3. Denetim Bulguları ve Uygunsuzluklar
+
+Aşağıda, analiz edilen verilerden elde edilen kritik, orta ve düşük risk seviyesindeki uygunsuzluklar ile ramak kala olaylar ve iyi uygulamalar, ilgili mevzuat maddeleri belirtilerek sunulmuştur.
+
+#### 3.1. Kritik Risk Seviyesindeki Uygunsuzluklar
+
+1.  **Pres Makinesi Emniyet Sensörü Devre Dışı Bırakılması:** Preshane bölümünde pres makinesinin emniyet sensörünün devre dışı bırakıldığı ve işçilerin elle müdahale ettiği tespit edilmiştir. Bu durum, ciddi yaralanma riski taşımaktadır. Üretim durdurulmuştur.
+    *   (6331 Sayılı İSG Kanunu Madde 4 - İşverenin genel yükümlülüğü; Yapı İşl. Yön. Ek-1, Madde 6 - İş ekipmanları ve güvenlik sistemleri)
+2.  **Kazan Dairesi Ana Panodan Duman ve Cızırtı:** Kazan dairesinde ana elektrik panosundan duman çıktığı ve cızırtı sesi geldiği, elektrik çarpması ve yangın riski taşıdığı belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 5.1 - Elektrik tesisatı; Madde 4.4 - Yangınla mücadele)
+3.  **Tavan Vinci Halatında Ciddi Aşınma:** Lojistik depoda tavan vincinin halatında ciddi aşınma olduğu, yük düşmesi ve ezilme riski taşıdığı rapor edilmiştir. Acil bakım gerekmektedir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 6 - İş ekipmanları; Madde 3.5 - Makine, alet ve tesisatların bakımı)
+4.  **Boyahane Havalandırma Arızası ve Maskesiz Çalışma:** Boyahane havalandırmasının bozulduğu, kimyasal kokusundan durulamadığı ve maskesiz çalışanların bulunduğu tespit edilmiştir. Acil tahliye yapılmıştır.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 10 - Risk değerlendirmesi; Yapı İşl. Yön. Ek-1, Madde 10 - Kimyasal maddeler, yeterli havalandırma; Madde 1 - Kişisel koruyucu donanım kullanımı)
+5.  **Rafların Üst Katına Ağır Palet İstifleme ve Raf Esnemesi:** Lojistik depoda rafların en üst katına çok ağır paletlerin konulduğu ve rafın esnediği, devrilme riski bulunduğu belirlenmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 10; Yapı İşl. Yön. Ek-1, Madde 2.7 - Yapıların sağlamlığı ve kararlılığı; Madde 2.1 - Çalışma yerlerinin düzeni)
+6.  **Vinç Kancası Emniyet Mandalı Kırık:** Montaj Hattı A'da vinç kancasının emniyet mandalının kırık olduğu ve yük düşme riski nedeniyle kullanım dışı bırakıldığı tespit edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 6 - İş ekipmanları; Madde 3.5 - Makine, alet ve tesisatların bakımı)
+7.  **Kazan Dairesi Gaz Kokusu:** Kazan dairesinde gaz kokusu alındığı, dedektör alarm vermese de riskli görüldüğü ve vanaların kapattırıldığı bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 10, Madde 11 - Acil durum planları; Yapı İşl. Yön. Ek-1, Madde 10 - Kimyasal maddeler ve gazlar)
+8.  **Makine Koruma Kapağı Açıkken Makine Çalışması:** Preshane bölümünde makine koruma kapağı açıkken makinenin çalıştığı ve switch arızası olduğu tespit edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 6 - İş ekipmanları ve güvenlik sistemleri)
+9.  **Yangın Çıkış Kapısının Kilitli Olması:** Ofis Katı'nda yangın çıkış kapısının kilitli bulunduğu ve anahtarın panoda olmadığı belirlenmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 11; Yapı İşl. Yön. Ek-1, Madde 4.1 - Acil çıkış yolları ve kapıları)
+10. **Sıcak Su Kazanı Termostat Arızası ve Aşırı Isınma:** Yemekhanede sıcak su kazanı termostatının arızalı olduğu ve suyun aşırı ısındığı, haşlanma riski taşıdığı rapor edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 9 - Yüksek ve düşük sıcaklıklar; Madde 6 - İş ekipmanları)
+11. **Gece Vardiyasında Havalandırma Kapatılması:** Boyahanede gece vardiyasında havalandırmanın kapatıldığı, içerisinin ağır kimyasal koktuğu tespit edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 10; Yapı İşl. Yön. Ek-1, Madde 10 - Kimyasal maddeler, yeterli havalandırma)
+12. **İstiflemenin Yüksek Yapılması ve Devrilme Tehlikesi:** Lojistik depoda istiflemenin çok yüksek yapıldığı ve devrilme tehlikesi bulunduğu gözlenmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 10; Yapı İşl. Yön. Ek-1, Madde 2.1 - Çalışma yerlerinin düzeni; Madde 2.7 - Yapıların sağlamlığı ve kararlılığı)
+13. **Statik Elektrik Önleyici Bileklik Kullanılmaması:** Boyahanede statik elektrik önleyici bilekliklerin kullanılmadığı, patlama riski oluşturduğu tespit edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 19 - Çalışanların yükümlülükleri; Yapı İşl. Yön. Ek-1, Madde 1 - Kişisel koruyucu donanım kullanımı; Madde 4.4 - Yangın ve patlama önleme)
+14. **Streçleme Makinesi Kablosu Ezilmiş ve Bakır Görünüyor:** Lojistik depoda streçleme makinesinin kablosunun ezildiği ve bakırın göründüğü, elektrik çarpma riski taşıdığı ve kullanımının yasaklandığı belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 5.1 - Elektrik tesisatı; Madde 5.2 - Elektrik tehlikelerine karşı korunma)
+15. **Çift El Kumanda Butonu Arızalı:** Preshane bölümünde çift el kumanda butonunun arızalı olduğu ve makinenin tek elle çalıştığı tespit edilerek durdurulmuştur.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 6 - İş ekipmanları ve güvenlik sistemleri)
+16. **Yemekhanede Zehirlenme Şüphesi:** Yemekhanede akşam yemeği sonrası zehirlenme şüphesiyle 2 kişinin revire gittiği, yemek numunesinin incelendiği rapor edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 11 - Sağlık ve hijyen)
+
+#### 3.2. Orta Risk Seviyesindeki Uygunsuzluklar ve Ramak Kala Olaylar
+
+1.  **Forklift Kör Nokta Ramak Kala:** Lojistik depoda forklift geri manevra yaparken kör noktada duran personeli son anda fark etmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 10; Yapı İşl. Yön. Ek-1, Madde 3.1 - Çalışma yerleri ve ulaşım yolları)
+2.  **Kaygan Zemin, Sarı Tabela Eksikliği:** Yemekhane zemin temizliğinden sonra sarı tabela konulmadığı, yerlerin kaygan olduğu belirlenmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.5 - Zeminlerin kayganlığı; Madde 3.3 - İşaretlemeler)
+3.  **Havalandırma Fanı Gürültülü Çalışması:** Boyahanede havalandırma fanlarından birinin gürültülü çalıştığı, rulman dağıtmış olabileceği ve bakıma alındığı bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.5 - Makine, alet ve tesisatların bakımı)
+4.  **Kabloya Takılan Personel Ramak Kala:** Montaj Hattı A'da kabloya takılan personelin düşmekten son anda kurtulduğu, kabloların toplanması gerektiği belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.1 - Çalışma yerlerinin düzeni; Madde 2.5 - Zeminler)
+5.  **Acil Çıkış Kapısı Önüne Palet Yığılması:** Preshane'de acil çıkış kapısının önüne palet yığıldığı ve kapının tam açılmadığı tespit edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 11; Yapı İşl. Yön. Ek-1, Madde 4.1 - Acil çıkış yolları ve kapıları)
+6.  **Toplantı Odası Prizi Gevşemesi:** Ofis Katı'nda toplantı odasındaki prizin gevşediği ve kıvılcım çıkardığı, onarıldığı bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 5.1 - Elektrik tesisatı; Madde 5.2 - Elektrik tehlikelerine karşı korunma)
+7.  **Kimyasal Varili Kapağı Gevşemesi Ramak Kala:** Boyahanede kimyasal varili taşırken kapağın gevşediği, dökülmeden fark edilip sıkıldığı belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 10; Yapı İşl. Yön. Ek-1, Madde 10 - Kimyasal maddeler)
+8.  **İskele Kurulumunda Yeşil Etiket Eksikliği:** Montaj Hattı A'da iskele kurulumunda yeşil etiket asılmadığı, kontrol edilip edilmediğinin belli olmadığı ve çalışmanın durdurulduğu belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-4, Madde 1.10 - İskelelerin kontrolü ve etiketlenmesi)
+9.  **Çekiç İskeleden Düşmesi Ramak Kala:** Kazan Dairesi'nde çekiç iskeleden düşerek aşağıdan geçen işçinin 1 metre yanına isabet etmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.4 - Düşen cisimlere karşı korunma; Madde 2.6 - Açıklıklar ve düşme tehlikesi)
+10. **Kaynak Yapan Personelin Gözlüksüz Çalışması:** Preshane'de kaynak yapan personelin gözlüğü olmadan çalıştığı ve uyarıldığı tespit edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 19; Yapı İşl. Yön. Ek-1, Madde 1 - Kişisel koruyucu donanım kullanımı)
+11. **Forklift Şarj Kablo İzolasyonu Sıyrılması:** Lojistik depoda forklift şarj istasyonunda kablo izolasyonunun sıyrıldığı, elektrik çarpma riski bulunduğu ve geçici bantlandığı bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 5.1 - Elektrik tesisatı; Madde 5.2 - Elektrik tehlikelerine karşı korunma)
+12. **Yemekhane Zemininde Yağ Döküntüsü:** Yemekhane zemininde yağ döküldüğü ve temizlenmeden bırakıldığı gözlenmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.5 - Zeminler)
+13. **Forklift Yolu Üzerine Malzeme Bırakılması:** Dış sahada forklift yolu üzerine malzeme bırakıldığı ve geçişi kapattığı tespit edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.1 - Çalışma yerleri ve ulaşım yolları; Madde 2.1 - Çalışma yerlerinin düzeni)
+14. **Konveyör Bandında Sıkışma Ramak Kala:** Montaj Hattı A'da konveyör bandında sıkışma olduğu, operatörün elini kaptırmaktan son anda kurtulduğu bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 6 - İş ekipmanları ve güvenlik sistemleri)
+15. **Kazan Basınç Göstergesi Kırmızı Bölgeye Yaklaşması:** Kazan dairesinde kazan basınç göstergesinin kırmızı bölgeye yaklaştığı, operatöre haber verilerek basıncın düşürüldüğü bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 6 - İş ekipmanları, periyodik kontroller)
+16. **Çay Ocağı Tüp Hortumu Eskiliği:** Yemekhanedeki çay ocağı tüp hortumunun eski göründüğü ve çatlaklar olduğu, değiştirilmesi gerektiği belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 4.4 - Yangınla mücadele; Madde 3.5 - Makine, alet ve tesisatların bakımı)
+17. **Maskesiz Boya Yapan Personel:** Boyahanede maskesiz boya yapan personel tespit edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 19; Yapı İşl. Yön. Ek-1, Madde 1 - Kişisel koruyucu donanım kullanımı)
+18. **Yağmur Suyu Gideri Tıkanıklığı ve Gölet:** Dış sahada yağmur suyu giderinin tıkandığı, kapı önünde gölet oluştuğu ve kayma riski bulunduğu gözlenmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.5 - Zeminler)
+19. **Yaya Yoluna Malzeme Konulması:** Lojistik depoda yaya yoluna malzeme konulduğu, personelin forklift yolundan yürümek zorunda kaldığı tespit edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.1 - Çalışma yerleri ve ulaşım yolları; Madde 2.1 - Çalışma yerlerinin düzeni)
+20. **Bulaşıkhane Zemininde Su Birikintisi:** Yemekhanede bulaşıkhane zemininde su birikintisi olduğu, giderin tıkandığı ve kayma uyarısı levhası konulduğu bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.5 - Zeminler)
+21. **Tiner Tenekeleri Açık Bırakılması:** Boyahanede tiner tenekelerinin açık bırakıldığı, buharlaşma olduğu ve kapaklarının kapattırıldığı tespit edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 10; Yapı İşl. Yön. Ek-1, Madde 10 - Kimyasal maddelerin depolanması; Madde 4.4 - Yangınla mücadele)
+22. **Dış Aydınlatma Direği Sallanması:** Dış sahada dış aydınlatma direklerinden birinin rüzgarda çok sallandığı, dibinin çürümüş olabileceği ve kontrol edilmesi gerektiği belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.7 - Yapıların sağlamlığı ve kararlılığı)
+23. **Montaj Bankosu Ayağı Kırık:** Montaj hattında montaj bankosunun ayağının kırık olduğu, üstündeki malzemelerin devrilebileceği ve geçici destek konulduğu bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.5 - Makine, alet ve tesisatların bakımı; Madde 2.7 - Yapıların sağlamlığı ve kararlılığı)
+24. **Sıcak Su Borusu Yalıtımı Açık:** Kazan dairesinde sıcak su borusunda yalıtımın açıldığı ve dokunanın yanabileceği, uyarı şeridi çekildiği belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 9 - Yüksek ve düşük sıcaklıklar)
+25. **Preshane Gürültü Seviyesi 85 db Üzeri:** Preshane'de gürültü ölçümünün 85 db üzeri çıktığı, kulaklık kullanımının zorunlu hale getirilmesi gerektiği rapor edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 1 - Kişisel koruyucu donanım kullanımı; Madde 9 - Gürültü)
+26. **Forklift Operatörü Hız Sınırını Aşması:** Lojistik depoda forklift operatörünün hız sınırını aştığı, defalarca uyarıldığı ve disipline sevk edilebileceği belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4 - İşverenin denetleme yükümlülüğü, Madde 19 - Çalışanların yükümlülükleri; Yapı İşl. Yön. Ek-1, Madde 3.1 - Çalışma yerleri ve ulaşım yolları)
+27. **Ocak Davlumbazı Yağ İçinde:** Yemekhanede ocak davlumbazının yağ içinde kaldığı, yangın riski bulunduğu ve temizlik talep edildiği bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 4.4 - Yangınla mücadele)
+28. **Boya Tabancası Hortumu Patlaması Ramak Kala:** Boyahanede boya tabancası hortumunun patladığı, kimsenin yaralanmadığı ancak ortalığın battığı rapor edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.5 - Makine, alet ve tesisatların bakımı; Madde 6 - İş ekipmanları)
+29. **Yükleme Rampasında Takoz Kullanımı İhmali:** Dış sahada yükleme rampasında takoz kullanımının ihmal edildiği, şoförlerin uyarıldığı belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 19; Yapı İşl. Yön. Ek-1, Madde 6 - İş ekipmanlarının güvenli kullanımı)
+30. **Elektrikli El Aleti Kablosu Ekli ve Bantsız:** Montaj Hattı A'da elektrikli el aletinin kablosunun ekli ve bantsız kullanıldığı tespit edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 5.1 - Elektrik tesisatı; Madde 5.2 - Elektrik tehlikelerine karşı korunma)
+31. **Vardiya Değişiminde Makine Temizliği Yapılmaması:** Preshane'de vardiya değişiminde makine temizliğinin yapılmadığı, yağlı parçaların yerde durduğu gözlenmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.1 - Çalışma yerlerinin düzeni; Madde 2.5 - Zeminler)
+32. **Rafın Bir Ayağına Forklift Çarpması:** Lojistik depoda rafın bir ayağına forklift çarptığı, hafif eğilme olduğu ve mühendis kontrolü gerektiği bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.7 - Yapıların sağlamlığı ve kararlılığı)
+33. **Zemin Epoksi Kaplamasında Kalkmalar:** Boyahanede zemin epoksi kaplamasında kalkmalar olduğu, takılıp düşme riski oluşturduğu tespit edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.5 - Zeminler)
+34. **Metal Çapakları Zemine Yayılmış:** Preshane'de metal çapaklarının zemine yayılmış ve temizlenmemiş olduğu, kayma ve batma riski taşıdığı gözlenmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.1 - Çalışma yerlerinin düzeni; Madde 2.5 - Zeminler)
+35. **Otomatik Kapı Sensörü Arızalı:** Lojistik depoda otomatik kapı sensörünün arızalı olduğu, kapının kapanmadığı ve güvenlik zafiyeti bulunduğu belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.5 - Makine, alet ve tesisatların bakımı; Madde 6 - İş ekipmanları)
+36. **Tüp Gaz Kaçağı Alarmı (Yanlış Alarm):** Yemekhanede tüp gaz kaçağı alarmının çaldığı, yanlış alarm olduğu ancak panik yaşandığı, sensör kontrolü gerektiği bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 11; Yapı İşl. Yön. Ek-1, Madde 4.3 - Yangın algılama ve alarm sistemleri; Madde 3.5 - Tesisatların bakımı)
+37. **Matkap Ucu Sıkışıp Fırlaması Ramak Kala:** Montaj Hattı A'da matkap ucunun sıkışıp fırladığı, kimseye gelmediği ve ramak kala raporu tutulduğu belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 6 - İş ekipmanları)
+38. **Klima Su Akıtıyor, Zemin Islak:** Ofis Katı'nda klimanın su akıttığı, zeminin ıslak olduğu ve kova konulduğu belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.5 - Zeminler)
+39. **Fan Kayışı Kopması:** Boyahanede fan kayışının koptuğu, üretimin durduğu ve kayış değişimi yapıldığı bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.5 - Makine, alet ve tesisatların bakımı)
+40. **Güvenlik Kulübesi Isıtıcısı Eski, Kablosu Isınıyor:** Dış sahada güvenlik kulübesi ısıtıcısının çok eski olduğu, kablosunun ısındığı ve yangın riski taşıdığı gözlenmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 5.1 - Elektrik tesisatı; Madde 4.4 - Yangınla mücadele)
+41. **Rampa Körüğü Yırtılmış:** Lojistik depoda rampa körüğünün yırtıldığı, içeri yağmur girdiği ve kaygan zemin riski oluştuğu belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.5 - Zeminler)
+42. **Transpalet Tekerleği Kırık Ramak Kala:** Lojistik depoda transpalet tekerleğinin kırık olduğu, yük taşırken devrildiği ancak kimsenin yaralanmadığı bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.5 - Makine, alet ve tesisatların bakımı; Madde 6 - İş ekipmanları)
+43. **Yemekhane Elektrik Panosu Kapağı Açık:** Yemekhanede elektrik panosu kapağının açık bırakıldığı ve kilitlendiği tespit edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 5.1 - Elektrik tesisatı; Madde 5.2 - Elektrik tehlikelerine karşı korunma)
+44. **Boya Atığı Varillerinin Sızdırmaz Zemin Üzerinde Olmaması:** Boyahanede boya atığı varillerinin sızdırmaz zemin üzerinde olmadığı, çevre kirliliği riski taşıdığı gözlenmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 10; Yapı İşl. Yön. Ek-1, Madde 10 - Kimyasal maddeler, depolama)
+45. **Montaj Hattı Çalışan Ergonomik Olmayan Oturma Düzeni:** Montaj hattında çalışanların oturma düzeninin ergonomik olmadığı, bel ağrısı şikayetlerinin arttığı belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 7 - Ergonomi)
+46. **Kazan Dairesi Vana Etiketleri Silinmiş:** Kazan dairesinde vana etiketlerinin silindiği, hangi vananın ne olduğunun belli olmadığı ve yanlış müdahale riski bulunduğu bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.3 - İşaretlemeler; Madde 6 - İş ekipmanları hakkında bilgi)
+47. **Preshane Hidrolik Hortumda Sızıntı:** Preshane'de hidrolik hortumda sızıntı olduğu, yağın yere damladığı ve müdahale edildiği belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.5 - Makine, alet ve tesisatların bakımı; Madde 2.5 - Zeminler)
+48. **Kar Yağışı Nedeniyle Buzlanma:** Dış sahada kar yağışı nedeniyle yolların buzlandığı, tuzlama yapılmadan araç çıkışına izin verilmediği bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.5 - Zeminler)
+49. **Asansör Kapısı Takılması:** Ofis Katı'nda asansör kapısının bazen takıldığı ve servis çağrıldığı belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.5 - Makine, alet ve tesisatların bakımı; Madde 6 - İş ekipmanları)
+
+#### 3.3. Düşük Risk Seviyesindeki Uygunsuzluklar ve İyi Uygulamalar
+
+1.  **Yangın Tüpleri Aylık Kontrolü:** Ofis katında yangın tüplerinin aylık kontrolünün yapıldığı, hepsinin sağlam olduğu ve etiketlerin yenilendiği belirtilmiştir. (İyi Uygulama)
+2.  **Baret Takmayan Taşeron Personel Uyarılması:** Dış sahada baretini takmayan iki taşeron personelin uyarıldığı ve takmaları sağlandığı bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 19; Yapı İşl. Yön. Madde 8 - Çalışanların yükümlülükleri; Ek-1 Madde 1 - Kişisel koruyucu donanım kullanımı)
+3.  **Bariyer Sensörü Arızası:** Dış sahada araç giriş kapısında bariyer sensörünün bazen arızalandığı, servis çağrıldığı bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.5 - Makine, alet ve tesisatların bakımı)
+4.  **Merdiven Korkuluğu Sallanması:** Ofis Katı'nda merdiven korkuluğunun sallandığı, vidalarının gevşediği ve teknik servise iş emri açıldığı belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.2 - Merdivenler; Madde 2.6 - Düşme tehlikesi)
+5.  **KKD Kullanım Oranı %95:** Preshane'de koruyucu ekipman (KKD) kullanımının %95 oranında olduğu ve durumun iyi olduğu belirtilmiştir. (İyi Uygulama, ancak %100 hedeflenmeli)
+6.  **Yangın Dedektörü Pili Bitişi:** Arşiv odasındaki yangın dedektörünün çalışmadığı, pilinin bittiği ve değiştirildiği bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 11; Yapı İşl. Yön. Ek-1, Madde 4.3 - Yangın algılama ve alarm sistemleri)
+7.  **Ergonomi Eğitimi Verilmesi:** Ofis katında ergonomi eğitimi verildiği ve katılımın yüksek olduğu, ofis sandalyelerinin kontrol edildiği belirtilmiştir. (İyi Uygulama)
+8.  **Doğalgaz Borusunda Paslanma:** Kazan dairesinde doğalgaz borusunda paslanma başladığı ve boyanması gerektiği bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.5 - Makine, alet ve tesisatların bakımı)
+9.  **Hijyen Kontrolü ve Bone Kullanımı Yetersizliği:** Yemekhanede hijyen kontrolü yapıldığı, bone kullanımının yetersiz olduğu ve uyarıldığı belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 19; Yapı İşl. Yön. Ek-1, Madde 1 - Kişisel koruyucu donanım kullanımı; Madde 11 - Sağlık ve hijyen)
+10. **Fotokopi Makinesi Kablosu Geçiş Yolunda:** Ofis Katı'nda fotokopi makinesi kablosunun geçiş yolunda durduğu, takılma riski bulunduğu ve kablo kanalı gerektiği belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.1 - Çalışma yerlerinin düzeni; Madde 2.5 - Zeminler)
+11. **Topraklama Ölçümü Yapılması:** Boyahanede topraklama ölçümü yapıldığı ve değerlerin normal sınırlarda olduğu belirtilmiştir. (İyi Uygulama)
+12. **Basınçlı Kapların Periyodik Kontrol Süresi Yaklaşması:** Kazan dairesinde basınçlı kapların periyodik kontrol süresinin yaklaştığı ve randevu alınması gerektiği bildirilmiştir. (İyi Uygulama, önleyici faaliyet)
+13. **İş Eldiveni Dağıtımı:** Preshane'de iş eldiveni dağıtımı yapıldığı ve herkesin eldiveninin tam olduğu belirtilmiştir. (İyi Uygulama)
+14. **Pencere Kolu Kopuk:** Ofis Katı'nda pencere kolunun kopuk olduğu, camın açılmadığı ve havalandırma sorunu bulunduğu gözlenmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 10 - Kapalı alanlarda havalandırma)
+15. **Çöp Konteynerleri Taşması:** Dış sahada çöp konteynerlerinin taştığı, rüzgarda çöplerin dağıldığı ve hijyen sorunu yaşandığı belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.1 - Çalışma yerlerinin düzeni; Madde 11 - Sağlık ve hijyen)
+16. **Hava Kompresörü Su Tahliyesi:** Montaj Hattı A'da hava kompresörü su tahliyesi yapıldığı bildirilmiştir. (İyi Uygulama)
+17. **Yabancı Araç İzinsiz Park:** Kazan dairesi girişine yabancı bir aracın izinsiz park ettiği ve çektirildiği bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.1 - Çalışma yerleri ve ulaşım yolları)
+18. **Forklift Periyodik Bakımı:** Lojistik depoda forklift periyodik bakımının yapıldığı ve fren hidroliğinin değiştiği bildirilmiştir. (İyi Uygulama)
+19. **Fabrika Çevresi Teli Açıklığı:** Fabrika çevresindeki tellerinde açıklık olduğu, içeri hayvan girebileceği belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.1 - Çalışma yerlerinin düzeni)
+20. **Yemek Numunelerinin Usulüne Uygun Saklanmaması:** Yemekhanede yemek numunelerinin usulüne uygun saklanmadığı, gıda mühendisinin uyarıldığı belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 11 - Sağlık ve hijyen)
+21. **İlk Yardım Dolabı Kontrolü:** Ofis Katı'nda ilk yardım dolabının kontrol edildiği ve eksik malzemelerin tamamlandığı bildirilmiştir. (İyi Uygulama)
+22. **Ziyaretçi Baret Takmadan Sahaya Girmesi:** Montaj Hattı A'da ziyaretçi baret takmadan sahaya girdiği, dışarı çıkarıldığı bildirilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4, Madde 19; Yapı İşl. Yön. Ek-1, Madde 1 - Kişisel koruyucu donanım kullanımı)
+23. **Gürültü Levhası Düşmesi:** Kazan dairesinde gürültü levhasının düştüğü ve yerine asıldığı belirtilmiştir. (İyi Uygulama, düzeltici faaliyet)
+24. **Işık Bariyeri Testi Yapılması:** Preshane'de ışık bariyeri testinin yapıldığı ve sorunsuz çalıştığı belirtilmiştir. (İyi Uygulama)
+25. **Balkon Kapısı Sert Çarpması:** Ofis Katı'nda balkon kapısının rüzgardan sert çarptığı, cam kırılma riski bulunduğu ve stoper takılması gerektiği belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.7 - Yapıların sağlamlığı ve kararlılığı)
+26. **Servis Araçları Hız Sınırına Uyuyor:** Dış sahada servis araçlarının hız sınırına uyduğu kontrol edilmiştir. (İyi Uygulama)
+27. **Vida Tabancası Yere Bırakılması:** Montaj hattında bir vida tabancasının havada asılı kalması gerekirken yere bırakıldığı, takılma riski bulunduğu belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.1 - Çalışma yerlerinin düzeni; Madde 2.5 - Zeminler)
+28. **Brülör Arızaya Geçmesi:** Kazan dairesinde brülörün arızaya geçtiği, resetlendiği ve tekrarlarsa servis çağrılacağı belirtilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.5 - Makine, alet ve tesisatların bakımı)
+29. **Vardiya Başlangıcında İşçilerin Yorgunluk Durumu:** Preshane'de vardiya başlangıcında işçilerin yorgun ve uykusuz olduğu gözlenmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 7 - Ergonomi, işin düzenlenmesi)
+30. **Personelin Yemek Sırasında Mesafe Kuralına Uymaması:** Yemekhanede personelin yemek sırasında mesafe kuralına uymadığı görüldü ve uyarı yapıldı.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 11 - Sağlık ve hijyen)
+31. **Çalışma Alanında Gereksiz Malzemeler:** Montaj Hattı A'da çalışma alanında gereksiz malzemelerin olduğu, düzen (5S) bozukluğu tespit edilmiştir.
+    *   (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.1 - Çalışma yerlerinin düzeni)
+32. **Kazan Dairesi Gürültü Haritası Çıkarılması:** Kazan dairesi gürültü haritası çıkarılmıştır. (İyi Uygulama)
+33. **Ofis İçi Kablo Karışıklığı Giderilmesi:** Ofis Katı'nda ofis içi kablo karışıklığının giderildiği ve organizer kullanıldığı belirtilmiştir. (İyi Uygulama)
+
+### 4. Sonuç ve Öneriler
+
+Yapılan denetim ve veri analizi sonucunda, işletme genelinde özellikle makine emniyet sistemleri, acil durum yolları, kimyasal madde yönetimi ve elektrik güvenliği konularında yüksek risk taşıyan ciddi uygunsuzluklar tespit edilmiştir. Orta ve düşük risk seviyesindeki uygunsuzlukların da ramak kala olaylara yol açtığı ve potansiyel tehlike barındırdığı görülmüştür.
+
+İşletmenin sağlıklı ve güvenli bir çalışma ortamı sağlamak adına aşağıdaki genel önlemlerin alınması önerilmektedir:
+
+1.  **Risk Değerlendirme Revizyonu:** Tespit edilen tüm uygunsuzluklar ve ramak kala olaylar, güncel risk değerlendirmesi kapsamında yeniden ele alınmalı ve aksiyon planları oluşturulmalıdır. (6331 Sayılı İSG Kanunu Madde 10)
+2.  **Mühendislik Kontrolleri ve Bakım Planları:** Kritik risk seviyesindeki arızalı veya güvensiz ekipmanlar (pres makinesi sensörü, vinç halatı, havalandırma, elektrik panosu vb.) için derhal kalıcı mühendislik çözümleri üretilmeli ve düzenli bakım programlarına dahil edilmelidir. (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 3.5, 6)
+3.  **Acil Durum Prosedürleri ve Tatbikatları:** Acil çıkış yollarının sürekli açık ve erişilebilir olması sağlanmalı, acil durum sistemlerinin (yangın dedektörleri, alarmlar) düzenli kontrol ve bakımları yapılmalıdır. Acil durum tatbikatları periyodik olarak düzenlenmelidir. (6331 Sayılı İSG Kanunu Madde 11; Yapı İşl. Yön. Ek-1, Madde 4.1, 4.3)
+4.  **Kişisel Koruyucu Donanım (KKD) Yönetimi:** KKD kullanımına ilişkin denetimler artırılmalı, uygunsuzluk tespit edildiğinde yasal süreçler işletilmeli ve KKD'lerin doğru, eksiksiz ve amacına uygun kullanımı için sürekli eğitimler verilmelidir. (6331 Sayılı İSG Kanunu Madde 4, 19; Yapı İşl. Yön. Ek-1, Madde 1)
+5.  **Tertip, Düzen ve Temizlik (5S):** Çalışma alanlarında genel tertip, düzen ve temizliğin sağlanması, yürüme yollarının serbest bırakılması için 5S prensipleri etkin bir şekilde uygulanmalıdır. Zemin güvenliği (kayganlık, çapak, engel) konularına öncelik verilmelidir. (6331 Sayılı İSG Kanunu Madde 4; Yapı İşl. Yön. Ek-1, Madde 2.1, 2.5, 3.1)
+6.  **Eğitim ve Bilinçlendirme:** Çalışanlara yönelik iş ekipmanlarının güvenli kullanımı, kimyasal madde güvenliği, acil durumlar ve ergonomi konularında periyodik ve etkin eğitimler verilmelidir. (6331 Sayılı İSG Kanunu Madde 17)
+7.  **Yönetim Gözetimi ve Disiplin:** İSG kurallarına uyulmaması durumunda gerekli disiplin süreçleri uygulanmalı, yöneticilerin İSG konularındaki sorumlulukları ve denetim yükümlülükleri pekiştirilmelidir. (6331 Sayılı İSG Kanunu Madde 4, 19)
+
+Bu rapor, tespit edilen uygunsuzlukların giderilmesi ve gelecekte benzer olayların önlenmesi amacıyla bir yol haritası niteliğindedir. Tüm birim amirlerinin ve çalışanların işbirliği ile sağlıklı ve güvenli bir çalışma ortamının sürdürülebilirliği sağlanmalıdır.
+
+Saygılarımızla,
+
+[İSG Uzmanı Adı Soyadı]
+Kıdemli İSG Uzmanı
+[Tarih]

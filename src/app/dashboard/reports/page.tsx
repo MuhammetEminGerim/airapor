@@ -142,7 +142,24 @@ export default function ReportsPage() {
     doc.setFontSize(12)
     // splitTextToSize uzun metinleri satırlara böler
     const splitText = doc.splitTextToSize(report.content, 190)
-    doc.text(splitText, 10, 40)
+
+    let y = 40
+    const pageHeight = doc.internal.pageSize.height
+    const lineHeight = 7 // 12pt font için satır yüksekliği
+
+    // Her satırı döngü ile kontrol edip yazdırıyoruz
+    if (Array.isArray(splitText)) {
+        splitText.forEach((line: string) => {
+            if (y + lineHeight > pageHeight - 10) {
+                doc.addPage()
+                y = 20 // Yeni sayfa başlangıç Y koordinatı
+            }
+            doc.text(line, 10, y)
+            y += lineHeight
+        })
+    } else {
+        doc.text(splitText, 10, 40)
+    }
 
     doc.save(`${report.title}.pdf`)
     toast.success('PDF olarak indirildi.')

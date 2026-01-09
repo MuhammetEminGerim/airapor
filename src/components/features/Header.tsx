@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/s
 import { Sidebar } from './Sidebar'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { supabase } from '@/lib/supabase'
+import { ModeToggle } from '@/components/ui/mode-toggle'
 
 export function Header() {
   const [userName, setUserName] = useState('Kullanıcı')
@@ -43,6 +44,7 @@ export function Header() {
       </Sheet>
       <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
         <div className="ml-auto flex items-center gap-2">
+            <ModeToggle />
             <span className="text-sm text-muted-foreground hidden md:inline-block">{userName}</span>
             <Avatar>
               <AvatarImage src="" />
