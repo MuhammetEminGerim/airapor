@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { geminiModel } from '@/lib/gemini'
+import { getGeminiModel } from '@/lib/gemini'
 import { createClient } from '@/lib/supabase-server'
 
 export async function POST(req: NextRequest) {
@@ -13,6 +13,10 @@ export async function POST(req: NextRequest) {
             { status: 401 }
         )
     }
+
+    // Kullanıcının API Key'ini çek
+    const { data: profile } = await supabase.from('profiles').select('gemini_api_key').eq('id', user.id).single()
+    const userApiKey = profile?.gemini_api_key
 
     // Rate Limiting ve Plan Kontrolü Kaldırıldı.
 
@@ -69,7 +73,8 @@ VERİ:
             break;
     }
 
-    const result = await geminiModel.generateContent(systemPrompt + text)
+    const model = getGeminiModel(userApiKey)
+    const result = await model.generateContent(systemPrompt + text)
     const response = await result.response
     const generatedText = response.text()
 

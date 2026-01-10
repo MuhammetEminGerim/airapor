@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTheme } from 'next-themes'
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -21,8 +22,14 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { supabase } from '@/lib/supabase'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Info } from 'lucide-react'
 import { toast } from 'sonner'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
@@ -30,6 +37,8 @@ export default function SettingsPage() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [userId, setUserId] = useState('')
+  const [apiKey, setApiKey] = useState('')
+  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     async function getProfile() {
@@ -37,8 +46,11 @@ export default function SettingsPage() {
       if (user) {
         setEmail(user.email || '')
         setUserId(user.id)
-        const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
-        if (data) setFullName(data.full_name || '')
+        const { data } = await supabase.from('profiles').select('full_name, gemini_api_key').eq('id', user.id).single()
+        if (data) {
+            setFullName(data.full_name || '')
+            setApiKey(data.gemini_api_key || '')
+        }
       }
       setLoading(false)
     }
@@ -47,6 +59,12 @@ export default function SettingsPage() {
 
   const updateProfile = async () => {
     if (!userId) return
+
+    if (fullName.length < 3) {
+        toast.error('Ad Soyad en az 3 karakter olmalıdır.')
+        return
+    }
+
     setUpdating(true)
 
     const updates = {
@@ -59,6 +77,27 @@ export default function SettingsPage() {
 
     if (!error) {
         toast.success('Profil güncellendi!')
+    } else {
+        console.error('Update Profile Error:', JSON.stringify(error, null, 2))
+        toast.error('Hata oluştu: ' + (error.message || 'Bilinmeyen hata'))
+    }
+    setUpdating(false)
+  }
+
+  const updateApiKey = async () => {
+    if (!userId) return
+    setUpdating(true)
+
+    const updates = {
+        id: userId,
+        gemini_api_key: apiKey,
+        updated_at: new Date().toISOString(),
+    }
+
+    const { error } = await supabase.from('profiles').upsert(updates)
+
+    if (!error) {
+        toast.success('API Anahtarı güncellendi!')
     } else {
         console.error(error)
         toast.error('Hata oluştu: ' + error.message)
@@ -95,7 +134,21 @@ export default function SettingsPage() {
                     <AvatarImage src="" />
                     <AvatarFallback className="text-xl">{fullName ? fullName[0].toUpperCase() : 'U'}</AvatarFallback>
                 </Avatar>
-                <Button variant="outline" disabled>Fotoğrafı Değiştir (Yakında)</Button>
+                <div className="flex flex-col gap-2">
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="text-sm text-muted-foreground flex items-center gap-2 cursor-help">
+                                    <Info className="h-4 w-4" />
+                                    Profil fotoğrafı değiştirme
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Profil fotoğrafınız Gravatar üzerinden e-posta adresinize göre otomatik çekilir.</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
               </div>
               <div className="space-y-1">
                 <Label htmlFor="name">Ad Soyad</Label>
@@ -129,7 +182,11 @@ export default function SettingsPage() {
                     <span>Karanlık Mod</span>
                     <span className="font-normal text-xs text-muted-foreground">Uygulamayı koyu temada kullan.</span>
                   </Label>
-                  <Switch id="dark-mode" disabled />
+                  <Switch
+                    id="dark-mode"
+                    checked={theme === 'dark'}
+                    onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                  />
                 </div>
                 <div className="flex items-center justify-between space-x-2">
                   <Label htmlFor="notifications" className="flex flex-col space-y-1">
@@ -153,14 +210,23 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-1">
                 <Label htmlFor="api-key">Google Gemini API Key</Label>
-                <Input id="api-key" type="password" placeholder="AIzaSy..." disabled />
+                <Input
+                    id="api-key"
+                    type="password"
+                    placeholder="AIzaSy..."
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                />
                 <p className="text-xs text-muted-foreground">
-                    Bu ayar şimdilik .env dosyasından yönetilmektedir.
+                    Kendi API anahtarınızı kullanarak limitlere takılmadan işlem yapabilirsiniz.
                 </p>
               </div>
             </CardContent>
             <CardFooter>
-              <Button variant="secondary" disabled>Anahtarı Güncelle</Button>
+              <Button onClick={updateApiKey} disabled={updating}>
+                {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Anahtarı Güncelle
+              </Button>
             </CardFooter>
           </Card>
         </TabsContent>

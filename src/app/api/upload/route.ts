@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { geminiVisionModel } from '@/lib/gemini'
+import { getGeminiVisionModel } from '@/lib/gemini'
 import mammoth from 'mammoth'
 import { createClient } from '@/lib/supabase-server'
 
@@ -14,6 +14,10 @@ export async function POST(req: NextRequest) {
             { status: 401 }
         )
     }
+
+    // Kullanıcının API Key'ini çek
+    const { data: profile } = await supabase.from('profiles').select('gemini_api_key').eq('id', user.id).single()
+    const userApiKey = profile?.gemini_api_key
 
     // Rate Limiting ve Plan Kontrolü Kaldırıldı.
 
@@ -65,7 +69,8 @@ export async function POST(req: NextRequest) {
             prompt = "Bu ses kaydını dinle ve içeriğini detaylı bir şekilde yazıya dök (transkript). Konuşulanları profesyonel bir dille özetle ve varsa alınan kararları veya önemli notları madde madde listele. Sadece raporu ver, 'İşte döküm' gibi giriş cümleleri kurma."
         }
 
-        const result = await geminiVisionModel.generateContent([prompt, mediaData])
+        const model = getGeminiVisionModel(userApiKey)
+        const result = await model.generateContent([prompt, mediaData])
         const response = await result.response
         processedText = response.text()
     }
