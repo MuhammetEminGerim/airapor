@@ -15,7 +15,7 @@ async function generateWithRetry(model: GenerativeModel, params: any[], retries 
 }
 
 export function getGeminiModel(userApiKey?: string) {
-  const apiKey = userApiKey || process.env.GEMINI_API_KEY
+  const apiKey = (userApiKey && userApiKey.trim() !== '') ? userApiKey : process.env.GEMINI_API_KEY
 
   if (!apiKey) {
     throw new Error('Gemini API Key is missing. Please set it in .env or provide it in user settings.')
@@ -31,7 +31,7 @@ export function getGeminiModel(userApiKey?: string) {
 }
 
 export function getGeminiVisionModel(userApiKey?: string) {
-  const apiKey = userApiKey || process.env.GEMINI_API_KEY
+  const apiKey = (userApiKey && userApiKey.trim() !== '') ? userApiKey : process.env.GEMINI_API_KEY
 
   if (!apiKey) {
     throw new Error('Gemini API Key is missing. Please set it in .env or provide it in user settings.')

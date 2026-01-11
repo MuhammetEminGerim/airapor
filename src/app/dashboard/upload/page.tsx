@@ -1,23 +1,47 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Loader2, Wand2, ImagePlus, Upload, Copy, Download, Check, Save, Mic, Square, StopCircle, FileText } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select'
+import { Loader2, Wand2, Upload, Copy, Download, Check, Save, Mic, StopCircle, FileText, Sparkles } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
+import { Badge } from '@/components/ui/badge'
+
+interface Template {
+  id: string
+  name: string
+  icon: string
+}
 
 export default function UploadPage() {
   const [input, setInput] = useState('')
   const [reportType, setReportType] = useState('genel')
+  const [templates, setTemplates] = useState<Template[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isOcrLoading, setIsOcrLoading] = useState(false)
   const [result, setResult] = useState('')
   const [isCopied, setIsCopied] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [activeTab, setActiveTab] = useState<'write' | 'upload'>('write')
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+        try {
+            const res = await fetch('/api/templates')
+            const data = await res.json()
+            if (data.templates) {
+                setTemplates(data.templates)
+            }
+        } catch (error) {
+            console.error('Error fetching templates:', error)
+        }
+    }
+    fetchTemplates()
+  }, [])
 
   const handleSave = async () => {
     if (!result) return
@@ -115,10 +139,15 @@ export default function UploadPage() {
     setIsLoading(true)
     setIsSaved(false)
     try {
+      const isStandard = ['genel', 'isg', 'finans'].includes(reportType)
+      const body = isStandard
+        ? { text: input, reportType }
+        : { text: input, templateId: reportType }
+
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: input, reportType }),
+        body: JSON.stringify(body),
       })
       const data = await res.json()
       if (data.error) throw new Error(data.error)
@@ -196,13 +225,57 @@ export default function UploadPage() {
   return (
     <div className="grid gap-6 lg:grid-cols-2 h-[calc(100vh-8rem)]">
       {/* Input Area */}
-      <Card className="flex flex-col h-full">
-        <CardHeader>
-            <CardTitle>Yeni Rapor Oluştur</CardTitle>
-            <CardDescription>Notlarınızı yazın veya belge fotoğrafı yükleyin.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col gap-4 min-h-0">
-            <div className="flex gap-2">
+      <div className="flex flex-col gap-6 h-full">
+        <div>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Yeni Rapor</h1>
+            <p className="text-sm text-muted-foreground mt-1">Verilerinizi yükleyin, AI sizin için raporlasın.</p>
+        </div>
+
+        <Card className="flex-1 flex flex-col shadow-sm border-border/50">
+            <div className="flex items-center border-b p-2">
+                <Button
+                    variant={activeTab === 'write' ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setActiveTab('write')}
+                    className="gap-2"
+                >
+                    <FileText className="h-4 w-4" /> Yazı & Not
+                </Button>
+                <div className="w-px h-4 bg-border mx-2" />
+                <Button
+                    variant={activeTab === 'upload' ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => {
+                        setActiveTab('upload')
+                        fileInputRef.current?.click()
+                    }}
+                    disabled={isOcrLoading}
+                    className="gap-2"
+                >
+                    {isOcrLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    Dosya Yükle
+                </Button>
+                <Button
+                    variant={isRecording ? "destructive" : "ghost"}
+                    size="sm"
+                    onClick={isRecording ? stopRecording : startRecording}
+                    disabled={isOcrLoading}
+                    className={`gap-2 ml-2 ${isRecording ? 'animate-pulse' : ''}`}
+                >
+                    {isRecording ? <StopCircle className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                    {isRecording ? 'Kaydediyor...' : 'Ses Kaydet'}
+                </Button>
+            </div>
+
+            <CardContent className="flex-1 flex flex-col p-0 min-h-0 relative">
+                {isOcrLoading && (
+                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center text-center p-4">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                        <p className="font-medium">Dosya işleniyor...</p>
+                        <p className="text-sm text-muted-foreground">Yapay zeka içeriği metne dönüştürüyor.</p>
+                    </div>
+                )}
+
                 <input
                     type="file"
                     accept="image/*,audio/*,.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -210,119 +283,157 @@ export default function UploadPage() {
                     ref={fileInputRef}
                     onChange={handleFileUpload}
                 />
-                <Button
-                    variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isOcrLoading || isLoading || isRecording}
-                    className="w-full sm:w-auto"
-                >
-                    {isOcrLoading ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                        <Upload className="mr-2 h-4 w-4" />
-                    )}
-                    {isOcrLoading ? 'İşleniyor...' : 'Dosya Yükle (Resim/Ses/PDF/Docx)'}
-                </Button>
 
-                <Button
-                    variant={isRecording ? "destructive" : "outline"}
-                    onClick={isRecording ? stopRecording : startRecording}
-                    disabled={isOcrLoading || isLoading}
-                    className="w-full sm:w-auto min-w-[140px]"
-                >
-                    {isRecording ? (
-                        <>
-                           <StopCircle className="mr-2 h-4 w-4 animate-pulse" /> Kaydı Bitir
-                        </>
-                    ) : (
-                        <>
-                           <Mic className="mr-2 h-4 w-4" /> Ses Kaydet
-                        </>
-                    )}
-                </Button>
-            </div>
+                <Textarea
+                    placeholder="Buraya notlarınızı yazın, yapıştırın veya yukarıdaki butonlarla dosya yükleyin..."
+                    className="flex-1 resize-none border-0 focus-visible:ring-0 p-4 text-base font-mono bg-transparent rounded-none"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                />
 
-            <Textarea
-                placeholder="Örn: Bugünkü toplantıda alınan kararlar şunlar..."
-                className="flex-1 resize-none p-4 text-base font-mono"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-            />
-
-            <div className="flex gap-4">
-                <Select value={reportType} onValueChange={setReportType}>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Rapor Türü" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="genel">Genel Rapor</SelectItem>
-                        <SelectItem value="isg">İş Güvenliği (İSG)</SelectItem>
-                        <SelectItem value="finans">Finansal Analiz</SelectItem>
-                    </SelectContent>
-                </Select>
-
-                <Button onClick={handleGenerate} disabled={isLoading || !input} className="flex-1">
-                    {isLoading ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            AI Rapor Hazırlıyor...
-                        </>
-                    ) : (
-                        <>
-                            <Wand2 className="mr-2 h-4 w-4" />
-                            Rapor Oluştur
-                        </>
-                    )}
-                </Button>
-            </div>
-        </CardContent>
-      </Card>
+                <div className="p-4 border-t bg-muted/20 space-y-4">
+                    <div className="flex gap-4 items-center">
+                        <div className="flex-1">
+                            <Select value={reportType} onValueChange={setReportType}>
+                                <SelectTrigger className="bg-background">
+                                    <SelectValue placeholder="Rapor Türü" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Standart Raporlar</SelectLabel>
+                                        <SelectItem value="genel">
+                                            <div className="flex flex-col">
+                                                <span className="font-medium">Genel Rapor</span>
+                                                <span className="text-xs text-muted-foreground">Standart iş raporu formatı</span>
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="isg">
+                                            <div className="flex flex-col">
+                                                <span className="font-medium">İş Güvenliği (İSG)</span>
+                                                <span className="text-xs text-muted-foreground">Yönetmelik referanslı denetim</span>
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="finans">
+                                            <div className="flex flex-col">
+                                                <span className="font-medium">Finansal Analiz</span>
+                                                <span className="text-xs text-muted-foreground">Bütçe ve harcama analizi</span>
+                                            </div>
+                                        </SelectItem>
+                                    </SelectGroup>
+                                    {templates.length > 0 && (
+                                        <SelectGroup>
+                                            <SelectLabel>Asistanlarım</SelectLabel>
+                                            {templates.map(t => (
+                                                <SelectItem key={t.id} value={t.id}>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-lg">{t.icon}</span>
+                                                        <div className="flex flex-col">
+                                                            <span className="font-medium">{t.name}</span>
+                                                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                                                <Sparkles className="w-3 h-3 text-yellow-500" /> Özel Asistan
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    )}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <Button
+                            onClick={handleGenerate}
+                            disabled={isLoading || !input}
+                            className="flex-1 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    AI Analiz Ediyor...
+                                </>
+                            ) : (
+                                <>
+                                    <Wand2 className="mr-2 h-4 w-4" />
+                                    Rapor Oluştur
+                                </>
+                            )}
+                        </Button>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+      </div>
 
       {/* Output Area */}
-      <Card className="flex flex-col h-full bg-muted/50 overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between py-2 px-6 min-h-[4rem]">
-            <div className="space-y-1">
-                <CardTitle className="flex items-center gap-2">
-                    AI Rapor Çıktısı
-                    {isSaved && <span className="text-xs font-normal text-green-600 bg-green-100 px-2 py-0.5 rounded-full flex items-center gap-1"><Check className="w-3 h-3" /> Kaydedildi</span>}
-                </CardTitle>
-                <CardDescription>Oluşturulan rapor burada görünecek.</CardDescription>
-            </div>
-            {result && (
-                <div className="flex gap-2">
-                    {!isSaved && (
-                        <Button variant="outline" size="sm" onClick={handleSave} disabled={isSaving} className="h-8">
-                            {isSaving ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <Save className="mr-2 h-3 w-3" />}
-                            Kaydet
-                        </Button>
+      <div className="flex flex-col gap-6 h-full">
+        <div>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 lg:invisible">Sonuç</h1>
+            <p className="text-sm text-muted-foreground mt-1 lg:invisible">Hazır olan raporunuz.</p>
+        </div>
+
+        <Card className="flex-1 flex flex-col bg-muted/30 border-border/50 shadow-sm overflow-hidden h-full">
+            <CardHeader className="flex flex-row items-center justify-between py-3 px-4 border-b bg-background">
+                <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm">Rapor Önizleme</span>
+                    {isSaved ? (
+                        <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 border-0">
+                            <Check className="w-3 h-3 mr-1" /> Kaydedildi
+                        </Badge>
+                    ) : result ? (
+                        <Badge variant="outline" className="text-orange-600 border-orange-200 bg-orange-50">
+                            Kaydedilmedi
+                        </Badge>
+                    ) : null}
+                </div>
+                <div className="flex gap-1">
+                    {result && (
+                        <>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy} title="Kopyala">
+                                {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload} title="İndir">
+                                <Download className="h-4 w-4" />
+                            </Button>
+                            {!isSaved && (
+                                <Button
+                                    size="sm"
+                                    variant="default"
+                                    onClick={handleSave}
+                                    disabled={isSaving}
+                                    className="h-8 ml-2 gap-2"
+                                >
+                                    {isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                                    Kaydet
+                                </Button>
+                            )}
+                        </>
                     )}
-                    <Button variant="ghost" size="icon" onClick={handleCopy} title="Kopyala">
-                        {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={handleDownload} title="İndir">
-                        <Download className="h-4 w-4" />
-                    </Button>
                 </div>
-            )}
-        </CardHeader>
-        <CardContent className="flex-1 overflow-auto min-h-0 p-6 pt-0">
-            {result ? (
-                <Textarea
-                    className="w-full h-full min-h-[400px] resize-none border-0 focus-visible:ring-0 p-0 text-base leading-relaxed font-mono bg-transparent"
-                    value={result}
-                    onChange={(e) => {
-                        setResult(e.target.value)
-                        setIsSaved(false)
-                    }}
-                />
-            ) : (
-                <div className="flex flex-col items-center justify-center h-full text-muted-foreground opacity-50">
-                    <Wand2 className="h-12 w-12 mb-4" />
-                    <p>Henüz bir rapor oluşturulmadı.</p>
-                </div>
-            )}
-        </CardContent>
-      </Card>
+            </CardHeader>
+            <CardContent className="flex-1 p-0 min-h-0 relative bg-background">
+                {result ? (
+                    <Textarea
+                        className="w-full h-full resize-none border-0 focus-visible:ring-0 p-6 text-sm leading-relaxed font-mono bg-transparent"
+                        value={result}
+                        onChange={(e) => {
+                            setResult(e.target.value)
+                            setIsSaved(false)
+                        }}
+                    />
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground/50 gap-4">
+                        <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center">
+                            <FileText className="h-8 w-8" />
+                        </div>
+                        <div className="text-center space-y-1">
+                            <p className="font-medium text-foreground/80">Rapor bekleniyor</p>
+                            <p className="text-sm">Sol taraftan veri girişi yaparak analizi başlatın.</p>
+                        </div>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

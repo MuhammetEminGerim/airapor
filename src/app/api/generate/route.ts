@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     // Rate Limiting ve Plan Kontrolü Kaldırıldı.
 
-    const { text, reportType } = await req.json()
+    const { text, reportType, templateId } = await req.json()
 
     if (!text) {
       return NextResponse.json(
@@ -31,7 +31,24 @@ export async function POST(req: NextRequest) {
 
     let systemPrompt = ""
 
-    switch (reportType) {
+    if (templateId) {
+        // Özel Şablon Kullanımı
+        const { data: template, error } = await supabase
+            .from('templates')
+            .select('system_prompt')
+            .eq('id', templateId)
+            .single()
+
+        if (error || !template) {
+            return NextResponse.json(
+                { error: 'Seçilen şablon bulunamadı.' },
+                { status: 404 }
+            )
+        }
+        systemPrompt = template.system_prompt
+    } else {
+        // Standart Rapor Türleri
+        switch (reportType) {
         case 'isg':
             systemPrompt = `
 GÖREV: Sen kıdemli bir İş Sağlığı ve Güvenliği (İSG) Uzmanısın.
@@ -71,6 +88,7 @@ KURALLAR:
 VERİ:
 `
             break;
+        }
     }
 
     const model = getGeminiModel(userApiKey)
