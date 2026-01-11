@@ -9,6 +9,7 @@ import { Loader2, Wand2, Upload, Copy, Download, Check, Save, Mic, StopCircle, F
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
+import jsPDF from 'jspdf'
 
 interface Template {
   id: string
@@ -222,6 +223,60 @@ export default function UploadPage() {
     document.body.removeChild(link)
   }
 
+  const handleDownloadPDF = async () => {
+    if (!result) return
+    const doc = new jsPDF()
+
+    try {
+        const fontUrl = '/fonts/Roboto-Regular.ttf'
+        const response = await fetch(fontUrl)
+        const blob = await response.blob()
+        const reader = new FileReader()
+        await new Promise((resolve, reject) => {
+            reader.onload = resolve
+            reader.onerror = reject
+            reader.readAsDataURL(blob)
+        })
+
+        if (reader.result && typeof reader.result === 'string') {
+            const base64 = reader.result.split(',')[1]
+            doc.addFileToVFS('Roboto-Regular.ttf', base64)
+            doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal')
+            doc.setFont('Roboto')
+        }
+    } catch (error) {
+        console.error('Font error:', error)
+        toast.error('PDF fontu yüklenemedi, standart font kullanılıyor.')
+    }
+
+    const title = `Rapor - ${new Date().toLocaleDateString('tr-TR')}`
+    doc.setFontSize(16)
+    doc.text(title, 10, 10)
+
+    doc.setFontSize(12)
+    const splitText = doc.splitTextToSize(result, 190)
+
+    let y = 30
+    const pageHeight = doc.internal.pageSize.height
+    const lineHeight = 7
+
+    if (Array.isArray(splitText)) {
+        splitText.forEach((line: string) => {
+            if (y + lineHeight > pageHeight - 10) {
+                doc.addPage()
+                y = 20
+            }
+            doc.text(line, 10, y)
+            y += lineHeight
+        })
+    } else {
+        doc.text(splitText, 10, 30)
+    }
+
+    doc.save(`${title}.pdf`)
+    toast.success('PDF olarak indirildi.')
+  }
+
   return (
     <div className="grid gap-6 lg:grid-cols-2 h-[calc(100vh-8rem)]">
       {/* Input Area */}
@@ -391,7 +446,10 @@ export default function UploadPage() {
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy} title="Kopyala">
                                 {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload} title="İndir">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownloadPDF} title="PDF İndir">
+                                <FileText className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload} title="TXT İndir">
                                 <Download className="h-4 w-4" />
                             </Button>
                             {!isSaved && (

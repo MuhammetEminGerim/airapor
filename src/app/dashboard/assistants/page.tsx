@@ -223,10 +223,10 @@ export default function AssistantsPage() {
                     <div className="space-y-3">
                         <Label>Hızlı Başlangıç Şablonları</Label>
                         <Tabs defaultValue="business" className="w-full">
-                            <TabsList className="w-full grid grid-cols-3 mb-4">
-                                <TabsTrigger value="business">İş & Kurumsal</TabsTrigger>
-                                <TabsTrigger value="education">Eğitim & Akademik</TabsTrigger>
-                                <TabsTrigger value="creative">Teknik & Kreatif</TabsTrigger>
+                            <TabsList className="w-full h-auto grid grid-cols-1 sm:grid-cols-3 mb-4 gap-2 bg-transparent p-0">
+                                <TabsTrigger value="business" className="w-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background">İş & Kurumsal</TabsTrigger>
+                                <TabsTrigger value="education" className="w-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background">Eğitim & Akademik</TabsTrigger>
+                                <TabsTrigger value="creative" className="w-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background">Teknik & Kreatif</TabsTrigger>
                             </TabsList>
 
                             {Object.entries(recommendedPrompts).map(([key, items]) => (
