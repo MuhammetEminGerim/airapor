@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { FileText, Loader2, AlertCircle } from 'lucide-react'
+import { FileText, Loader2, AlertCircle, Mail, Lock, CheckCircle2, ArrowRight } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -77,126 +77,156 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center bg-muted/40 p-4">
-      <Link href="/" className="mb-8 flex items-center text-lg font-bold">
-        <FileText className="mr-2 h-6 w-6" />
-        Rapor Asistanı
-      </Link>
+    <div className="container relative h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+      {/* Left Side - Visual & Testimonial */}
+      <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
+        <div className="absolute inset-0 bg-zinc-900" />
+        <div className="relative z-20 flex items-center text-lg font-medium">
+          <Link href="/" className="flex items-center gap-2">
+             <div className="h-8 w-8 rounded bg-white text-zinc-900 flex items-center justify-center">
+                <FileText className="h-5 w-5" />
+             </div>
+             <span>Rapor Asistanı</span>
+          </Link>
+        </div>
+        <div className="relative z-20 mt-auto">
+          <blockquote className="space-y-2">
+            <p className="text-lg">
+              &ldquo;Rapor Asistanı ile toplantı notlarımı saniyeler içinde düzenli raporlara dönüştürebiliyorum. Bana haftada en az 5 saat kazandırdı.&rdquo;
+            </p>
+            <footer className="text-sm">Sofia Davis, Ürün Yöneticisi</footer>
+          </blockquote>
+        </div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-primary/20 rounded-full blur-[100px] pointer-events-none" />
+      </div>
 
-      <Tabs defaultValue="login" className="w-full max-w-sm">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="login">Giriş Yap</TabsTrigger>
-          <TabsTrigger value="register">Kayıt Ol</TabsTrigger>
-        </TabsList>
+      {/* Right Side - Auth Form */}
+      <div className="lg:p-8">
+        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+          {/* Mobile Header */}
+          <div className="flex flex-col space-y-2 text-center lg:hidden">
+             <Link href="/" className="flex items-center justify-center gap-2 font-bold text-xl mb-4">
+                <div className="h-8 w-8 rounded bg-primary flex items-center justify-center">
+                    <FileText className="h-5 w-5 text-primary-foreground" />
+                </div>
+                <span>Rapor Asistanı</span>
+             </Link>
+          </div>
 
-        <TabsContent value="login">
-          <Card>
-            <CardHeader>
-              <CardTitle>Giriş Yap</CardTitle>
-              <CardDescription>Hesabınıza erişmek için bilgilerinizi girin.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={isLoading}>
-                {isLoading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                    <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
-                        <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
-                    </svg>
-                )}
-                Google ile devam et
-              </Button>
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    veya
-                  </span>
-                </div>
-              </div>
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <form onSubmit={(e) => handleAuth(e, 'login')} className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">E-posta</Label>
-                  <Input id="email" name="email" type="email" placeholder="ornek@sirket.com" required />
-                </div>
-                <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Şifre</Label>
+          <div className="flex flex-col space-y-2 text-center">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Hesabınıza Erişin
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Raporlarınızı yönetmek için giriş yapın veya kayıt olun.
+            </p>
+          </div>
+
+          <Tabs defaultValue="login" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="login">Giriş Yap</TabsTrigger>
+              <TabsTrigger value="register">Kayıt Ol</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="login">
+              <div className="grid gap-6">
+                <form onSubmit={(e) => handleAuth(e, 'login')}>
+                  <div className="grid gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">E-posta</Label>
+                      <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input id="email" name="email" type="email" placeholder="ornek@sirket.com" className="pl-9" required />
+                      </div>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="password">Şifre</Label>
+                      <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input id="password" name="password" type="password" className="pl-9" required />
+                      </div>
+                    </div>
+                    <Button disabled={isLoading}>
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Giriş Yap
+                    </Button>
                   </div>
-                  <Input id="password" name="password" type="password" required />
-                </div>
-                <Button className="w-full" type="submit" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Giriş Yap'}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="register">
-          <Card>
-            <CardHeader>
-              <CardTitle>Kayıt Ol</CardTitle>
-              <CardDescription>Yeni bir hesap oluşturun.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={isLoading}>
-                {isLoading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                    <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
-                        <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
-                    </svg>
-                )}
-                Google ile devam et
-              </Button>
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    veya
-                  </span>
-                </div>
+                </form>
               </div>
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-               {success && (
-                <Alert className="bg-green-50 text-green-900 border-green-200">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{success}</AlertDescription>
-                </Alert>
-              )}
-              <form onSubmit={(e) => handleAuth(e, 'register')} className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">E-posta</Label>
-                  <Input id="email" name="email" type="email" placeholder="ornek@sirket.com" required />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="password">Şifre</Label>
-                  <Input id="password" name="password" type="password" required minLength={6} />
-                </div>
-                <Button className="w-full" type="submit" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Kayıt Ol'}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </TabsContent>
+
+            <TabsContent value="register">
+                <div className="grid gap-6">
+                <form onSubmit={(e) => handleAuth(e, 'register')}>
+                  <div className="grid gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">E-posta</Label>
+                      <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input id="email" name="email" type="email" placeholder="ornek@sirket.com" className="pl-9" required />
+                      </div>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="password">Şifre</Label>
+                      <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input id="password" name="password" type="password" className="pl-9" required minLength={6} />
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground space-y-1">
+                        <div className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-500" /> En az 6 karakter</div>
+                        <div className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-500" /> Ücretsiz plan</div>
+                    </div>
+                    <Button disabled={isLoading}>
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Hesap Oluştur
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                veya
+              </span>
+            </div>
+          </div>
+
+          <Button variant="outline" type="button" disabled={isLoading} onClick={handleGoogleLogin} className="w-full">
+            {isLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+                <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                    <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
+                </svg>
+            )}
+            Google ile devam et
+          </Button>
+
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          {success && (
+            <Alert className="bg-green-50 text-green-900 border-green-200">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <AlertDescription>{success}</AlertDescription>
+            </Alert>
+          )}
+
+          <p className="px-8 text-center text-sm text-muted-foreground">
+            Devam ederek, <Link href="#" className="underline underline-offset-4 hover:text-primary">Kullanım Şartları</Link> ve <Link href="#" className="underline underline-offset-4 hover:text-primary">Gizlilik Politikamızı</Link> kabul etmiş olursunuz.
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

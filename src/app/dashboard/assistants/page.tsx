@@ -13,6 +13,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -103,20 +109,59 @@ export default function AssistantsPage() {
     setIcon('🤖')
   }
 
-  const recommendedPrompts = [
-    {
-        title: "SEO Uzmanı",
-        prompt: "Sen kıdemli bir SEO uzmanısın. Gönderilen içeriği anahtar kelime yoğunluğu, okunabilirlik ve SEO uyumluluğu açısından analiz et. Hataları ve iyileştirme önerilerini listele."
-    },
-    {
-        title: "Kod Denetçisi",
-        prompt: "Sen uzman bir yazılım mimarısın. Sana verilen kodu güvenlik, performans ve 'clean code' prensipleri açısından incele. Puanla ve refactoring önerileri sun."
-    },
-    {
-        title: "E-Posta Yazarı",
-        prompt: "Sen kurumsal iletişim uzmanısın. Verilen kaba notları veya maddeleri, son derece profesyonel, nazik ve ikna edici bir iş e-postasına dönüştür."
-    }
-  ]
+  const recommendedPrompts = {
+    business: [
+        {
+            title: "Toplantı Özeti",
+            icon: "📝",
+            prompt: "Sen profesyonel bir toplantı asistanısın. Gönderilen dağınık toplantı notlarını veya deşifre metnini analiz et. Şu başlıklar altında yapılandırılmış bir tutanak oluştur: 1) Toplantı Künyesi (Tarih, Katılımcılar), 2) Gündem Maddeleri, 3) Alınan Kararlar, 4) Aksiyon Planı (Kim, Ne Zaman, Ne Yapacak)."
+        },
+        {
+            title: "Sözleşme Analisti",
+            icon: "⚖️",
+            prompt: "Sen kıdemli bir hukuk danışmanısın. Sana verilen sözleşme metnini incele. Taraflar için kritik riskleri, fesih şartlarını, cezai yükümlülükleri ve belirsiz maddeleri sade bir dille özetle. Dikkat edilmesi gereken noktaları 'Kırmızı Bayrak' olarak işaretle."
+        },
+        {
+            title: "Proje Yöneticisi (SWOT)",
+            icon: "📊",
+            prompt: "Sen stratejik düşünen bir proje yöneticisisin. Verilen proje fikrini veya iş planını analiz et. Detaylı bir SWOT analizi (Güçlü Yönler, Zayıf Yönler, Fırsatlar, Tehditler) yap. Projenin başarısı için kritik başarı faktörlerini listele."
+        }
+    ],
+    education: [
+        {
+            title: "Sınav Okuyucu",
+            icon: "💯",
+            prompt: "Sen adil ve titiz bir öğretmensin. Sana verilen öğrenci cevabını, sorulan soru bağlamında değerlendir. Doğruları ve yanlışları belirt. 100 üzerinden tahmini bir puan ver ve öğrencinin kendini geliştirmesi için yapıcı geri bildirimlerde bulun."
+        },
+        {
+            title: "Makale Özetleyici (ELI5)",
+            icon: "🧠",
+            prompt: "Sen karmaşık konuları basitleştirmede uzman bir bilim iletişimcisisin. Sana verilen akademik makaleyi veya teknik yazıyı, 15 yaşındaki bir öğrencinin anlayabileceği sadelikte özetle. Ana fikri, metodolojiyi ve sonuçları madde madde açıkla. Jargon kullanma."
+        }
+    ],
+    creative: [
+        {
+            title: "Sosyal Medya Uzmanı",
+            icon: "🚀",
+            prompt: "Sen viral içerik üretme konusunda uzman bir sosyal medya yöneticisisin. Verilen konuyu baz alarak 3 farklı platform için içerik üret: 1) LinkedIn (Profesyonel ve öğretici), 2) Twitter/X (Kısa, vurucu, flood şeklinde), 3) Instagram (Görsel betimlemesi ve samimi caption). Hashtag önerileri ekle."
+        },
+        {
+            title: "SEO Uzmanı",
+            icon: "🔎",
+            prompt: "Sen kıdemli bir SEO uzmanısın. Gönderilen içeriği anahtar kelime yoğunluğu, okunabilirlik ve SEO uyumluluğu açısından analiz et. Başlık etiketlerini (H1, H2) kontrol et. Hataları ve sıralama artırıcı iyileştirme önerilerini listele."
+        },
+        {
+            title: "Kod Denetçisi",
+            icon: "💻",
+            prompt: "Sen uzman bir yazılım mimarısın. Sana verilen kodu güvenlik, performans ve 'clean code' prensipleri açısından incele. Olası bugları, güvenlik açıklarını tespit et. Kodu daha verimli ve okunabilir hale getirmek için refactoring önerileri sun."
+        },
+        {
+            title: "E-Posta Yazarı",
+            icon: "✉️",
+            prompt: "Sen kurumsal iletişim uzmanısın. Verilen kaba notları veya maddeleri, son derece profesyonel, nazik, ikna edici ve amaca yönelik bir iş e-postasına dönüştür. Konu satırı önerileri de sun."
+        }
+    ]
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -131,39 +176,42 @@ export default function AssistantsPage() {
                     <Plus className="h-4 w-4" /> Yeni Asistan
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Yeni Asistan Oluştur</DialogTitle>
                     <DialogDescription>
                         Yapay zekaya yeni bir rol verin. Ona nasıl davranması gerektiğini öğretin.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                        <Label htmlFor="name">Asistan Adı</Label>
-                        <Input
-                            id="name"
-                            placeholder="Örn: Emlak Danışmanı"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                        />
+                <div className="grid gap-6 py-4">
+                    <div className="grid grid-cols-4 gap-4">
+                        <div className="col-span-3 grid gap-2">
+                            <Label htmlFor="name">Asistan Adı</Label>
+                            <Input
+                                id="name"
+                                placeholder="Örn: Emlak Danışmanı"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                            />
+                        </div>
+                        <div className="col-span-1 grid gap-2">
+                            <Label htmlFor="icon">İkon</Label>
+                            <Input
+                                id="icon"
+                                className="text-center text-lg"
+                                value={icon}
+                                onChange={(e) => setIcon(e.target.value)}
+                                maxLength={2}
+                            />
+                        </div>
                     </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="icon">İkon (Emoji)</Label>
-                        <Input
-                            id="icon"
-                            className="w-16 text-center text-lg"
-                            value={icon}
-                            onChange={(e) => setIcon(e.target.value)}
-                            maxLength={2}
-                        />
-                    </div>
+
                     <div className="grid gap-2">
                         <Label htmlFor="prompt">Sistem Talimatı (Prompt)</Label>
                         <Textarea
                             id="prompt"
                             placeholder="Sen bir emlak uzmanısın. Sana gönderilen ev özelliklerini inceleyip..."
-                            className="h-32"
+                            className="h-32 font-mono text-sm"
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
                         />
@@ -172,23 +220,46 @@ export default function AssistantsPage() {
                         </p>
                     </div>
 
-                    <div className="bg-muted/30 p-3 rounded-md border border-dashed">
-                        <span className="text-xs font-medium text-muted-foreground mb-2 block">Hızlı Başlangıç Örnekleri:</span>
-                        <div className="flex gap-2 overflow-x-auto pb-1">
-                            {recommendedPrompts.map((item, i) => (
-                                <Badge
-                                    key={i}
-                                    variant="outline"
-                                    className="cursor-pointer hover:bg-muted whitespace-nowrap"
-                                    onClick={() => {
-                                        setName(item.title)
-                                        setPrompt(item.prompt)
-                                    }}
-                                >
-                                    {item.title}
-                                </Badge>
+                    <div className="space-y-3">
+                        <Label>Hızlı Başlangıç Şablonları</Label>
+                        <Tabs defaultValue="business" className="w-full">
+                            <TabsList className="w-full grid grid-cols-3 mb-4">
+                                <TabsTrigger value="business">İş & Kurumsal</TabsTrigger>
+                                <TabsTrigger value="education">Eğitim & Akademik</TabsTrigger>
+                                <TabsTrigger value="creative">Teknik & Kreatif</TabsTrigger>
+                            </TabsList>
+
+                            {Object.entries(recommendedPrompts).map(([key, items]) => (
+                                <TabsContent key={key} value={key} className="mt-0">
+                                    <div className="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto pr-2">
+                                        {items.map((item, i) => (
+                                            <div
+                                                key={i}
+                                                className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-muted/30 hover:bg-muted/80 hover:border-primary/30 cursor-pointer transition-all group"
+                                                onClick={() => {
+                                                    setName(item.title)
+                                                    setPrompt(item.prompt)
+                                                    setIcon(item.icon)
+                                                }}
+                                            >
+                                                <div className="text-2xl bg-background p-2 rounded-md shadow-sm group-hover:scale-110 transition-transform">
+                                                    {item.icon}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="font-medium text-sm flex items-center justify-between">
+                                                        {item.title}
+                                                        <Badge variant="secondary" className="text-[10px] h-5 opacity-0 group-hover:opacity-100 transition-opacity">Seç</Badge>
+                                                    </div>
+                                                    <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                                                        {item.prompt}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </TabsContent>
                             ))}
-                        </div>
+                        </Tabs>
                     </div>
                 </div>
                 <DialogFooter>
