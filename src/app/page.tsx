@@ -35,7 +35,7 @@ export default function LandingPage() {
           <Link href="/login">
             <Button variant="ghost" size="sm">Giriş Yap</Button>
           </Link>
-          <Link href="/login">
+          <Link href="/login?tab=register">
             <Button size="sm">Ücretsiz Başla</Button>
           </Link>
         </nav>
@@ -214,7 +214,7 @@ export default function LandingPage() {
                 <p className="text-zinc-400 max-w-2xl mx-auto mb-8 text-lg">
                     Bugün ücretsiz üye olun ve yapay zeka destekli iş akışının konforunu yaşayın. Kredi kartı gerekmez.
                 </p>
-                <Link href="/login">
+                <Link href="/login?tab=register">
                     <Button size="lg" variant="secondary" className="h-14 px-8 text-lg font-semibold">
                         Hemen Başlayın <Zap className="ml-2 h-5 w-5" />
                     </Button>
