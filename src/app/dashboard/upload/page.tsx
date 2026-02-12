@@ -1,11 +1,27 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Loader2, Wand2, Upload, Copy, Download, Check, Save, Mic, StopCircle, FileText, Sparkles } from 'lucide-react'
+import {
+  Loader2,
+  Wand2,
+  Upload,
+  Copy,
+  Download,
+  Check,
+  Save,
+  Mic,
+  StopCircle,
+  FileText,
+  Sparkles,
+  Circle,
+  CheckCircle2,
+  Lightbulb,
+  X,
+} from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
@@ -27,63 +43,101 @@ type BannerState = {
 
 const MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 const MIN_INPUT_LENGTH = 20
+const ONBOARDING_KEY = 'ra:onboarding:upload:v1'
 
 export default function UploadPage() {
   const [input, setInput] = useState('')
   const [reportType, setReportType] = useState('genel')
   const [templates, setTemplates] = useState<Template[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
   const [isUploadLoading, setIsUploadLoading] = useState(false)
   const [result, setResult] = useState('')
   const [isCopied, setIsCopied] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'write' | 'upload'>('write')
   const [isRecording, setIsRecording] = useState(false)
   const [banner, setBanner] = useState<BannerState | null>(null)
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
 
   const trimmedInput = input.trim()
-  const canGenerate = trimmedInput.length >= MIN_INPUT_LENGTH && !isLoading && !isUploadLoading
-  const isBusy = isLoading || isUploadLoading || isSaving
+  const canGenerate = trimmedInput.length >= MIN_INPUT_LENGTH && !isGenerating && !isUploadLoading
+  const isBusy = isGenerating || isUploadLoading || isSaving
+
+  const onboardingSteps = useMemo(
+    () => [
+      { label: 'Veri girisi yapin (yazi / dosya / ses)', done: trimmedInput.length > 0 },
+      { label: 'Raporu olusturun', done: result.trim().length > 0 },
+      { label: 'Raporu kaydedin', done: isSaved },
+    ],
+    [trimmedInput.length, result, isSaved]
+  )
+
+  useEffect(() => {
+    const dismissed = typeof window !== 'undefined' ? window.localStorage.getItem(ONBOARDING_KEY) === 'dismissed' : true
+    setShowOnboarding(!dismissed)
+  }, [])
 
   useEffect(() => {
     const fetchTemplates = async () => {
       setBanner({
         state: 'loading',
-        title: 'Şablonlar yükleniyor',
+        title: 'Sablonlar yukleniyor',
         message: 'Asistan listesi getiriliyor.',
       })
 
       try {
         const res = await fetch('/api/templates')
         const data = await res.json()
-        if (!res.ok || data.error) throw new Error(data.error || 'Şablonlar getirilemedi.')
+        if (!res.ok || data.error) throw new Error(data.error || 'Sablonlar getirilemedi.')
 
         setTemplates(data.templates || [])
         setBanner(null)
       } catch (error) {
-        const message = getReadableErrorMessage(error, 'Şablonlar getirilemedi.')
-        setBanner({ state: 'error', title: 'Şablonlar yüklenemedi', message })
+        const message = getReadableErrorMessage(error, 'Sablonlar getirilemedi.')
+        setBanner({ state: 'error', title: 'Sablonlar yuklenemedi', message })
       }
     }
 
     fetchTemplates()
   }, [])
 
+  const dismissOnboarding = () => {
+    setShowOnboarding(false)
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(ONBOARDING_KEY, 'dismissed')
+    }
+  }
+
   const appendToInput = (label: string, text: string) => {
     setInput((prev) => (prev ? `${prev}\n\n---\n${label}:\n${text}` : `${label}:\n${text}`))
+  }
+
+  const insertSampleInput = () => {
+    const sample = [
+      'Toplanti Notlari:',
+      '- Musteri sunumunda rapor formatinin haftalik olmasi istendi.',
+      '- Finans bolumu toplam gider kalemlerini daha net istemektedir.',
+      '- Bir sonraki toplanti tarihi 14 Mart olarak belirlendi.',
+    ].join('\n')
+
+    setInput(sample)
+    setBanner({
+      state: 'info',
+      title: 'Ornek icerik eklendi',
+      message: 'Hizli deneme icin rapor olusturabilirsiniz.',
+    })
   }
 
   const handleSave = async () => {
     if (!result.trim()) {
       setBanner({
         state: 'error',
-        title: 'Kaydetme işlemi başarısız',
-        message: 'Önce bir rapor üretin veya içerik ekleyin.',
+        title: 'Kaydetme islemi basarisiz',
+        message: 'Once bir rapor olusturun veya cikti ekleyin.',
       })
       return
     }
@@ -92,7 +146,7 @@ export default function UploadPage() {
     setBanner({
       state: 'loading',
       title: 'Rapor kaydediliyor',
-      message: 'Veriler hesabınıza ekleniyor.',
+      message: 'Veriler hesabiniza ekleniyor.',
     })
 
     try {
@@ -100,9 +154,7 @@ export default function UploadPage() {
         data: { user },
       } = await supabase.auth.getUser()
 
-      if (!user) {
-        throw new Error('Oturum açmanız gerekiyor.')
-      }
+      if (!user) throw new Error('Oturum acmaniz gerekiyor.')
 
       const { error } = await supabase.from('reports').insert({
         user_id: user.id,
@@ -118,12 +170,12 @@ export default function UploadPage() {
       setBanner({
         state: 'success',
         title: 'Rapor kaydedildi',
-        message: 'Raporlarım ekranından düzenleyebilir veya paylaşabilirsiniz.',
+        message: 'Raporlarim ekranindan duzenleyebilir veya paylasabilirsiniz.',
       })
-      toast.success('Rapor başarıyla kaydedildi.')
+      toast.success('Rapor basariyla kaydedildi.')
     } catch (error) {
       const message = getReadableErrorMessage(error, 'Rapor kaydedilemedi.')
-      setBanner({ state: 'error', title: 'Kaydetme işlemi başarısız', message })
+      setBanner({ state: 'error', title: 'Kaydetme islemi basarisiz', message })
       toast.error(message)
     } finally {
       setIsSaving(false)
@@ -134,8 +186,8 @@ export default function UploadPage() {
     try {
       setBanner({
         state: 'info',
-        title: 'Ses kaydı başladı',
-        message: 'Kaydı durdurduğunuzda ses metne dönüştürülecek.',
+        title: 'Ses kaydi basladi',
+        message: 'Kaydi durdurdugunuzda ses metne donusturulecek.',
       })
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -144,9 +196,7 @@ export default function UploadPage() {
       audioChunksRef.current = []
 
       mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data)
-        }
+        if (event.data.size > 0) audioChunksRef.current.push(event.data)
       }
 
       mediaRecorder.onstop = async () => {
@@ -158,8 +208,8 @@ export default function UploadPage() {
       mediaRecorder.start()
       setIsRecording(true)
     } catch (error) {
-      const message = getReadableErrorMessage(error, 'Mikrofon erişimi sağlanamadı.')
-      setBanner({ state: 'error', title: 'Ses kaydı başlatılamadı', message })
+      const message = getReadableErrorMessage(error, 'Mikrofon erisimi saglanamadi.')
+      setBanner({ state: 'error', title: 'Ses kaydi baslatilamadi', message })
       toast.error(message)
     }
   }
@@ -171,8 +221,8 @@ export default function UploadPage() {
     setIsRecording(false)
     setBanner({
       state: 'loading',
-      title: 'Ses kaydı işleniyor',
-      message: 'Kayıt metne dönüştürülüyor.',
+      title: 'Ses kaydi isleniyor',
+      message: 'Kayit metne donusturuluyor.',
     })
   }
 
@@ -188,7 +238,7 @@ export default function UploadPage() {
         body: formData,
       })
       const data = await res.json()
-      if (!res.ok || data.error) throw new Error(data.error || 'Dosya işlenemedi.')
+      if (!res.ok || data.error) throw new Error(data.error || 'Dosya islenemedi.')
 
       const fileType = 'type' in file ? file.type : ''
       const isAudio = fileType.startsWith('audio/')
@@ -196,23 +246,23 @@ export default function UploadPage() {
       const isDocx = fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 
       const label = isAudio
-        ? '[SES DOSYASI ÇÖZÜMLEMESİ]'
+        ? '[SES DOSYASI COZUMLEMESI]'
         : isPdf
-          ? '[PDF İÇERİĞİ]'
+          ? '[PDF ICERIGI]'
           : isDocx
-            ? '[WORD İÇERİĞİ]'
-            : '[GÖRSELDEN ÇIKARILAN METİN]'
+            ? '[WORD ICERIGI]'
+            : '[GORSELDEN CIKARILAN METIN]'
 
       appendToInput(label, data.text)
       setBanner({
         state: 'success',
-        title: 'Dosya işlendi',
-        message: 'Çıkarılan metin giriş alanına eklendi.',
+        title: 'Dosya islendi',
+        message: 'Cikarilan metin giris alanina eklendi.',
       })
-      toast.success('Dosya başarıyla işlendi.')
+      toast.success('Dosya basariyla islendi.')
     } catch (error) {
-      const message = getReadableErrorMessage(error, 'Dosya işleme başarısız.')
-      setBanner({ state: 'error', title: 'Dosya işlenemedi', message })
+      const message = getReadableErrorMessage(error, 'Dosya isleme basarisiz.')
+      setBanner({ state: 'error', title: 'Dosya islenemedi', message })
       toast.error(message)
     } finally {
       setIsUploadLoading(false)
@@ -224,18 +274,18 @@ export default function UploadPage() {
     if (!canGenerate) {
       setBanner({
         state: 'error',
-        title: 'Rapor oluşturulamadı',
-        message: `Rapor üretmek için en az ${MIN_INPUT_LENGTH} karakter içerik girin.`,
+        title: 'Rapor olusturulamadi',
+        message: `Rapor uretmek icin en az ${MIN_INPUT_LENGTH} karakter icerik girin.`,
       })
       return
     }
 
-    setIsLoading(true)
+    setIsGenerating(true)
     setIsSaved(false)
     setBanner({
       state: 'loading',
-      title: 'Rapor oluşturuluyor',
-      message: 'Yapay zeka içeriği analiz ediyor.',
+      title: 'Rapor olusturuluyor',
+      message: 'Yapay zeka icerigi analiz ediyor.',
     })
 
     try {
@@ -249,23 +299,22 @@ export default function UploadPage() {
       })
 
       const data = await res.json()
-      if (!res.ok || data.error) throw new Error(data.error || 'Rapor oluşturulamadı.')
+      if (!res.ok || data.error) throw new Error(data.error || 'Rapor olusturulamadi.')
 
-      const generatedResult = String(data.result || '')
-      setResult(generatedResult)
+      setResult(String(data.result || ''))
       setIsSaved(false)
       setBanner({
         state: 'success',
-        title: 'Rapor hazır',
-        message: 'Çıktıyı düzenleyip kaydedebilirsiniz.',
+        title: 'Rapor hazir',
+        message: 'Ciktiyi duzenleyip kaydedebilirsiniz.',
       })
-      toast.success('Rapor oluşturuldu.')
+      toast.success('Rapor olusturuldu.')
     } catch (error) {
-      const message = getReadableErrorMessage(error, 'Rapor oluşturulamadı.')
-      setBanner({ state: 'error', title: 'Rapor oluşturulamadı', message })
+      const message = getReadableErrorMessage(error, 'Rapor olusturulamadi.')
+      setBanner({ state: 'error', title: 'Rapor olusturulamadi', message })
       toast.error(message)
     } finally {
-      setIsLoading(false)
+      setIsGenerating(false)
     }
   }
 
@@ -283,7 +332,7 @@ export default function UploadPage() {
       setBanner({
         state: 'error',
         title: 'Desteklenmeyen dosya tipi',
-        message: 'Sadece görsel, ses, PDF ve DOCX yükleyebilirsiniz.',
+        message: 'Sadece gorsel, ses, PDF ve DOCX yukleyebilirsiniz.',
       })
       if (fileInputRef.current) fileInputRef.current.value = ''
       return
@@ -292,8 +341,8 @@ export default function UploadPage() {
     if (file.size > MAX_UPLOAD_BYTES) {
       setBanner({
         state: 'error',
-        title: 'Dosya boyutu çok büyük',
-        message: 'Maksimum dosya boyutu 15MB olmalıdır.',
+        title: 'Dosya boyutu cok buyuk',
+        message: 'Maksimum dosya boyutu 15MB olmalidir.',
       })
       if (fileInputRef.current) fileInputRef.current.value = ''
       return
@@ -301,8 +350,8 @@ export default function UploadPage() {
 
     setBanner({
       state: 'loading',
-      title: 'Dosya işleniyor',
-      message: 'İçerik metne dönüştürülüyor.',
+      title: 'Dosya isleniyor',
+      message: 'Icerik metne donusturuluyor.',
     })
     await processUpload(file)
   }
@@ -311,7 +360,7 @@ export default function UploadPage() {
     if (!result) return
     navigator.clipboard.writeText(result)
     setIsCopied(true)
-    toast.success('Rapor panoya kopyalandı.')
+    toast.success('Rapor panoya kopyalandi.')
     setTimeout(() => setIsCopied(false), 2000)
   }
 
@@ -349,7 +398,7 @@ export default function UploadPage() {
         doc.setFont('Roboto')
       }
     } catch (error) {
-      const message = getReadableErrorMessage(error, 'PDF fontu yüklenemedi, varsayılan font kullanılacak.')
+      const message = getReadableErrorMessage(error, 'PDF fontu yuklenemedi, varsayilan font kullanilacak.')
       toast.error(message)
     }
 
@@ -386,44 +435,62 @@ export default function UploadPage() {
       <div className="flex flex-col gap-6 h-full">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Yeni Rapor</h1>
-          <p className="text-sm text-muted-foreground mt-1">Metin yazın, dosya yükleyin veya ses kaydı alın.</p>
+          <p className="text-sm text-muted-foreground mt-1">Metin yazin, dosya yukleyin veya ses kaydi alin.</p>
         </div>
+
+        {showOnboarding ? (
+          <Card className="border-border/50 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-background">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div className="flex items-center gap-2">
+                <Lightbulb className="h-4 w-4 text-amber-500" />
+                <span className="text-sm font-semibold">Ilk rapor rehberi</span>
+              </div>
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={dismissOnboarding}>
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {onboardingSteps.map((step) => (
+                <div key={step.label} className="flex items-center gap-2 text-sm">
+                  {step.done ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <Circle className="h-4 w-4 text-muted-foreground" />}
+                  <span className={step.done ? 'text-foreground' : 'text-muted-foreground'}>{step.label}</span>
+                </div>
+              ))}
+              <Button variant="outline" size="sm" onClick={insertSampleInput}>
+                Ornek not ekle
+              </Button>
+            </CardContent>
+          </Card>
+        ) : null}
 
         {banner ? <StatusBanner state={banner.state} title={banner.title} message={banner.message} /> : null}
 
         <Card className="flex-1 flex flex-col shadow-sm border-border/50">
-          <div className="flex items-center border-b p-2">
-            <Button
-              variant={activeTab === 'write' ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveTab('write')}
-              className="gap-2"
-            >
-              <FileText className="h-4 w-4" /> Yazı ve Not
+          <div className="flex flex-wrap items-center gap-2 border-b p-2">
+            <Button variant="secondary" size="sm" className="gap-2">
+              <FileText className="h-4 w-4" /> Yazi / Not
             </Button>
-            <div className="w-px h-4 bg-border mx-2" />
+
             <Button
-              variant={activeTab === 'upload' ? 'secondary' : 'ghost'}
+              variant="ghost"
               size="sm"
-              onClick={() => {
-                setActiveTab('upload')
-                fileInputRef.current?.click()
-              }}
+              onClick={() => fileInputRef.current?.click()}
               disabled={isBusy}
               className="gap-2"
             >
               {isUploadLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              Dosya Yükle
+              Dosya Yukle
             </Button>
+
             <Button
               variant={isRecording ? 'destructive' : 'ghost'}
               size="sm"
               onClick={isRecording ? stopRecording : startRecording}
               disabled={isBusy}
-              className={`gap-2 ml-2 ${isRecording ? 'animate-pulse' : ''}`}
+              className={`gap-2 ${isRecording ? 'animate-pulse' : ''}`}
             >
               {isRecording ? <StopCircle className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-              {isRecording ? 'Kaydı Durdur' : 'Ses Kaydet'}
+              {isRecording ? 'Kaydi Durdur' : 'Ses Kaydet'}
             </Button>
           </div>
 
@@ -431,8 +498,8 @@ export default function UploadPage() {
             {isUploadLoading ? (
               <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center text-center p-4">
                 <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-                <p className="font-medium">Dosya işleniyor</p>
-                <p className="text-sm text-muted-foreground">Bu işlem dosya boyutuna göre birkaç saniye sürebilir.</p>
+                <p className="font-medium">Dosya isleniyor</p>
+                <p className="text-sm text-muted-foreground">Bu islem dosya boyutuna gore birkac saniye surebilir.</p>
               </div>
             ) : null}
 
@@ -445,7 +512,7 @@ export default function UploadPage() {
             />
 
             <Textarea
-              placeholder="Notlarınızı yazın veya üstteki butonları kullanarak içerik ekleyin..."
+              placeholder="Notlarinizi yazin veya ustteki butonlari kullanarak icerik ekleyin..."
               className="flex-1 resize-none border-0 focus-visible:ring-0 p-4 text-base font-mono bg-transparent rounded-none"
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -453,26 +520,26 @@ export default function UploadPage() {
 
             <div className="p-4 border-t bg-muted/20 space-y-4">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Minimum {MIN_INPUT_LENGTH} karakter önerilir.</span>
+                <span>Minimum {MIN_INPUT_LENGTH} karakter onerilir.</span>
                 <span>{trimmedInput.length} karakter</span>
               </div>
 
-              <div className="flex gap-4 items-center">
+              <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
                 <div className="flex-1">
                   <Select value={reportType} onValueChange={setReportType}>
                     <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Rapor Türü" />
+                      <SelectValue placeholder="Rapor Turu" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
                         <SelectLabel>Standart Raporlar</SelectLabel>
                         <SelectItem value="genel">Genel Rapor</SelectItem>
-                        <SelectItem value="isg">İş Güvenliği (İSG)</SelectItem>
+                        <SelectItem value="isg">Is Guvenligi (ISG)</SelectItem>
                         <SelectItem value="finans">Finansal Analiz</SelectItem>
                       </SelectGroup>
                       {templates.length > 0 ? (
                         <SelectGroup>
-                          <SelectLabel>Asistanlarım</SelectLabel>
+                          <SelectLabel>Asistanlarim</SelectLabel>
                           {templates.map((t) => (
                             <SelectItem key={t.id} value={t.id}>
                               <div className="flex items-center gap-2">
@@ -480,7 +547,7 @@ export default function UploadPage() {
                                 <div className="flex flex-col">
                                   <span className="font-medium">{t.name}</span>
                                   <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <Sparkles className="w-3 h-3 text-yellow-500" /> Özel Asistan
+                                    <Sparkles className="w-3 h-3 text-yellow-500" /> Ozel Asistan
                                   </span>
                                 </div>
                               </div>
@@ -492,16 +559,16 @@ export default function UploadPage() {
                   </Select>
                 </div>
 
-                <Button onClick={handleGenerate} disabled={!canGenerate} className="flex-1 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900">
-                  {isLoading ? (
+                <Button onClick={handleGenerate} disabled={!canGenerate} className="sm:w-auto w-full bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900">
+                  {isGenerating ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Oluşturuluyor...
+                      Olusturuluyor...
                     </>
                   ) : (
                     <>
                       <Wand2 className="mr-2 h-4 w-4" />
-                      Rapor Oluştur
+                      Rapor Olustur
                     </>
                   )}
                 </Button>
@@ -513,14 +580,14 @@ export default function UploadPage() {
 
       <div className="flex flex-col gap-6 h-full">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 lg:invisible">Sonuç</h1>
-          <p className="text-sm text-muted-foreground mt-1 lg:invisible">Hazır rapor çıktısı.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 lg:invisible">Sonuc</h1>
+          <p className="text-sm text-muted-foreground mt-1 lg:invisible">Hazir rapor ciktisi.</p>
         </div>
 
         <Card className="flex-1 flex flex-col bg-muted/30 border-border/50 shadow-sm overflow-hidden h-full">
-          <CardHeader className="flex flex-row items-center justify-between py-3 px-4 border-b bg-background">
+          <CardHeader className="flex flex-wrap items-center justify-between gap-2 py-3 px-4 border-b bg-background">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-sm">Rapor Önizleme</span>
+              <span className="font-semibold text-sm">Rapor Onizleme</span>
               {isSaved ? (
                 <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 border-0">
                   <Check className="w-3 h-3 mr-1" /> Kaydedildi
@@ -531,20 +598,20 @@ export default function UploadPage() {
                 </Badge>
               ) : null}
             </div>
-            <div className="flex gap-1">
+            <div className="flex flex-wrap gap-1">
               {result ? (
                 <>
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy} title="Kopyala">
                     {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownloadPDF} title="PDF İndir">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownloadPDF} title="PDF Indir">
                     <FileText className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload} title="TXT İndir">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload} title="TXT Indir">
                     <Download className="h-4 w-4" />
                   </Button>
                   {!isSaved ? (
-                    <Button size="sm" variant="default" onClick={handleSave} disabled={isSaving} className="h-8 ml-2 gap-2">
+                    <Button size="sm" variant="default" onClick={handleSave} disabled={isSaving} className="h-8 ml-1 gap-2">
                       {isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
                       Kaydet
                     </Button>
@@ -553,6 +620,7 @@ export default function UploadPage() {
               ) : null}
             </div>
           </CardHeader>
+
           <CardContent className="flex-1 p-0 min-h-0 relative bg-background">
             {result ? (
               <Textarea
@@ -564,13 +632,18 @@ export default function UploadPage() {
                 }}
               />
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground/50 gap-4">
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground/50 gap-4 text-center px-4">
                 <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center">
                   <FileText className="h-8 w-8" />
                 </div>
-                <div className="text-center space-y-1">
+                <div className="space-y-1">
                   <p className="font-medium text-foreground/80">Rapor bekleniyor</p>
-                  <p className="text-sm">Sol taraftan içerik ekleyip analiz başlatın.</p>
+                  <p className="text-sm">Sol taraftan icerik ekleyip analiz baslatin.</p>
+                  {trimmedInput.length === 0 ? (
+                    <Button variant="link" size="sm" onClick={insertSampleInput}>
+                      Ornek icerik ekle
+                    </Button>
+                  ) : null}
                 </div>
               </div>
             )}
