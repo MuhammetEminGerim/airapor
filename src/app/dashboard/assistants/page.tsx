@@ -36,6 +36,9 @@ type BannerState = {
   message?: string
 }
 
+const INITIAL_LOADING_DELAY_MS = 600
+const INITIAL_LOADING_TITLE = 'Asistanlar yukleniyor'
+
 const QUICK_PROMPTS = {
   business: [
     {
@@ -119,31 +122,50 @@ export default function AssistantsPage() {
   const canCreate = !creating && !nameError && !promptError && !iconError
 
   useEffect(() => {
-    fetchTemplates()
-  }, [])
+    let isMounted = true
+    const loadingBannerTimer = setTimeout(() => {
+      if (!isMounted) return
+      setBanner({
+        state: 'loading',
+        title: INITIAL_LOADING_TITLE,
+        message: 'Kayitli sablonlar getiriliyor.',
+      })
+    }, INITIAL_LOADING_DELAY_MS)
 
-  const fetchTemplates = async () => {
-    setBanner({
-      state: 'loading',
-      title: 'Asistanlar yükleniyor',
-      message: 'Kayıtlı şablonlar getiriliyor.',
-    })
+    const fetchTemplates = async () => {
+      try {
+        const res = await fetch('/api/templates')
+        const data = await res.json()
+        if (!res.ok || data.error) throw new Error(data.error || 'Asistanlar yuklenemedi.')
 
-    try {
-      const res = await fetch('/api/templates')
-      const data = await res.json()
-      if (!res.ok || data.error) throw new Error(data.error || 'Asistanlar yüklenemedi.')
-
-      setTemplates(data.templates || [])
-      setBanner(null)
-    } catch (error) {
-      const message = getReadableErrorMessage(error, 'Asistanlar yüklenemedi.')
-      setBanner({ state: 'error', title: 'Asistanlar yüklenemedi', message })
-      toast.error(message)
-    } finally {
-      setLoading(false)
+        clearTimeout(loadingBannerTimer)
+        if (!isMounted) return
+        setTemplates(data.templates || [])
+        setBanner((current) => {
+          if (current?.state === 'loading' && current.title === INITIAL_LOADING_TITLE) {
+            return null
+          }
+          return current
+        })
+      } catch (error) {
+        clearTimeout(loadingBannerTimer)
+        if (!isMounted) return
+        const message = getReadableErrorMessage(error, 'Asistanlar yuklenemedi.')
+        setBanner({ state: 'error', title: 'Asistanlar yuklenemedi', message })
+        toast.error(message)
+      } finally {
+        if (!isMounted) return
+        setLoading(false)
+      }
     }
-  }
+
+    fetchTemplates()
+
+    return () => {
+      isMounted = false
+      clearTimeout(loadingBannerTimer)
+    }
+  }, [])
 
   const handleCreate = async () => {
     if (!canCreate) {
@@ -355,8 +377,10 @@ export default function AssistantsPage() {
       {banner ? <StatusBanner state={banner.state} title={banner.title} message={banner.message} /> : null}
 
       {loading ? (
-        <div className="flex items-center justify-center min-h-[200px]">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <div key={idx} className="h-44 rounded-xl border bg-muted/40 animate-pulse" />
+          ))}
         </div>
       ) : templates.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-[300px] border-2 border-dashed rounded-xl bg-muted/20">

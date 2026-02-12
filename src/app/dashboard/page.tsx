@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileText, Clock, Upload, Loader2, Search, TrendingUp, Zap, ArrowRight, Sparkles } from 'lucide-react'
+import { FileText, Clock, Upload, Search, TrendingUp, Zap, ArrowRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { Input } from '@/components/ui/input'
@@ -146,7 +146,7 @@ export default function DashboardPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {isLoading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : <div className="text-2xl font-bold">{stats.total}</div>}
+            {isLoading ? <div className="h-7 w-16 rounded bg-muted animate-pulse" /> : <div className="text-2xl font-bold">{stats.total}</div>}
           </CardContent>
         </Card>
 
@@ -156,7 +156,7 @@ export default function DashboardPage() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {isLoading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : <div className="text-2xl font-bold">{stats.savedTime}</div>}
+            {isLoading ? <div className="h-7 w-16 rounded bg-muted animate-pulse" /> : <div className="text-2xl font-bold">{stats.savedTime}</div>}
           </CardContent>
         </Card>
 
@@ -166,7 +166,7 @@ export default function DashboardPage() {
             <TrendingUp className="h-4 w-4 text-indigo-500" />
           </CardHeader>
           <CardContent>
-            {isLoading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : <div className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">Yuksek</div>}
+            {isLoading ? <div className="h-7 w-20 rounded bg-indigo-200/60 dark:bg-indigo-800/40 animate-pulse" /> : <div className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">Yuksek</div>}
           </CardContent>
         </Card>
 
@@ -176,8 +176,10 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="flex justify-center p-8">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <div className="p-4 space-y-3">
+                <div className="h-12 w-full rounded-lg border bg-muted/40 animate-pulse" />
+                <div className="h-12 w-full rounded-lg border bg-muted/40 animate-pulse" />
+                <div className="h-12 w-full rounded-lg border bg-muted/40 animate-pulse" />
               </div>
             ) : filteredReports.length > 0 ? (
               <div className="space-y-3">

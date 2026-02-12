@@ -195,8 +195,10 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="p-8 flex justify-center">
-        <Loader2 className="animate-spin h-8 w-8 text-muted-foreground" />
+      <div className="p-4 md:p-6 space-y-4">
+        <div className="h-7 w-36 rounded-md bg-muted animate-pulse" />
+        <div className="h-4 w-64 rounded-md bg-muted/80 animate-pulse" />
+        <div className="h-64 w-full rounded-xl border bg-muted/40 animate-pulse" />
       </div>
     )
   }

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { supabase } from '@/lib/supabase'
-import { Loader2, TrendingUp, PieChart as PieChartIcon, ArrowRight, Lightbulb } from 'lucide-react'
+import { TrendingUp, PieChart as PieChartIcon, ArrowRight, Lightbulb } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
@@ -82,8 +82,10 @@ export default function StatsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="h-32 rounded-xl border bg-muted/40 animate-pulse" />
+        <div className="h-32 rounded-xl border bg-muted/40 animate-pulse" />
+        <div className="h-32 rounded-xl border bg-muted/40 animate-pulse" />
       </div>
     )
   }

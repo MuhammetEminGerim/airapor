@@ -44,6 +44,8 @@ type BannerState = {
 const MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 const MIN_INPUT_LENGTH = 20
 const ONBOARDING_KEY = 'ra:onboarding:upload:v1'
+const TEMPLATE_LOADING_DELAY_MS = 600
+const TEMPLATE_LOADING_TITLE = 'Sablonlar yukleniyor'
 
 export default function UploadPage() {
   const [input, setInput] = useState('')
@@ -82,27 +84,45 @@ export default function UploadPage() {
   }, [])
 
   useEffect(() => {
-    const fetchTemplates = async () => {
+    let isMounted = true
+    const loadingBannerTimer = setTimeout(() => {
+      if (!isMounted) return
       setBanner({
         state: 'loading',
-        title: 'Sablonlar yukleniyor',
+        title: TEMPLATE_LOADING_TITLE,
         message: 'Asistan listesi getiriliyor.',
       })
+    }, TEMPLATE_LOADING_DELAY_MS)
 
+    const fetchTemplates = async () => {
       try {
         const res = await fetch('/api/templates')
         const data = await res.json()
         if (!res.ok || data.error) throw new Error(data.error || 'Sablonlar getirilemedi.')
 
+        clearTimeout(loadingBannerTimer)
+        if (!isMounted) return
         setTemplates(data.templates || [])
-        setBanner(null)
+        setBanner((current) => {
+          if (current?.state === 'loading' && current.title === TEMPLATE_LOADING_TITLE) {
+            return null
+          }
+          return current
+        })
       } catch (error) {
+        clearTimeout(loadingBannerTimer)
+        if (!isMounted) return
         const message = getReadableErrorMessage(error, 'Sablonlar getirilemedi.')
         setBanner({ state: 'error', title: 'Sablonlar yuklenemedi', message })
       }
     }
 
     fetchTemplates()
+
+    return () => {
+      isMounted = false
+      clearTimeout(loadingBannerTimer)
+    }
   }, [])
 
   const dismissOnboarding = () => {

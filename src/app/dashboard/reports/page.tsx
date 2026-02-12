@@ -326,9 +326,10 @@ export default function ReportsPage() {
       <Card className="border-border/50 shadow-sm">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center p-12 text-muted-foreground">
-              <Loader2 className="h-8 w-8 animate-spin mb-2" />
-              <p>Raporlar yukleniyor...</p>
+            <div className="p-4 md:p-6 space-y-3">
+              <div className="h-10 w-full rounded-lg border bg-muted/40 animate-pulse" />
+              <div className="h-10 w-full rounded-lg border bg-muted/40 animate-pulse" />
+              <div className="h-10 w-full rounded-lg border bg-muted/40 animate-pulse" />
             </div>
           ) : filteredReports.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-12 text-muted-foreground text-center">
