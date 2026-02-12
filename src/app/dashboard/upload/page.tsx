@@ -1,15 +1,17 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Wand2, Upload, Copy, Download, Check, Save, Mic, StopCircle, FileText, Sparkles } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import jsPDF from 'jspdf'
+import { getReadableErrorMessage } from '@/lib/user-feedback'
+import { StatusBanner } from '@/components/features/status-banner'
 
 interface Template {
   id: string
@@ -17,69 +19,125 @@ interface Template {
   icon: string
 }
 
+type BannerState = {
+  state: 'loading' | 'success' | 'error' | 'info'
+  title: string
+  message?: string
+}
+
+const MAX_UPLOAD_BYTES = 15 * 1024 * 1024
+const MIN_INPUT_LENGTH = 20
+
 export default function UploadPage() {
   const [input, setInput] = useState('')
   const [reportType, setReportType] = useState('genel')
   const [templates, setTemplates] = useState<Template[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [isOcrLoading, setIsOcrLoading] = useState(false)
+  const [isUploadLoading, setIsUploadLoading] = useState(false)
   const [result, setResult] = useState('')
   const [isCopied, setIsCopied] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'write' | 'upload'>('write')
-
-  useEffect(() => {
-    const fetchTemplates = async () => {
-        try {
-            const res = await fetch('/api/templates')
-            const data = await res.json()
-            if (data.templates) {
-                setTemplates(data.templates)
-            }
-        } catch (error) {
-            console.error('Error fetching templates:', error)
-        }
-    }
-    fetchTemplates()
-  }, [])
-
-  const handleSave = async () => {
-    if (!result) return
-    setIsSaving(true)
-    try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-            toast.error('Oturum açmanız gerekiyor.')
-            return
-        }
-
-        const { error } = await supabase.from('reports').insert({
-            user_id: user.id,
-            title: `Rapor - ${new Date().toLocaleDateString('tr-TR')}`,
-            type: reportType,
-            content: result,
-            input_text: input
-        })
-
-        if (error) throw error
-
-        setIsSaved(true)
-        toast.success('Rapor başarıyla kaydedildi.')
-    } catch (error) {
-        console.error(error)
-        toast.error('Kaydetme hatası: ' + (error as Error).message)
-    } finally {
-        setIsSaving(false)
-    }
-  }
   const [isRecording, setIsRecording] = useState(false)
+  const [banner, setBanner] = useState<BannerState | null>(null)
+
   const fileInputRef = useRef<HTMLInputElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
 
+  const trimmedInput = input.trim()
+  const canGenerate = trimmedInput.length >= MIN_INPUT_LENGTH && !isLoading && !isUploadLoading
+  const isBusy = isLoading || isUploadLoading || isSaving
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      setBanner({
+        state: 'loading',
+        title: 'Şablonlar yükleniyor',
+        message: 'Asistan listesi getiriliyor.',
+      })
+
+      try {
+        const res = await fetch('/api/templates')
+        const data = await res.json()
+        if (!res.ok || data.error) throw new Error(data.error || 'Şablonlar getirilemedi.')
+
+        setTemplates(data.templates || [])
+        setBanner(null)
+      } catch (error) {
+        const message = getReadableErrorMessage(error, 'Şablonlar getirilemedi.')
+        setBanner({ state: 'error', title: 'Şablonlar yüklenemedi', message })
+      }
+    }
+
+    fetchTemplates()
+  }, [])
+
+  const appendToInput = (label: string, text: string) => {
+    setInput((prev) => (prev ? `${prev}\n\n---\n${label}:\n${text}` : `${label}:\n${text}`))
+  }
+
+  const handleSave = async () => {
+    if (!result.trim()) {
+      setBanner({
+        state: 'error',
+        title: 'Kaydetme işlemi başarısız',
+        message: 'Önce bir rapor üretin veya içerik ekleyin.',
+      })
+      return
+    }
+
+    setIsSaving(true)
+    setBanner({
+      state: 'loading',
+      title: 'Rapor kaydediliyor',
+      message: 'Veriler hesabınıza ekleniyor.',
+    })
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        throw new Error('Oturum açmanız gerekiyor.')
+      }
+
+      const { error } = await supabase.from('reports').insert({
+        user_id: user.id,
+        title: `Rapor - ${new Date().toLocaleDateString('tr-TR')}`,
+        type: reportType,
+        content: result,
+        input_text: input,
+      })
+
+      if (error) throw error
+
+      setIsSaved(true)
+      setBanner({
+        state: 'success',
+        title: 'Rapor kaydedildi',
+        message: 'Raporlarım ekranından düzenleyebilir veya paylaşabilirsiniz.',
+      })
+      toast.success('Rapor başarıyla kaydedildi.')
+    } catch (error) {
+      const message = getReadableErrorMessage(error, 'Rapor kaydedilemedi.')
+      setBanner({ state: 'error', title: 'Kaydetme işlemi başarısız', message })
+      toast.error(message)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   const startRecording = async () => {
     try {
+      setBanner({
+        state: 'info',
+        title: 'Ses kaydı başladı',
+        message: 'Kaydı durdurduğunuzda ses metne dönüştürülecek.',
+      })
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       const mediaRecorder = new MediaRecorder(stream)
       mediaRecorderRef.current = mediaRecorder
@@ -87,80 +145,125 @@ export default function UploadPage() {
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
-            audioChunksRef.current.push(event.data)
+          audioChunksRef.current.push(event.data)
         }
       }
 
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
-        await handleAudioUpload(audioBlob)
-        stream.getTracks().forEach(track => track.stop())
+        await processUpload(audioBlob, 'voice-note.webm')
+        stream.getTracks().forEach((track) => track.stop())
       }
 
       mediaRecorder.start()
       setIsRecording(true)
     } catch (error) {
-        console.error('Mikrofon hatası:', error)
-        toast.error('Mikrofon izni verilmedi veya bir hata oluştu.')
+      const message = getReadableErrorMessage(error, 'Mikrofon erişimi sağlanamadı.')
+      setBanner({ state: 'error', title: 'Ses kaydı başlatılamadı', message })
+      toast.error(message)
     }
   }
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-        mediaRecorderRef.current.stop()
-        setIsRecording(false)
-    }
+    if (!mediaRecorderRef.current || !isRecording) return
+
+    mediaRecorderRef.current.stop()
+    setIsRecording(false)
+    setBanner({
+      state: 'loading',
+      title: 'Ses kaydı işleniyor',
+      message: 'Kayıt metne dönüştürülüyor.',
+    })
   }
 
-  const handleAudioUpload = async (audioBlob: Blob) => {
-    setIsOcrLoading(true)
-    const formData = new FormData()
-    formData.append('file', audioBlob, 'voice-note.webm')
+  const processUpload = async (file: Blob | File, fileName?: string) => {
+    setIsUploadLoading(true)
 
     try {
-        const res = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData
-        })
-        const data = await res.json()
-        if (data.error) throw new Error(data.error)
+      const formData = new FormData()
+      formData.append('file', file, fileName)
 
-        setInput(prev => (prev ? prev + '\n\n---\n' : '') + `[SES KAYDI ÖZETİ]:\n${data.text}`)
-        toast.success('Ses kaydı başarıyla işlendi.')
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) throw new Error(data.error || 'Dosya işlenemedi.')
+
+      const fileType = 'type' in file ? file.type : ''
+      const isAudio = fileType.startsWith('audio/')
+      const isPdf = fileType === 'application/pdf'
+      const isDocx = fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+      const label = isAudio
+        ? '[SES DOSYASI ÇÖZÜMLEMESİ]'
+        : isPdf
+          ? '[PDF İÇERİĞİ]'
+          : isDocx
+            ? '[WORD İÇERİĞİ]'
+            : '[GÖRSELDEN ÇIKARILAN METİN]'
+
+      appendToInput(label, data.text)
+      setBanner({
+        state: 'success',
+        title: 'Dosya işlendi',
+        message: 'Çıkarılan metin giriş alanına eklendi.',
+      })
+      toast.success('Dosya başarıyla işlendi.')
     } catch (error) {
-        console.error(error)
-        toast.error('Ses işlenirken hata oluştu: ' + (error as Error).message)
+      const message = getReadableErrorMessage(error, 'Dosya işleme başarısız.')
+      setBanner({ state: 'error', title: 'Dosya işlenemedi', message })
+      toast.error(message)
     } finally {
-        setIsOcrLoading(false)
+      setIsUploadLoading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
-    const handleGenerate = async () => {
-    if (!input) return
+  const handleGenerate = async () => {
+    if (!canGenerate) {
+      setBanner({
+        state: 'error',
+        title: 'Rapor oluşturulamadı',
+        message: `Rapor üretmek için en az ${MIN_INPUT_LENGTH} karakter içerik girin.`,
+      })
+      return
+    }
+
     setIsLoading(true)
     setIsSaved(false)
+    setBanner({
+      state: 'loading',
+      title: 'Rapor oluşturuluyor',
+      message: 'Yapay zeka içeriği analiz ediyor.',
+    })
+
     try {
       const isStandard = ['genel', 'isg', 'finans'].includes(reportType)
-      const body = isStandard
-        ? { text: input, reportType }
-        : { text: input, templateId: reportType }
+      const body = isStandard ? { text: trimmedInput, reportType } : { text: trimmedInput, templateId: reportType }
 
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      const data = await res.json()
-      if (data.error) throw new Error(data.error)
 
-      const generatedResult = data.result
+      const data = await res.json()
+      if (!res.ok || data.error) throw new Error(data.error || 'Rapor oluşturulamadı.')
+
+      const generatedResult = String(data.result || '')
       setResult(generatedResult)
       setIsSaved(false)
-      toast.success('Rapor oluşturuldu. Düzenleyip kaydedebilirsiniz.')
-
+      setBanner({
+        state: 'success',
+        title: 'Rapor hazır',
+        message: 'Çıktıyı düzenleyip kaydedebilirsiniz.',
+      })
+      toast.success('Rapor oluşturuldu.')
     } catch (error) {
-      console.error(error)
-      toast.error('Hata oluştu: ' + (error as Error).message)
+      const message = getReadableErrorMessage(error, 'Rapor oluşturulamadı.')
+      setBanner({ state: 'error', title: 'Rapor oluşturulamadı', message })
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }
@@ -170,44 +273,45 @@ export default function UploadPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    setIsOcrLoading(true)
-    const formData = new FormData()
-    formData.append('file', file)
+    const isSupportedType =
+      file.type.startsWith('image/') ||
+      file.type.startsWith('audio/') ||
+      file.type === 'application/pdf' ||
+      file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 
-    const isAudio = file.type.startsWith('audio/')
-    const isPdf = file.type === 'application/pdf'
-    const isDocx = file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-
-    let label = '[RESİMDEN OKUNAN VERİ]'
-    if (isAudio) label = '[SES DOSYASI ÇÖZÜMLEMESİ]'
-    else if (isPdf) label = '[PDF İÇERİĞİ]'
-    else if (isDocx) label = '[WORD İÇERİĞİ]'
-
-    try {
-        const res = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData
-        })
-        const data = await res.json()
-        if (data.error) throw new Error(data.error)
-
-        // Append text to existing input
-        setInput(prev => (prev ? prev + '\n\n---\n' : '') + `${label}:\n${data.text}`)
-        toast.success('Dosya başarıyla okundu.')
-    } catch (error) {
-        console.error(error)
-        toast.error('Dosya okunurken hata oluştu: ' + (error as Error).message)
-    } finally {
-        setIsOcrLoading(false)
-        if (fileInputRef.current) fileInputRef.current.value = ''
+    if (!isSupportedType) {
+      setBanner({
+        state: 'error',
+        title: 'Desteklenmeyen dosya tipi',
+        message: 'Sadece görsel, ses, PDF ve DOCX yükleyebilirsiniz.',
+      })
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
     }
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setBanner({
+        state: 'error',
+        title: 'Dosya boyutu çok büyük',
+        message: 'Maksimum dosya boyutu 15MB olmalıdır.',
+      })
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
+    }
+
+    setBanner({
+      state: 'loading',
+      title: 'Dosya işleniyor',
+      message: 'İçerik metne dönüştürülüyor.',
+    })
+    await processUpload(file)
   }
 
   const handleCopy = () => {
     if (!result) return
     navigator.clipboard.writeText(result)
     setIsCopied(true)
-    toast.success('Kopyalandı!')
+    toast.success('Rapor panoya kopyalandı.')
     setTimeout(() => setIsCopied(false), 2000)
   }
 
@@ -228,25 +332,25 @@ export default function UploadPage() {
     const doc = new jsPDF()
 
     try {
-        const fontUrl = '/fonts/Roboto-Regular.ttf'
-        const response = await fetch(fontUrl)
-        const blob = await response.blob()
-        const reader = new FileReader()
-        await new Promise((resolve, reject) => {
-            reader.onload = resolve
-            reader.onerror = reject
-            reader.readAsDataURL(blob)
-        })
+      const fontUrl = '/fonts/Roboto-Regular.ttf'
+      const response = await fetch(fontUrl)
+      const blob = await response.blob()
+      const reader = new FileReader()
+      await new Promise((resolve, reject) => {
+        reader.onload = resolve
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
+      })
 
-        if (reader.result && typeof reader.result === 'string') {
-            const base64 = reader.result.split(',')[1]
-            doc.addFileToVFS('Roboto-Regular.ttf', base64)
-            doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal')
-            doc.setFont('Roboto')
-        }
+      if (reader.result && typeof reader.result === 'string') {
+        const base64 = reader.result.split(',')[1]
+        doc.addFileToVFS('Roboto-Regular.ttf', base64)
+        doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal')
+        doc.setFont('Roboto')
+      }
     } catch (error) {
-        console.error('Font error:', error)
-        toast.error('PDF fontu yüklenemedi, standart font kullanılıyor.')
+      const message = getReadableErrorMessage(error, 'PDF fontu yüklenemedi, varsayılan font kullanılacak.')
+      toast.error(message)
     }
 
     const title = `Rapor - ${new Date().toLocaleDateString('tr-TR')}`
@@ -261,16 +365,16 @@ export default function UploadPage() {
     const lineHeight = 7
 
     if (Array.isArray(splitText)) {
-        splitText.forEach((line: string) => {
-            if (y + lineHeight > pageHeight - 10) {
-                doc.addPage()
-                y = 20
-            }
-            doc.text(line, 10, y)
-            y += lineHeight
-        })
+      splitText.forEach((line: string) => {
+        if (y + lineHeight > pageHeight - 10) {
+          doc.addPage()
+          y = 20
+        }
+        doc.text(line, 10, y)
+        y += lineHeight
+      })
     } else {
-        doc.text(splitText, 10, 30)
+      doc.text(splitText, 10, 30)
     }
 
     doc.save(`${title}.pdf`)
@@ -279,219 +383,201 @@ export default function UploadPage() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2 h-[calc(100vh-8rem)]">
-      {/* Input Area */}
       <div className="flex flex-col gap-6 h-full">
         <div>
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Yeni Rapor</h1>
-            <p className="text-sm text-muted-foreground mt-1">Verilerinizi yükleyin, AI sizin için raporlasın.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Yeni Rapor</h1>
+          <p className="text-sm text-muted-foreground mt-1">Metin yazın, dosya yükleyin veya ses kaydı alın.</p>
         </div>
 
+        {banner ? <StatusBanner state={banner.state} title={banner.title} message={banner.message} /> : null}
+
         <Card className="flex-1 flex flex-col shadow-sm border-border/50">
-            <div className="flex items-center border-b p-2">
-                <Button
-                    variant={activeTab === 'write' ? 'secondary' : 'ghost'}
-                    size="sm"
-                    onClick={() => setActiveTab('write')}
-                    className="gap-2"
-                >
-                    <FileText className="h-4 w-4" /> Yazı & Not
-                </Button>
-                <div className="w-px h-4 bg-border mx-2" />
-                <Button
-                    variant={activeTab === 'upload' ? 'secondary' : 'ghost'}
-                    size="sm"
-                    onClick={() => {
-                        setActiveTab('upload')
-                        fileInputRef.current?.click()
-                    }}
-                    disabled={isOcrLoading}
-                    className="gap-2"
-                >
-                    {isOcrLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                    Dosya Yükle
-                </Button>
-                <Button
-                    variant={isRecording ? "destructive" : "ghost"}
-                    size="sm"
-                    onClick={isRecording ? stopRecording : startRecording}
-                    disabled={isOcrLoading}
-                    className={`gap-2 ml-2 ${isRecording ? 'animate-pulse' : ''}`}
-                >
-                    {isRecording ? <StopCircle className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                    {isRecording ? 'Kaydediyor...' : 'Ses Kaydet'}
-                </Button>
-            </div>
+          <div className="flex items-center border-b p-2">
+            <Button
+              variant={activeTab === 'write' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab('write')}
+              className="gap-2"
+            >
+              <FileText className="h-4 w-4" /> Yazı ve Not
+            </Button>
+            <div className="w-px h-4 bg-border mx-2" />
+            <Button
+              variant={activeTab === 'upload' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => {
+                setActiveTab('upload')
+                fileInputRef.current?.click()
+              }}
+              disabled={isBusy}
+              className="gap-2"
+            >
+              {isUploadLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              Dosya Yükle
+            </Button>
+            <Button
+              variant={isRecording ? 'destructive' : 'ghost'}
+              size="sm"
+              onClick={isRecording ? stopRecording : startRecording}
+              disabled={isBusy}
+              className={`gap-2 ml-2 ${isRecording ? 'animate-pulse' : ''}`}
+            >
+              {isRecording ? <StopCircle className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              {isRecording ? 'Kaydı Durdur' : 'Ses Kaydet'}
+            </Button>
+          </div>
 
-            <CardContent className="flex-1 flex flex-col p-0 min-h-0 relative">
-                {isOcrLoading && (
-                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center text-center p-4">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-                        <p className="font-medium">Dosya işleniyor...</p>
-                        <p className="text-sm text-muted-foreground">Yapay zeka içeriği metne dönüştürüyor.</p>
-                    </div>
-                )}
+          <CardContent className="flex-1 flex flex-col p-0 min-h-0 relative">
+            {isUploadLoading ? (
+              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center text-center p-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                <p className="font-medium">Dosya işleniyor</p>
+                <p className="text-sm text-muted-foreground">Bu işlem dosya boyutuna göre birkaç saniye sürebilir.</p>
+              </div>
+            ) : null}
 
-                <input
-                    type="file"
-                    accept="image/*,audio/*,.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    className="hidden"
-                    ref={fileInputRef}
-                    onChange={handleFileUpload}
-                />
+            <input
+              type="file"
+              accept="image/*,audio/*,.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+            />
 
-                <Textarea
-                    placeholder="Buraya notlarınızı yazın, yapıştırın veya yukarıdaki butonlarla dosya yükleyin..."
-                    className="flex-1 resize-none border-0 focus-visible:ring-0 p-4 text-base font-mono bg-transparent rounded-none"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                />
+            <Textarea
+              placeholder="Notlarınızı yazın veya üstteki butonları kullanarak içerik ekleyin..."
+              className="flex-1 resize-none border-0 focus-visible:ring-0 p-4 text-base font-mono bg-transparent rounded-none"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
 
-                <div className="p-4 border-t bg-muted/20 space-y-4">
-                    <div className="flex gap-4 items-center">
-                        <div className="flex-1">
-                            <Select value={reportType} onValueChange={setReportType}>
-                                <SelectTrigger className="bg-background">
-                                    <SelectValue placeholder="Rapor Türü" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectLabel>Standart Raporlar</SelectLabel>
-                                        <SelectItem value="genel">
-                                            <div className="flex flex-col">
-                                                <span className="font-medium">Genel Rapor</span>
-                                                <span className="text-xs text-muted-foreground">Standart iş raporu formatı</span>
-                                            </div>
-                                        </SelectItem>
-                                        <SelectItem value="isg">
-                                            <div className="flex flex-col">
-                                                <span className="font-medium">İş Güvenliği (İSG)</span>
-                                                <span className="text-xs text-muted-foreground">Yönetmelik referanslı denetim</span>
-                                            </div>
-                                        </SelectItem>
-                                        <SelectItem value="finans">
-                                            <div className="flex flex-col">
-                                                <span className="font-medium">Finansal Analiz</span>
-                                                <span className="text-xs text-muted-foreground">Bütçe ve harcama analizi</span>
-                                            </div>
-                                        </SelectItem>
-                                    </SelectGroup>
-                                    {templates.length > 0 && (
-                                        <SelectGroup>
-                                            <SelectLabel>Asistanlarım</SelectLabel>
-                                            {templates.map(t => (
-                                                <SelectItem key={t.id} value={t.id}>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-lg">{t.icon}</span>
-                                                        <div className="flex flex-col">
-                                                            <span className="font-medium">{t.name}</span>
-                                                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                                                <Sparkles className="w-3 h-3 text-yellow-500" /> Özel Asistan
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    )}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <Button
-                            onClick={handleGenerate}
-                            disabled={isLoading || !input}
-                            className="flex-1 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900"
-                        >
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    AI Analiz Ediyor...
-                                </>
-                            ) : (
-                                <>
-                                    <Wand2 className="mr-2 h-4 w-4" />
-                                    Rapor Oluştur
-                                </>
-                            )}
-                        </Button>
-                    </div>
+            <div className="p-4 border-t bg-muted/20 space-y-4">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Minimum {MIN_INPUT_LENGTH} karakter önerilir.</span>
+                <span>{trimmedInput.length} karakter</span>
+              </div>
+
+              <div className="flex gap-4 items-center">
+                <div className="flex-1">
+                  <Select value={reportType} onValueChange={setReportType}>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Rapor Türü" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Standart Raporlar</SelectLabel>
+                        <SelectItem value="genel">Genel Rapor</SelectItem>
+                        <SelectItem value="isg">İş Güvenliği (İSG)</SelectItem>
+                        <SelectItem value="finans">Finansal Analiz</SelectItem>
+                      </SelectGroup>
+                      {templates.length > 0 ? (
+                        <SelectGroup>
+                          <SelectLabel>Asistanlarım</SelectLabel>
+                          {templates.map((t) => (
+                            <SelectItem key={t.id} value={t.id}>
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg">{t.icon}</span>
+                                <div className="flex flex-col">
+                                  <span className="font-medium">{t.name}</span>
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Sparkles className="w-3 h-3 text-yellow-500" /> Özel Asistan
+                                  </span>
+                                </div>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      ) : null}
+                    </SelectContent>
+                  </Select>
                 </div>
-            </CardContent>
+
+                <Button onClick={handleGenerate} disabled={!canGenerate} className="flex-1 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Oluşturuluyor...
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="mr-2 h-4 w-4" />
+                      Rapor Oluştur
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
         </Card>
       </div>
 
-      {/* Output Area */}
       <div className="flex flex-col gap-6 h-full">
         <div>
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 lg:invisible">Sonuç</h1>
-            <p className="text-sm text-muted-foreground mt-1 lg:invisible">Hazır olan raporunuz.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 lg:invisible">Sonuç</h1>
+          <p className="text-sm text-muted-foreground mt-1 lg:invisible">Hazır rapor çıktısı.</p>
         </div>
 
         <Card className="flex-1 flex flex-col bg-muted/30 border-border/50 shadow-sm overflow-hidden h-full">
-            <CardHeader className="flex flex-row items-center justify-between py-3 px-4 border-b bg-background">
-                <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm">Rapor Önizleme</span>
-                    {isSaved ? (
-                        <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 border-0">
-                            <Check className="w-3 h-3 mr-1" /> Kaydedildi
-                        </Badge>
-                    ) : result ? (
-                        <Badge variant="outline" className="text-orange-600 border-orange-200 bg-orange-50">
-                            Kaydedilmedi
-                        </Badge>
-                    ) : null}
+          <CardHeader className="flex flex-row items-center justify-between py-3 px-4 border-b bg-background">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-sm">Rapor Önizleme</span>
+              {isSaved ? (
+                <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 border-0">
+                  <Check className="w-3 h-3 mr-1" /> Kaydedildi
+                </Badge>
+              ) : result ? (
+                <Badge variant="outline" className="text-orange-600 border-orange-200 bg-orange-50">
+                  Kaydedilmedi
+                </Badge>
+              ) : null}
+            </div>
+            <div className="flex gap-1">
+              {result ? (
+                <>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy} title="Kopyala">
+                    {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownloadPDF} title="PDF İndir">
+                    <FileText className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload} title="TXT İndir">
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  {!isSaved ? (
+                    <Button size="sm" variant="default" onClick={handleSave} disabled={isSaving} className="h-8 ml-2 gap-2">
+                      {isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                      Kaydet
+                    </Button>
+                  ) : null}
+                </>
+              ) : null}
+            </div>
+          </CardHeader>
+          <CardContent className="flex-1 p-0 min-h-0 relative bg-background">
+            {result ? (
+              <Textarea
+                className="w-full h-full resize-none border-0 focus-visible:ring-0 p-6 text-sm leading-relaxed font-mono bg-transparent"
+                value={result}
+                onChange={(e) => {
+                  setResult(e.target.value)
+                  setIsSaved(false)
+                }}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground/50 gap-4">
+                <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center">
+                  <FileText className="h-8 w-8" />
                 </div>
-                <div className="flex gap-1">
-                    {result && (
-                        <>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy} title="Kopyala">
-                                {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownloadPDF} title="PDF İndir">
-                                <FileText className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload} title="TXT İndir">
-                                <Download className="h-4 w-4" />
-                            </Button>
-                            {!isSaved && (
-                                <Button
-                                    size="sm"
-                                    variant="default"
-                                    onClick={handleSave}
-                                    disabled={isSaving}
-                                    className="h-8 ml-2 gap-2"
-                                >
-                                    {isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
-                                    Kaydet
-                                </Button>
-                            )}
-                        </>
-                    )}
+                <div className="text-center space-y-1">
+                  <p className="font-medium text-foreground/80">Rapor bekleniyor</p>
+                  <p className="text-sm">Sol taraftan içerik ekleyip analiz başlatın.</p>
                 </div>
-            </CardHeader>
-            <CardContent className="flex-1 p-0 min-h-0 relative bg-background">
-                {result ? (
-                    <Textarea
-                        className="w-full h-full resize-none border-0 focus-visible:ring-0 p-6 text-sm leading-relaxed font-mono bg-transparent"
-                        value={result}
-                        onChange={(e) => {
-                            setResult(e.target.value)
-                            setIsSaved(false)
-                        }}
-                    />
-                ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground/50 gap-4">
-                        <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center">
-                            <FileText className="h-8 w-8" />
-                        </div>
-                        <div className="text-center space-y-1">
-                            <p className="font-medium text-foreground/80">Rapor bekleniyor</p>
-                            <p className="text-sm">Sol taraftan veri girişi yaparak analizi başlatın.</p>
-                        </div>
-                    </div>
-                )}
-            </CardContent>
+              </div>
+            )}
+          </CardContent>
         </Card>
       </div>
     </div>
   )
 }
+
