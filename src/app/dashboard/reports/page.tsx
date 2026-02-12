@@ -65,6 +65,7 @@ type Report = {
   input_text?: string
   is_public?: boolean
   share_token?: string
+  share_expires_at?: string | null
 }
 
 export default function ReportsPage() {
@@ -135,7 +136,12 @@ export default function ReportsPage() {
       const data = await res.json()
       if (!res.ok || data.error) throw new Error(data.error || 'Paylasim islemi basarisiz.')
 
-      const updatedReport = { ...report, is_public: enable, share_token: data.share_token || report.share_token }
+      const updatedReport = {
+        ...report,
+        is_public: enable,
+        share_token: data.share_token || report.share_token,
+        share_expires_at: enable ? data.share_expires_at || report.share_expires_at : null,
+      }
       setReports((prev) => prev.map((r) => (r.id === report.id ? updatedReport : r)))
       setShareReport(updatedReport)
 
@@ -530,6 +536,11 @@ export default function ReportsPage() {
                     <Lock className="h-3 w-3" />
                     Rapor internetteki herkes tarafindan goruntulenebilir hale gelir.
                   </div>
+                  {shareReport.share_expires_at ? (
+                    <p className="text-xs text-muted-foreground">
+                      Baglanti gecerlilik sonu: {new Date(shareReport.share_expires_at).toLocaleString('tr-TR')}
+                    </p>
+                  ) : null}
                 </div>
               ) : null}
             </div>
@@ -539,4 +550,3 @@ export default function ReportsPage() {
     </div>
   )
 }
-

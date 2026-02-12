@@ -13,6 +13,7 @@ export default async function PublicReportPage({
 }) {
   const { token } = await params
   const supabase = await createClient()
+  const nowIso = new Date().toISOString()
 
   // Token ile raporu çek
   const { data: report, error } = await supabase
@@ -20,6 +21,7 @@ export default async function PublicReportPage({
     .select('*, profiles(full_name)')
     .eq('share_token', token)
     .eq('is_public', true)
+    .gt('share_expires_at', nowIso)
     .single()
 
   if (error || !report) {
