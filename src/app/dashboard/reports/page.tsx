@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { FileText, MoreHorizontal, Download, Eye, Loader2, Trash2, Edit2, Save, X, Search, Filter, Calendar, Share2, Globe, Link as LinkIcon, Lock, Copy } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuContent,

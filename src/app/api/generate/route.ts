@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getGeminiModel } from '@/lib/gemini'
 import { createClient } from '@/lib/supabase-server'
+import { PLAN_LIMITS } from '@/lib/constants'
+import { rateLimit } from '@/lib/rate-limit'
+import { decryptSecret } from '@/lib/secrets'
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,11 +17,25 @@ export async function POST(req: NextRequest) {
         )
     }
 
+    const limiter = rateLimit(`generate:${user.id}`, PLAN_LIMITS.free.limit, PLAN_LIMITS.free.window)
+    if (!limiter.success) {
+      return NextResponse.json(
+        { error: 'Çok fazla istek gönderildi. Lütfen biraz bekleyin.' },
+        { status: 429 }
+      )
+    }
+
     // Kullanıcının API Key'ini çek
     const { data: profile } = await supabase.from('profiles').select('gemini_api_key').eq('id', user.id).single()
-    const userApiKey = profile?.gemini_api_key
-
-    // Rate Limiting ve Plan Kontrolü Kaldırıldı.
+    let userApiKey: string | undefined
+    try {
+      userApiKey = decryptSecret(profile?.gemini_api_key)
+    } catch {
+      return NextResponse.json(
+        { error: 'API anahtarı çözümlenemedi. Lütfen ayarlardan yeniden kaydedin.' },
+        { status: 500 }
+      )
+    }
 
     const { text, reportType, templateId } = await req.json()
 

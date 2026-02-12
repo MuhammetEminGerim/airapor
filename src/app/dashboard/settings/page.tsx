@@ -22,7 +22,7 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { supabase } from '@/lib/supabase'
-import { Loader2, Info, Settings, Shield, Bell, Palette } from 'lucide-react'
+import { Loader2, Info, Settings, Shield, Palette } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Tooltip,
@@ -38,6 +38,7 @@ export default function SettingsPage() {
   const [email, setEmail] = useState('')
   const [userId, setUserId] = useState('')
   const [apiKey, setApiKey] = useState('')
+  const [hasStoredApiKey, setHasStoredApiKey] = useState(false)
   const { theme, setTheme } = useTheme()
 
   useEffect(() => {
@@ -49,7 +50,8 @@ export default function SettingsPage() {
         const { data } = await supabase.from('profiles').select('full_name, gemini_api_key').eq('id', user.id).single()
         if (data) {
             setFullName(data.full_name || '')
-            setApiKey(data.gemini_api_key || '')
+            setHasStoredApiKey(Boolean(data.gemini_api_key))
+            setApiKey('')
         }
       }
       setLoading(false)
@@ -88,21 +90,25 @@ export default function SettingsPage() {
     if (!userId) return
     setUpdating(true)
 
-    const updates = {
-        id: userId,
-        gemini_api_key: apiKey,
-        updated_at: new Date().toISOString(),
-    }
+    try {
+      const res = await fetch('/api/settings/api-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey }),
+      })
 
-    const { error } = await supabase.from('profiles').upsert(updates)
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
 
-    if (!error) {
-        toast.success('API Anahtarı güncellendi!')
-    } else {
-        console.error(error)
-        toast.error('Hata oluştu: ' + error.message)
+      setApiKey('')
+      setHasStoredApiKey(Boolean(data.hasApiKey))
+      toast.success('API Anahtarı güncellendi!')
+    } catch (error) {
+      console.error(error)
+      toast.error('Hata oluştu: ' + (error as Error).message)
+    } finally {
+      setUpdating(false)
     }
-    setUpdating(false)
   }
 
   if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin h-8 w-8 text-muted-foreground" /></div>
@@ -233,8 +239,13 @@ export default function SettingsPage() {
                 </div>
                 <p className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 p-3 rounded-md flex gap-2 items-start mt-2">
                     <Info className="h-4 w-4 shrink-0 mt-0.5" />
-                    Kendi anahtarınızı girerseniz, sistem varsayılan anahtar yerine sizin anahtarınızı kullanacaktır. Bu sayede daha yüksek hız limitlerine sahip olabilirsiniz.
+                    Kendi anahtarınızı girerseniz, sistem varsayılan anahtar yerine sizin anahtarınızı kullanacaktır. Anahtarınız veritabanında şifreli saklanır.
                 </p>
+                {hasStoredApiKey && !apiKey && (
+                  <p className="text-xs text-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-300 p-3 rounded-md">
+                    Kayıtlı bir API anahtarı mevcut. Değiştirmek için yeni anahtarı girip güncelleyin.
+                  </p>
+                )}
               </div>
             </CardContent>
             <CardFooter className="bg-muted/20 border-t border-border/50 py-4">

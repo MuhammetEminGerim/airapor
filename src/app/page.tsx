@@ -7,7 +7,6 @@ import {
   FileText,
   Smartphone,
   Bot,
-  Globe,
   Share2,
   ShieldCheck,
   LayoutTemplate
@@ -99,7 +98,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-xl font-bold mb-2">Özel Asistanlar</h3>
                 <p className="text-muted-foreground">
-                  Sadece "özetle" demeyin. "Hukuk Danışmanı", "SEO Uzmanı" veya "Sınav Okuyucu" gibi özel roller atayın ve uzman raporları alın.
+                  Sadece özetleme istemeyin. Hukuk danışmanı, SEO uzmanı veya sınav okuyucu gibi özel roller atayın ve uzman raporları alın.
                 </p>
               </div>
 

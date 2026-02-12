@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getGeminiVisionModel } from '@/lib/gemini'
 import mammoth from 'mammoth'
+import pdfParse from 'pdf-parse'
 import { createClient } from '@/lib/supabase-server'
+import { PLAN_LIMITS } from '@/lib/constants'
+import { rateLimit } from '@/lib/rate-limit'
+import { decryptSecret } from '@/lib/secrets'
+
+const MAX_UPLOAD_BYTES = 15 * 1024 * 1024
+const DOC_MIME_TYPES = new Set([
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+])
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,11 +25,25 @@ export async function POST(req: NextRequest) {
         )
     }
 
+    const limiter = rateLimit(`upload:${user.id}`, PLAN_LIMITS.free.limit, PLAN_LIMITS.free.window)
+    if (!limiter.success) {
+      return NextResponse.json(
+        { error: 'Çok fazla istek gönderildi. Lütfen biraz bekleyin.' },
+        { status: 429 }
+      )
+    }
+
     // Kullanıcının API Key'ini çek
     const { data: profile } = await supabase.from('profiles').select('gemini_api_key').eq('id', user.id).single()
-    const userApiKey = profile?.gemini_api_key
-
-    // Rate Limiting ve Plan Kontrolü Kaldırıldı.
+    let userApiKey: string | undefined
+    try {
+      userApiKey = decryptSecret(profile?.gemini_api_key)
+    } catch {
+      return NextResponse.json(
+        { error: 'API anahtarı çözümlenemedi. Lütfen ayarlardan yeniden kaydedin.' },
+        { status: 500 }
+      )
+    }
 
     const formData = await req.formData()
     const file = formData.get('file') as File
@@ -28,20 +52,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Dosya yüklenmedi.' }, { status: 400 })
     }
 
+    if (file.size <= 0) {
+      return NextResponse.json({ error: 'Boş dosya yüklenemez.' }, { status: 400 })
+    }
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      return NextResponse.json(
+        { error: 'Dosya boyutu limiti aşıldı. Maksimum 15MB desteklenir.' },
+        { status: 413 }
+      )
+    }
+
     // Dosyayı ArrayBuffer'a çevir
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
     // MIME Type kontrolü
     const mimeType = file.type
+    const isAudio = mimeType.startsWith('audio/')
+    const isImage = mimeType.startsWith('image/')
+    const isDocument = DOC_MIME_TYPES.has(mimeType)
+
+    if (!isAudio && !isImage && !isDocument) {
+      return NextResponse.json(
+        { error: 'Desteklenmeyen dosya tipi. Sadece resim, ses, PDF ve DOCX kabul edilir.' },
+        { status: 415 }
+      )
+    }
 
     // İşlenmiş metin
     let processedText = ""
 
     // PDF İşleme
     if (mimeType === 'application/pdf') {
-        const pdf = require('pdf-parse')
-        const pdfData = await pdf(buffer)
+        const pdfData = await pdfParse(buffer)
         processedText = pdfData.text
     }
     // Word (DOCX) İşleme
@@ -52,7 +96,6 @@ export async function POST(req: NextRequest) {
     // Resim ve Ses (Mevcut Logic)
     else {
         const base64Data = buffer.toString('base64')
-        const isAudio = mimeType.startsWith('audio/')
 
         // Gemini'ye gönderilecek format
         const mediaData = {

@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Plus, Bot, Trash2, Loader2, Sparkles, MessageSquare } from 'lucide-react'
+import { Plus, Bot, Trash2, Loader2, Sparkles } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -216,7 +216,7 @@ export default function AssistantsPage() {
                             onChange={(e) => setPrompt(e.target.value)}
                         />
                         <p className="text-xs text-muted-foreground">
-                            İpucu: AI'ya kim olduğunu, amacını ve çıktı formatını net bir şekilde anlatın.
+                            İpucu: AI&apos;ya kim olduğunu, amacını ve çıktı formatını net bir şekilde anlatın.
                         </p>
                     </div>
 

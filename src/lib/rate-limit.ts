@@ -29,7 +29,7 @@ export function rateLimit(ip: string, limit: number = 5, windowMs: number = 60 *
 }
 
 // Her 10 dakikada bir eski kayıtları temizleyen basit bir garbage collector
-setInterval(() => {
+const gcInterval = setInterval(() => {
   const now = Date.now()
   for (const [key, value] of store.entries()) {
     if (now - value.lastReset > 60 * 1000 * 10) { // 10 dakika
@@ -37,3 +37,6 @@ setInterval(() => {
     }
   }
 }, 60 * 1000 * 10)
+
+// Prevent this interval from keeping Node.js process alive in tests/CLI scripts.
+gcInterval.unref?.()

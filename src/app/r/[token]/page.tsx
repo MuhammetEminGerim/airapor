@@ -1,10 +1,10 @@
 import { createClient } from '@/lib/supabase-server'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { FileText, Calendar, Download, ShieldCheck } from 'lucide-react'
+import { FileText, Calendar, ShieldCheck } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import jsPDF from 'jspdf'
 
 export default async function PublicReportPage({
   params,
@@ -41,9 +41,9 @@ export default async function PublicReportPage({
                         <span className="font-medium text-foreground">{report.profiles?.full_name || 'Bir Kullanıcı'}</span> tarafından paylaşıldı
                      </div>
                      <Button variant="outline" size="sm" asChild>
-                        <a href="/">Kendi Raporunu Oluştur</a>
+                        <Link href="/">Kendi Raporunu Oluştur</Link>
                      </Button>
-                </div>
+                 </div>
             </div>
         </header>
 

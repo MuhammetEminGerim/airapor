@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
+import { randomUUID } from 'crypto'
 
 export async function POST(
   req: NextRequest,
@@ -20,9 +21,10 @@ export async function POST(
     const { action } = await req.json() // 'enable' or 'disable'
 
     if (action === 'enable') {
+        const newShareToken = randomUUID()
         const { data, error } = await supabase
             .from('reports')
-            .update({ is_public: true })
+            .update({ is_public: true, share_token: newShareToken })
             .eq('id', id)
             .eq('user_id', user.id)
             .select('share_token')
@@ -31,9 +33,11 @@ export async function POST(
         if (error) throw error
         return NextResponse.json({ success: true, share_token: data.share_token })
     } else {
+        // Rotate token on disable so previously shared links are revoked.
+        const newShareToken = randomUUID()
         const { error } = await supabase
             .from('reports')
-            .update({ is_public: false })
+            .update({ is_public: false, share_token: newShareToken })
             .eq('id', id)
             .eq('user_id', user.id)
 

@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from "next/link"
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { FileText, Loader2, AlertCircle, Mail, Lock, CheckCircle2, ArrowRight } from 'lucide-react'
+import { FileText, Loader2, AlertCircle, Mail, Lock, CheckCircle2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"

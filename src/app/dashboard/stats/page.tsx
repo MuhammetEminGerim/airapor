@@ -4,13 +4,30 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { supabase } from '@/lib/supabase'
-import { Loader2, TrendingUp, Calendar, PieChart as PieChartIcon } from 'lucide-react'
+import { Loader2, TrendingUp, PieChart as PieChartIcon } from 'lucide-react'
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
 
+type WeeklyChartPoint = {
+  name: string
+  rapor: number
+}
+
+type TypeChartPoint = {
+  name: string
+  value: number
+}
+
+type ReportRow = {
+  type: string | null
+  created_at: string
+}
+
+type CountMap = Record<string, number>
+
 export default function StatsPage() {
-  const [weeklyData, setWeeklyData] = useState<any[]>([])
-  const [typeData, setTypeData] = useState<any[]>([])
+  const [weeklyData, setWeeklyData] = useState<WeeklyChartPoint[]>([])
+  const [typeData, setTypeData] = useState<TypeChartPoint[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -24,8 +41,9 @@ export default function StatsPage() {
             .eq('user_id', user.id)
 
         if (reports) {
+            const typedReports = reports as ReportRow[]
             // Process Type Data
-            const typeCounts = reports.reduce((acc: any, curr) => {
+            const typeCounts = typedReports.reduce((acc: CountMap, curr) => {
                 const type = curr.type || 'Bilinmeyen'
                 acc[type] = (acc[type] || 0) + 1
                 return acc
@@ -34,7 +52,7 @@ export default function StatsPage() {
 
             // Process Weekly Data (Last 7 days simplified)
             const days = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt']
-            const dayCounts = reports.reduce((acc: any, curr) => {
+            const dayCounts = typedReports.reduce((acc: CountMap, curr) => {
                 const day = days[new Date(curr.created_at).getDay()]
                 acc[day] = (acc[day] || 0) + 1
                 return acc
