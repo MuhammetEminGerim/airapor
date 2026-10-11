@@ -2,19 +2,17 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, FileText, Upload, Settings, PieChart, LogOut, Bot, HardHat } from 'lucide-react'
+import { LayoutDashboard, FileText, Settings, PieChart, LogOut, HardHat, ClipboardList } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 
 const sidebarItems = [
-  { icon: LayoutDashboard, label: 'Panel', href: '/dashboard' },
-  { icon: HardHat, label: 'İSG Saha Denetimi', href: '/dashboard/isg-denetim' },
-  { icon: Upload, label: 'Hızlı Not/Rapor', href: '/dashboard/upload' },
-  { icon: FileText, label: 'Raporlarım', href: '/dashboard/reports' },
-  { icon: Bot, label: 'Asistanlarım', href: '/dashboard/assistants' },
+  { icon: LayoutDashboard, label: 'Genel bakış', href: '/dashboard' },
+  { icon: HardHat, label: 'Saha denetimi', href: '/dashboard/isg-denetim' },
+  { icon: FileText, label: 'Rapor arşivi', href: '/dashboard/reports' },
   { icon: PieChart, label: 'İstatistikler', href: '/dashboard/stats' },
-  { icon: Settings, label: 'Ayarlar', href: '/dashboard/settings' },
+  { icon: Settings, label: 'Firma & Ayarlar', href: '/dashboard/settings' },
 ]
 
 export function Sidebar({ className }: { className?: string }) {
@@ -28,45 +26,47 @@ export function Sidebar({ className }: { className?: string }) {
   }
 
   return (
-    <div className={cn('pb-12 min-h-screen bg-muted/40 border-r flex flex-col', className)}>
-      <div className="space-y-4 py-4 flex-1">
-        <div className="px-3 py-2">
-          <h2 className="mb-6 px-4 text-lg font-bold tracking-tight flex items-center gap-2">
-            <div className="h-6 w-6 rounded bg-amber-600 flex items-center justify-center">
-                <HardHat className="h-4 w-4 text-white" />
-            </div>
-            İSG Asistanı
-          </h2>
-          <div className="space-y-1">
-            {sidebarItems.map((item) => (
+    <aside className={cn('dashboard-sidebar pb-5 min-h-screen flex flex-col', className)}>
+      <div className="flex-1">
+        <Link href="/dashboard" className="sidebar-brand flex items-center gap-2 text-inherit no-underline">
+          <span className="brand-mark"><HardHat size={17} /></span>
+          <span>İSG <strong>SAHA</strong></span>
+        </Link>
+        <p className="sidebar-section-label">ÇALIŞMA ALANI</p>
+        <nav className="space-y-1" aria-label="Panel gezinmesi">
+          {sidebarItems.map((item) => {
+            const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`))
+            return (
               <Button
                 key={item.href}
-                variant={pathname === item.href ? 'secondary' : 'ghost'}
-                className={cn(
-                    "w-full justify-start font-medium",
-                    pathname === item.href && "bg-secondary text-foreground shadow-sm"
-                )}
+                variant="ghost"
+                data-active={isActive}
+                className="sidebar-nav-item w-full justify-start gap-3 font-medium"
                 asChild
               >
-                <Link href={item.href}>
-                  <item.icon className="mr-2 h-4 w-4" />
+                <Link href={item.href} aria-current={isActive ? 'page' : undefined}>
+                  <item.icon aria-hidden="true" />
                   {item.label}
                 </Link>
               </Button>
-            ))}
-          </div>
-        </div>
+            )
+          })}
+        </nav>
       </div>
-      <div className="px-3 py-4 border-t bg-background/50 backdrop-blur-sm">
+      <div className="sidebar-logout mt-5">
+        <div className="mb-3 rounded-sm border border-border bg-background/60 p-3">
+          <div className="flex items-center gap-2 text-xs font-semibold"><ClipboardList size={15} /> SAHA DOSYASI</div>
+          <p className="mb-0 mt-1 text-[10px] leading-relaxed text-muted-foreground">Denetim notların ve raporların burada düzenli.</p>
+        </div>
         <Button
-            variant="ghost"
-            className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
-            onClick={handleLogout}
+          variant="ghost"
+          className="w-full justify-start text-xs text-muted-foreground hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30"
+          onClick={handleLogout}
         >
-            <LogOut className="mr-2 h-4 w-4" />
-            Çıkış Yap
+          <LogOut className="mr-2 h-4 w-4" />
+          Çıkış yap
         </Button>
       </div>
-    </div>
+    </aside>
   )
 }

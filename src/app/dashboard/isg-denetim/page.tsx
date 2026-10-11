@@ -27,6 +27,9 @@ import {
   ShieldAlert,
   ArrowLeft,
   Download,
+  Camera,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react'
 import { generateISGReportPDF } from '@/lib/isg-pdf'
 import { supabase } from '@/lib/supabase'
@@ -46,6 +49,12 @@ const WEATHER_OPTIONS = [
 export default function IsgDenetimPage() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
+  const [collapsedFindings, setCollapsedFindings] = useState<Record<string, boolean>>({})
+
+  const toggleFindingCollapse = (id: string) => {
+    setCollapsedFindings((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
 
   // Report metadata state
   const [reportNumber, setReportNumber] = useState('')
@@ -361,20 +370,21 @@ ${findings
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-6xl mx-auto pb-16">
+    <div className="field-page field-inspection-page flex flex-col gap-6 max-w-6xl mx-auto pb-16">
       {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
+      <div className="field-page-heading flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
         <div>
+          <p className="field-page-kicker">SAHA DENETİMİ / YENİ DOSYA</p>
           <div className="flex items-center gap-2 mb-1">
             <Link href="/dashboard" className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-1">
               <ArrowLeft className="h-4 w-4" /> Panel
             </Link>
             <span className="text-muted-foreground">/</span>
-            <Badge variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10">
+            <Badge variant="outline" className="border-amber-500/30 text-amber-600 bg-amber-500/10">
               <HardHat className="h-3 w-3 mr-1" /> Saha Gözetim Denetimi
             </Badge>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">
+          <h1 className="field-page-title text-3xl font-extrabold tracking-tight">
             Saha Denetim Raporu Oluşturucu
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -388,7 +398,7 @@ ${findings
             variant="outline"
             onClick={handleDownloadCurrentPDF}
             disabled={isExportingPDF || isAnalyzing || findings.length === 0}
-            className="border-amber-500/40 hover:bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold"
+            className="border-primary/40 hover:bg-primary/10 text-primary font-semibold"
           >
             {isExportingPDF ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
             PDF İndir
@@ -398,7 +408,7 @@ ${findings
             size="lg"
             onClick={handleSaveReport}
             disabled={isSaving || isAnalyzing}
-            className="bg-amber-600 hover:bg-amber-700 text-white shadow-md font-semibold"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-none font-semibold"
           >
             {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
             Raporu Kaydet
@@ -406,14 +416,20 @@ ${findings
         </div>
       </div>
 
+      <nav className="inspection-step-nav" aria-label="Denetim bölümleri">
+        <a href="#inspection-project"><span>01</span><strong>Proje künyesi</strong></a>
+        <a href="#inspection-findings"><span>02</span><strong>Bulgular</strong></a>
+        <a href="#inspection-approval"><span>03</span><strong>Değerlendirme ve imza</strong></a>
+      </nav>
+
       {/* Grid: Left metadata, Right action stats */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Project Metadata Section */}
-        <Card className="lg:col-span-2 border-border/60 shadow-sm">
+        <Card id="inspection-project" className="lg:col-span-2 border-border/60 shadow-sm scroll-mt-24">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 font-semibold">
-                <Building2 className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                <Building2 className="h-5 w-5 text-amber-600" />
                 <span>1. Şantiye & Denetim Parametreleri</span>
               </div>
               <Badge variant="secondary" className="font-mono text-xs">
@@ -466,7 +482,7 @@ ${findings
                     {WEATHER_OPTIONS.map((opt) => (
                       <SelectItem key={opt.label} value={opt.label}>
                         <div className="flex items-center gap-2">
-                          <opt.icon className="h-4 w-4 text-amber-500" />
+                          <opt.icon className="h-4 w-4 text-amber-600" />
                           <span>{opt.label}</span>
                         </div>
                       </SelectItem>
@@ -502,7 +518,7 @@ ${findings
                 <User className="h-3.5 w-3.5 text-muted-foreground" />
                 <span>Denetçi: <strong>{inspectorName || 'Belirtilmedi'}</strong> ({inspectorTitle})</span>
               </div>
-              <Link href="/dashboard/settings" className="text-amber-600 dark:text-amber-400 hover:underline">
+              <Link href="/dashboard/settings" className="text-amber-600 hover:underline font-medium">
                 Logo ve Uzman Bilgilerini Düzenle →
               </Link>
             </div>
@@ -511,7 +527,7 @@ ${findings
 
         {/* Quick Stats & Upload Box */}
         <div className="space-y-6">
-          <Card className="border-border/60 shadow-sm bg-gradient-to-br from-amber-500/5 via-transparent to-transparent">
+          <Card className="border-border/60 bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center justify-between">
                 <span>Denetim Özeti</span>
@@ -542,7 +558,7 @@ ${findings
           </Card>
 
           {/* Upload trigger */}
-          <Card className="border-dashed border-2 border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/10 transition-colors cursor-pointer text-center p-6">
+          <Card className="border-dashed border-2 border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/10 transition-colors text-center p-5 rounded-xl shadow-sm">
             <input
               type="file"
               ref={fileInputRef}
@@ -551,65 +567,179 @@ ${findings
               onChange={handlePhotoUpload}
               className="hidden"
             />
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="flex flex-col items-center justify-center gap-2"
-            >
-              <div className="h-12 w-12 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                {isAnalyzing ? <Loader2 className="h-6 w-6 animate-spin" /> : <Upload className="h-6 w-6" />}
+            <input
+              type="file"
+              ref={cameraInputRef}
+              accept="image/*"
+              capture="environment"
+              onChange={handlePhotoUpload}
+              className="hidden"
+            />
+            <div className="flex flex-col items-center justify-center gap-2">
+              <div className="h-12 w-12 rounded-full bg-amber-500/15 text-amber-600 flex items-center justify-center border border-amber-500/20">
+                {isAnalyzing ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
               </div>
-              <div className="font-semibold text-sm">
-                {isAnalyzing ? `Yapay zeka analiz ediyor (${uploadQueueCount} kaldı)...` : 'Saha Fotoğraflarını Yükle'}
+              <div className="font-bold text-sm text-foreground">
+                {isAnalyzing ? `Yapay zeka analiz ediyor (${uploadQueueCount} kaldı)...` : 'Saha Fotoğraflarını Ekle'}
               </div>
-              <p className="text-xs text-muted-foreground max-w-xs">
-                Birden fazla fotoğraf seçebilirsiniz. Gemini her görseli otomatik analiz eder.
+              <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
+                Kameradan anlık çekin veya galeriden çoklu fotoğraf yükleyin. Gemini Vision mevzuatı otomatik eşleştirir.
               </p>
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                <Button
+                  type="button"
+                  onClick={() => cameraInputRef.current?.click()}
+                  size="sm"
+                  className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs gap-1.5 shadow-sm"
+                  disabled={isAnalyzing}
+                >
+                  <Camera className="h-3.5 w-3.5" /> Kamerayı Aç
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  size="sm"
+                  className="font-semibold text-xs gap-1.5"
+                  disabled={isAnalyzing}
+                >
+                  <Upload className="h-3.5 w-3.5" /> Çoklu Seç
+                </Button>
+              </div>
             </div>
           </Card>
         </div>
       </div>
 
       {/* Findings Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
+      <div id="inspection-findings" className="space-y-4 scroll-mt-24">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-            <h2 className="text-xl font-bold tracking-tight">2. Tespitler ve Bulgular Listesi</h2>
+            <ShieldAlert className="h-5 w-5 text-amber-600" />
+            <h2 className="text-xl font-bold tracking-tight">2. Tespitler ve Bulgular ({findings.length})</h2>
           </div>
-          <Button variant="outline" size="sm" onClick={handleAddManualFinding} className="gap-1">
-            <Plus className="h-4 w-4" /> Manuel Bulgu Ekle
-          </Button>
+          <div className="flex items-center gap-2">
+            {findings.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const allCollapsed = Object.values(collapsedFindings).filter(Boolean).length === findings.length
+                  const nextState: Record<string, boolean> = {}
+                  findings.forEach((f) => { nextState[f.id] = !allCollapsed })
+                  setCollapsedFindings(nextState)
+                }}
+                className="text-xs text-muted-foreground hover:text-foreground h-8"
+              >
+                {Object.values(collapsedFindings).filter(Boolean).length === findings.length ? 'Tümünü Aç' : 'Tümünü Daralt'}
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={handleAddManualFinding} className="gap-1 font-semibold text-xs h-8">
+              <Plus className="h-4 w-4" /> Manuel Bulgu Ekle
+            </Button>
+          </div>
         </div>
 
         {findings.length === 0 ? (
-          <Card className="border-dashed p-12 text-center">
+          <Card className="border-dashed p-12 text-center rounded-xl">
             <div className="flex flex-col items-center justify-center gap-3 max-w-md mx-auto">
               <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-                <HardHat className="h-7 w-7" />
+                <HardHat className="h-7 w-7 text-amber-600" />
               </div>
-              <h3 className="text-lg font-semibold">Henüz denetim bulgusu eklenmedi</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="text-lg font-bold">Henüz denetim bulgusu eklenmedi</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Saha fotoğraflarını yukarıdaki alana yükleyerek veya manuel ekle butonuna tıklayarak ilk tespiti oluşturun.
               </p>
-              <Button onClick={() => fileInputRef.current?.click()} className="mt-2 bg-amber-600 hover:bg-amber-700 text-white">
-                <Upload className="h-4 w-4 mr-2" /> Fotoğraf Yükle ve Analiz Et
-              </Button>
+              <div className="flex gap-2 mt-2">
+                <Button onClick={() => cameraInputRef.current?.click()} className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs gap-1.5">
+                  <Camera className="h-4 w-4" /> Kamerayı Aç
+                </Button>
+                <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="font-semibold text-xs gap-1.5">
+                  <Upload className="h-4 w-4" /> Dosya Seç
+                </Button>
+              </div>
             </div>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {findings.map((item, index) => {
+              const isCollapsed = Boolean(collapsedFindings[item.id])
               const riskColor =
                 item.riskLevel === 'high'
-                  ? 'border-l-4 border-l-red-500 bg-red-500/5'
+                  ? 'border-l-4 border-l-red-500 bg-red-500/[0.03]'
                   : item.riskLevel === 'medium'
-                  ? 'border-l-4 border-l-amber-500 bg-amber-500/5'
-                  : 'border-l-4 border-l-emerald-500 bg-emerald-500/5'
+                  ? 'border-l-4 border-l-amber-500 bg-amber-500/[0.03]'
+                  : 'border-l-4 border-l-emerald-500 bg-emerald-500/[0.03]'
 
+              // COMPACT / COLLAPSED VIEW
+              if (isCollapsed) {
+                return (
+                  <Card key={item.id} className={`shadow-sm overflow-hidden transition-all ${riskColor} p-3.5`}>
+                    <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <span className="font-bold text-xs text-muted-foreground shrink-0">#{index + 1}</span>
+                        {item.photoUrl ? (
+                          <div className="h-10 w-10 rounded-md overflow-hidden border bg-black/5 shrink-0">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={item.photoUrl} alt="Bulgu" className="object-cover w-full h-full" />
+                          </div>
+                        ) : (
+                          <div className="h-10 w-10 rounded-md border border-dashed flex items-center justify-center text-[10px] text-muted-foreground shrink-0 bg-muted/30">
+                            <HardHat className="h-4 w-4 opacity-40" />
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-bold truncate text-foreground">
+                              {item.location || 'Saha Genel'}
+                            </span>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                              item.riskLevel === 'high'
+                                ? 'bg-red-500/10 text-red-600'
+                                : item.riskLevel === 'medium'
+                                ? 'bg-amber-500/10 text-amber-600'
+                                : 'bg-emerald-500/10 text-emerald-600'
+                            }`}>
+                              {item.riskLevel === 'high' ? 'YÜKSEK RİSK' : item.riskLevel === 'medium' ? 'ORTA RİSK' : 'DÜŞÜK RİSK'}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {item.status === 'open' ? '• Açık' : '• Giderildi'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            {item.description || 'Açıklama girilmedi...'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleFindingCollapse(item.id)}
+                          className="h-8 text-xs gap-1 font-semibold"
+                        >
+                          <ChevronDown className="h-3.5 w-3.5" /> Düzenle
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteFinding(item.id)}
+                          className="h-8 w-8 text-muted-foreground hover:text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                )
+              }
+
+              // EXPANDED VIEW
               return (
-                <Card key={item.id} className={`shadow-sm overflow-hidden transition-all ${riskColor}`}>
-                  <CardHeader className="py-3 px-4 bg-muted/20 border-b flex flex-row items-center justify-between">
-                    <div className="flex items-center gap-2">
+                <Card key={item.id} className={`shadow-sm overflow-hidden transition-all ${riskColor} rounded-xl`}>
+                  <CardHeader className="py-2.5 px-4 bg-muted/30 border-b flex flex-row items-center justify-between">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold text-sm text-muted-foreground">#{index + 1}</span>
                       <Select
                         value={item.riskLevel}
@@ -639,21 +769,31 @@ ${findings
                       </Select>
                     </div>
 
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteFinding(item.id)}
-                      className="h-7 w-7 text-muted-foreground hover:text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleFindingCollapse(item.id)}
+                        className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground font-medium"
+                      >
+                        <ChevronUp className="h-3.5 w-3.5" /> Daralt
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteFinding(item.id)}
+                        className="h-7 w-7 text-muted-foreground hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </CardHeader>
 
                   <CardContent className="p-4 grid gap-4 md:grid-cols-4">
                     {/* Photo preview */}
                     <div className="md:col-span-1">
                       {item.photoUrl ? (
-                        <div className="rounded-lg overflow-hidden border bg-black/5 dark:bg-white/5 relative aspect-video md:aspect-square flex items-center justify-center">
+                        <div className="rounded-lg overflow-hidden border bg-black/5 relative aspect-video md:aspect-square flex items-center justify-center shadow-sm">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={item.photoUrl}
@@ -741,13 +881,14 @@ ${findings
             })}
           </div>
         )}
+
       </div>
 
       {/* Section 3: Signatures and General Notes */}
-      <Card className="border-border/60 shadow-sm">
+      <Card id="inspection-approval" className="border-border/60 shadow-sm scroll-mt-24">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            <FileText className="h-5 w-5 text-field-gold" />
             <span>3. İmza Blokları & Genel Değerlendirme</span>
           </CardTitle>
           <CardDescription>Resmi raporun alt kısmında (Footer) yer alacak imza sahipleri.</CardDescription>
@@ -827,7 +968,7 @@ ${findings
           variant="outline"
           onClick={handleDownloadCurrentPDF}
           disabled={isExportingPDF || isAnalyzing || findings.length === 0}
-          className="border-amber-500/40 hover:bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold"
+          className="border-amber-500/40 hover:bg-amber-500/10 text-amber-800 dark:text-amber-400 font-semibold"
         >
           {isExportingPDF ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
           PDF İndir

@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { createDevTimer } from '@/lib/dev-timing'
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
+const COLORS = ['#34493c', '#c4a321', '#8b6e52', '#a83a2e']
 
 type WeeklyChartPoint = {
   name: string
@@ -98,16 +98,17 @@ export default function StatsPage() {
 
   if (!hasStatsData) {
     return (
-      <div className="flex flex-col gap-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Istatistikler</h1>
-          <p className="text-sm text-muted-foreground mt-1">Rapor olusturduktan sonra burada performans grafikleri gorunecek.</p>
+      <div className="field-page field-stats-page flex flex-col gap-6">
+        <div className="field-page-heading">
+          <p className="field-page-kicker">SAHA ÖZETİ / 01</p>
+          <h1 className="field-page-title">İstatistikler</h1>
+          <p className="text-sm text-muted-foreground mt-1">Rapor oluşturdukça çalışma yoğunluğun ve dağılımlar burada görünür.</p>
         </div>
 
         <Card className="border-border/50">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lightbulb className="h-4 w-4 text-amber-500" />
+            <CardTitle className="flex items-center gap-2 font-serif text-xl">
+              <Lightbulb className="h-4 w-4 text-primary" />
               Henuz veri yok
             </CardTitle>
             <CardDescription>Paneli doldurmak icin once birkac rapor olusturmaniz yeterli.</CardDescription>
@@ -118,7 +119,7 @@ export default function StatsPage() {
               <div className="rounded-lg border p-3 bg-muted/20">2. En az bir farkli rapor turu olusturun.</div>
               <div className="rounded-lg border p-3 bg-muted/20">3. Bu sayfayi yenileyip grafikleri inceleyin.</div>
             </div>
-            <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white font-medium">
+            <Button asChild className="bg-primary text-primary-foreground font-medium">
               <Link href="/dashboard/isg-denetim">
                 Saha Denetimi Başlat <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -130,30 +131,37 @@ export default function StatsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Istatistikler</h1>
-        <p className="text-sm text-muted-foreground mt-1">Raporlama aliskanliklariniz ve dagilimlariniz.</p>
+    <div className="field-page field-stats-page flex flex-col gap-6">
+      <div className="field-page-heading">
+        <p className="field-page-kicker">SAHA ÖZETİ / 01</p>
+        <h1 className="field-page-title">İstatistikler</h1>
+        <p className="text-sm text-muted-foreground mt-1">Raporlama alışkanlıkların ve saha dosyalarının dağılımı.</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <section className="stats-ledger" aria-label="Rapor istatistik özeti">
+        <div className="stats-ledger-primary"><span>ARŞİVDEKİ RAPOR</span><strong>{totalReports.toString().padStart(2, '0')}</strong><small>oluşturulan toplam dosya</small></div>
+        <div><span>RAPOR TÜRÜ</span><strong>{typeData.length.toString().padStart(2, '0')}</strong><small>farklı çalışma başlığı</small></div>
+        <div><span>EN YOĞUN GÜN</span><strong>{weeklyData.reduce((best, day) => day.rapor > best.rapor ? day : best, weeklyData[0] || { name: '—', rapor: 0 }).name}</strong><small>arşivde en sık rapor oluşturduğun gün</small></div>
+      </section>
+
+      <div className="field-stats-charts grid gap-6 md:grid-cols-2">
         <Card className="col-span-2 lg:col-span-1 border-border/50 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-blue-500" />
+              <TrendingUp className="h-4 w-4 text-primary" />
               Gunluk Rapor Aktivitesi
             </CardTitle>
-            <CardDescription>Son 7 gundeki rapor olusturma yogunlugu.</CardDescription>
+            <CardDescription>Arşivde rapor oluşturduğun günlerin dağılımı.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full mt-2">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={weeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
-                  <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} cursor={{ fill: '#F3F4F6' }} />
-                  <Bar dataKey="rapor" fill="#2563EB" radius={[4, 4, 0, 0]} barSize={32} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#747568', fontSize: 12 }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#747568', fontSize: 12 }} />
+                  <Tooltip contentStyle={{ borderRadius: '3px', border: '1px solid #d7d0bf', background: '#faf7ef', color: '#262921' }} cursor={{ fill: '#e5e9df' }} />
+                  <Bar dataKey="rapor" fill="#34493c" radius={[2, 2, 0, 0]} barSize={32} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

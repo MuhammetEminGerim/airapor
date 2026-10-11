@@ -465,18 +465,19 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2 h-[calc(100vh-8rem)]">
+    <div className="field-page field-report-composer grid gap-6 lg:grid-cols-2 h-[calc(100vh-8rem)]">
       <div className="flex flex-col gap-6 h-full">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Yeni Rapor</h1>
+        <div className="field-page-heading">
+          <p className="field-page-kicker">HIZLI NOT / RAPOR OLUŞTURUCU</p>
+          <h1 className="field-page-title">Yeni rapor</h1>
           <p className="text-sm text-muted-foreground mt-1">Metin yazin, dosya yukleyin veya ses kaydi alin.</p>
         </div>
 
         {showOnboarding ? (
-          <Card className="border-border/50 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-background">
+          <Card className="border-field-gold/50 bg-field-yellow/15">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div className="flex items-center gap-2">
-                <Lightbulb className="h-4 w-4 text-amber-500" />
+                <Lightbulb className="h-4 w-4 text-field-gold" />
                 <span className="text-sm font-semibold">Ilk rapor rehberi</span>
               </div>
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={dismissOnboarding}>
@@ -594,7 +595,7 @@ export default function UploadPage() {
                   </Select>
                 </div>
 
-                <Button onClick={handleGenerate} disabled={!canGenerate} className="sm:w-auto w-full bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900">
+                <Button onClick={handleGenerate} disabled={!canGenerate} className="sm:w-auto w-full bg-primary text-primary-foreground hover:bg-primary/90">
                   {isGenerating ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -613,10 +614,11 @@ export default function UploadPage() {
         </Card>
       </div>
 
-      <div className="flex flex-col gap-6 h-full">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 lg:invisible">Sonuc</h1>
-          <p className="text-sm text-muted-foreground mt-1 lg:invisible">Hazir rapor ciktisi.</p>
+      <div className="field-composer-preview flex flex-col gap-6 h-full">
+        <div className="field-page-heading lg:invisible">
+          <p className="field-page-kicker">BELGE ÖNİZLEMESİ</p>
+          <h1 className="field-page-title">Rapor çıktısı</h1>
+          <p className="text-sm text-muted-foreground mt-1">Hazır rapor içeriği.</p>
         </div>
 
         <Card className="flex-1 flex flex-col bg-muted/30 border-border/50 shadow-sm overflow-hidden h-full">

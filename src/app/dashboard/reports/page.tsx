@@ -31,6 +31,10 @@ import {
   Lock,
   Copy,
   ArrowRight,
+  MessageSquare,
+  AlertTriangle,
+  Clock,
+  Building2,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -87,6 +91,14 @@ export default function ReportsPage() {
 
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
+  const [quickFilter, setQuickFilter] = useState<'all' | 'high_risk' | 'open_dof' | 'isg'>('all')
+
+  const stats = useMemo(() => {
+    const highRisk = reports.filter((r) => r.isg_data?.findings?.some((f) => f.riskLevel === 'high')).length
+    const openDof = reports.filter((r) => r.isg_data?.findings?.some((f) => f.status === 'open')).length
+    const isg = reports.filter((r) => r.type === 'isg').length
+    return { highRisk, openDof, isg }
+  }, [reports])
 
   const fetchReports = async () => {
     const timer = createDevTimer('dashboard-reports')
@@ -124,13 +136,26 @@ export default function ReportsPage() {
   const filteredReports = useMemo(() => {
     const normalizedSearch = searchTerm.toLowerCase().trim()
     return reports.filter((report) => {
-      const matchesSearch = report.title.toLowerCase().includes(normalizedSearch)
+      const matchesSearch =
+        report.title.toLowerCase().includes(normalizedSearch) ||
+        (report.isg_data?.projectInfo?.projectName?.toLowerCase().includes(normalizedSearch) ?? false) ||
+        (report.isg_data?.projectInfo?.companyName?.toLowerCase().includes(normalizedSearch) ?? false)
       const matchesType = typeFilter === 'all' || report.type === typeFilter
-      return matchesSearch && matchesType
-    })
-  }, [reports, searchTerm, typeFilter])
 
-  const hasActiveFilters = Boolean(searchTerm.trim()) || typeFilter !== 'all'
+      let matchesQuick = true
+      if (quickFilter === 'high_risk') {
+        matchesQuick = Boolean(report.isg_data?.findings?.some((f) => f.riskLevel === 'high'))
+      } else if (quickFilter === 'open_dof') {
+        matchesQuick = Boolean(report.isg_data?.findings?.some((f) => f.status === 'open'))
+      } else if (quickFilter === 'isg') {
+        matchesQuick = report.type === 'isg'
+      }
+
+      return matchesSearch && matchesType && matchesQuick
+    })
+  }, [reports, searchTerm, typeFilter, quickFilter])
+
+  const hasActiveFilters = Boolean(searchTerm.trim()) || typeFilter !== 'all' || quickFilter !== 'all'
 
   const openReport = (report: Report) => {
     setViewReport(report)
@@ -281,6 +306,26 @@ export default function ReportsPage() {
     setIsSaving(false)
   }
 
+  const handleShareWhatsApp = (report: Report) => {
+    let summaryText = ''
+    if (report.isg_data) {
+      const highCount = report.isg_data.findings?.filter((f) => f.riskLevel === 'high').length ?? 0
+      const openCount = report.isg_data.findings?.filter((f) => f.status === 'open').length ?? 0
+      summaryText = `🚨 *İSG Saha Denetim Raporu*\n🏢 *Proje:* ${report.isg_data.projectInfo?.projectName || report.title}\n📅 *Tarih:* ${report.isg_data.projectInfo?.inspectionDate || new Date(report.created_at).toLocaleDateString('tr-TR')}\n⚠️ *Bulgular:* ${report.isg_data.findings?.length ?? 0} adet (${highCount} Kritik Risk, ${openCount} Açık DÖF)\n`
+    } else {
+      summaryText = `📋 *Saha Raporu:* ${report.title}\n📅 *Tarih:* ${new Date(report.created_at).toLocaleDateString('tr-TR')}\n`
+    }
+
+    if (report.is_public && report.share_token) {
+      summaryText += `🔗 *Rapor Bağlantısı:* ${window.location.origin}/share/${report.share_token}`
+    } else {
+      summaryText += `📄 *İSG Saha Asistanı ile Düzenlenmiştir.*`
+    }
+
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(summaryText)}`
+    window.open(waUrl, '_blank')
+  }
+
   const renderActions = (report: Report) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -290,19 +335,22 @@ export default function ReportsPage() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Islemler</DropdownMenuLabel>
+        <DropdownMenuLabel>İşlemler</DropdownMenuLabel>
         <DropdownMenuItem onClick={() => openReport(report)}>
-          <Eye className="mr-2 h-4 w-4" /> Goruntule
+          <Eye className="mr-2 h-4 w-4" /> Görüntüle
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleDownloadPDF(report)}>
-          <FileText className="mr-2 h-4 w-4" /> PDF Indir
+          <FileText className="mr-2 h-4 w-4" /> PDF İndir
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleShareWhatsApp(report)}>
+          <MessageSquare className="mr-2 h-4 w-4 text-emerald-600" /> WhatsApp ile Paylaş
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleDownload(report.content, report.title)}>
-          <Download className="mr-2 h-4 w-4" /> Metin Indir
+          <Download className="mr-2 h-4 w-4" /> Metin İndir
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => setShareReport(report)}>
-          <Share2 className="mr-2 h-4 w-4" /> Paylas
+          <Share2 className="mr-2 h-4 w-4" /> Paylaşım Linki
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50" onClick={() => handleDelete(report.id)}>
@@ -313,18 +361,19 @@ export default function ReportsPage() {
   )
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col md:flex-row justify-between md:items-end gap-4">
+    <div className="field-page field-reports-page flex flex-col gap-6">
+      <div className="field-page-heading flex flex-col md:flex-row justify-between md:items-end gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Raporlarim</h1>
-          <p className="text-sm text-muted-foreground mt-1">Tum raporlarinizi buradan yonetebilirsiniz.</p>
+          <p className="field-page-kicker">ARŞİV / RAPOR KAYITLARI</p>
+          <h1 className="field-page-title">Rapor arşivi</h1>
+          <p className="text-sm text-muted-foreground mt-1">Denetim çıktılarını bul, gözden geçir ve paylaş.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Baslik ara..."
-              className="pl-9 bg-background border-border/50"
+              placeholder="Rapor başlığı ara..."
+              className="pl-9 bg-card border-border/50"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -347,7 +396,168 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <Card className="border-border/50 shadow-sm">
+      {/* İSG Hızlı Filtre Butonları */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          variant={quickFilter === 'all' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setQuickFilter('all')}
+          className={`h-8 text-xs font-semibold ${quickFilter === 'all' ? 'bg-[#34493c] text-[#fbf9f4] hover:bg-[#28382e]' : 'border-border/60 hover:bg-muted'}`}
+        >
+          Tüm Dosyalar ({reports.length})
+        </Button>
+        <Button
+          variant={quickFilter === 'high_risk' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setQuickFilter('high_risk')}
+          className={`h-8 text-xs font-semibold ${
+            quickFilter === 'high_risk'
+              ? 'bg-red-600 hover:bg-red-700 text-white'
+              : 'text-red-600 hover:text-red-700 border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30'
+          }`}
+        >
+          <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />
+          Kritik Riskler ({stats.highRisk})
+        </Button>
+        <Button
+          variant={quickFilter === 'open_dof' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setQuickFilter('open_dof')}
+          className={`h-8 text-xs font-semibold ${
+            quickFilter === 'open_dof'
+              ? 'bg-amber-600 hover:bg-amber-700 text-white'
+              : 'text-amber-700 dark:text-amber-400 hover:text-amber-800 border-amber-300 dark:border-amber-900/50 hover:bg-amber-50 dark:hover:bg-amber-950/30'
+          }`}
+        >
+          <Clock className="h-3.5 w-3.5 mr-1.5" />
+          Açık DÖF Takibi ({stats.openDof})
+        </Button>
+        <Button
+          variant={quickFilter === 'isg' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setQuickFilter('isg')}
+          className={`h-8 text-xs font-semibold ${quickFilter === 'isg' ? 'bg-[#34493c] text-[#fbf9f4] hover:bg-[#28382e]' : 'border-border/60 hover:bg-muted'}`}
+        >
+          <FileText className="h-3.5 w-3.5 mr-1.5" />
+          Saha Denetimleri ({stats.isg})
+        </Button>
+      </div>
+
+      <section className="archive-summary" aria-label="Arşiv özeti">
+        <div className="archive-summary-lead">
+          <span className="archive-summary-icon"><FileText size={18} /></span>
+          <div><span className="archive-summary-label">TOPLAM DOSYA</span><strong>{isLoading ? '—' : reports.length.toString().padStart(2, '0')}</strong></div>
+        </div>
+        <div className="archive-summary-item"><span className="archive-summary-label">GÖRÜNTÜLENEN</span><strong>{isLoading ? '—' : filteredReports.length.toString().padStart(2, '0')}</strong></div>
+        <div className="archive-summary-item"><span className="archive-summary-label">PAYLAŞILAN</span><strong>{isLoading ? '—' : reports.filter((report) => report.is_public).length.toString().padStart(2, '0')}</strong></div>
+        <span className="archive-summary-note">DOSYA DÜZENİ · SON EKLENEN EN ÜSTTE</span>
+      </section>
+
+      {!isLoading && filteredReports.length > 0 ? (
+        <section className="archive-dossier-wall" aria-label="Rapor dosyaları">
+          {filteredReports.map((report, index) => {
+            const hasHighRisk = report.isg_data?.findings?.some((f) => f.riskLevel === 'high')
+            const openFindingsCount = report.isg_data?.findings?.filter((f) => f.status === 'open').length ?? 0
+            const totalFindingsCount = report.isg_data?.findings?.length ?? 0
+
+            return (
+              <article className="archive-dossier" key={`dossier-${report.id}`}>
+                <button
+                  className="archive-dossier-open"
+                  onClick={() => openReport(report)}
+                  aria-label={`${report.title} raporunu aç`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className="archive-dossier-index">
+                      DOSYA <strong>{String(filteredReports.length - index).padStart(3, '0')}</strong>
+                    </span>
+                    {hasHighRisk && (
+                      <span className="inline-flex items-center gap-1 text-[9.5px] font-bold text-red-600 bg-red-100 dark:bg-red-950/50 dark:text-red-400 px-2 py-0.5 rounded font-mono">
+                        <AlertTriangle className="h-3 w-3" /> KRİTİK RİSK
+                      </span>
+                    )}
+                  </div>
+
+                  <span className="archive-dossier-glyph">
+                    <FileText size={21} />
+                  </span>
+
+                  <span className="archive-dossier-title">{report.title}</span>
+
+                  {report.isg_data?.projectInfo?.projectName && (
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1 truncate max-w-full">
+                      <Building2 className="h-3 w-3 flex-none text-muted-foreground/70" />
+                      <span className="truncate">{report.isg_data.projectInfo.projectName}</span>
+                    </div>
+                  )}
+
+                  {totalFindingsCount > 0 && (
+                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                      <span className="text-[9.5px] font-mono font-semibold px-1.5 py-0.5 rounded bg-muted text-foreground/80">
+                        {totalFindingsCount} Bulgu
+                      </span>
+                      {openFindingsCount > 0 && (
+                        <span className="text-[9.5px] font-mono font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300">
+                          {openFindingsCount} Açık DÖF
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  <span className="archive-dossier-meta">
+                    <span>{report.type.toLocaleUpperCase('tr-TR')}</span>
+                    <span>
+                      {new Date(report.created_at).toLocaleDateString('tr-TR', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </span>
+                  </span>
+                </button>
+
+                <div className="archive-dossier-footer">
+                  <span className="archive-dossier-status">
+                    <i />
+                    {report.is_public ? 'PAYLAŞIMDA' : 'ARŞİVLENDİ'}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 px-2 text-[11px] font-semibold border-border/70 hover:bg-muted"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDownloadPDF(report)
+                      }}
+                      title="PDF İndir"
+                    >
+                      <Download className="h-3 w-3 mr-1" />
+                      PDF
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 px-2 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 border-emerald-500/40 hover:bg-emerald-500/10"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleShareWhatsApp(report)
+                      }}
+                      title="WhatsApp ile Paylaş"
+                    >
+                      <MessageSquare className="h-3 w-3 mr-1" />
+                      WhatsApp
+                    </Button>
+                    {renderActions(report)}
+                  </div>
+                </div>
+              </article>
+            )
+          })}
+        </section>
+      ) : null}
+
+      <Card className={`archive-ledger border-border/50 shadow-sm ${!isLoading && filteredReports.length > 0 ? 'hidden' : ''}`}>
         <CardContent className="p-0">
           {isLoading ? (
             <div className="p-4 md:p-6 space-y-3">
@@ -367,7 +577,7 @@ export default function ReportsPage() {
                   : 'Ilk raporunuzu olusturarak listede gormeye baslayabilirsiniz.'}
               </p>
               {!hasActiveFilters ? (
-                <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white font-medium">
+                <Button asChild className="bg-primary text-primary-foreground font-medium">
                   <Link href="/dashboard/isg-denetim">
                     Saha Denetimi Başlat <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
@@ -382,21 +592,44 @@ export default function ReportsPage() {
             <>
               <div className="md:hidden p-3 space-y-3">
                 {filteredReports.map((report) => (
-                  <div key={report.id} className="rounded-lg border p-3 space-y-3">
+                  <div key={report.id} className="rounded-lg border p-3 space-y-3 bg-card">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <button className="text-left w-full" onClick={() => openReport(report)}>
-                          <p className="font-medium text-sm truncate">{report.title}</p>
+                          <p className="font-semibold text-sm truncate">{report.title}</p>
                         </button>
                         <p className="text-xs text-muted-foreground mt-1">
                           {new Date(report.created_at).toLocaleDateString('tr-TR')}
                         </p>
                       </div>
-                      {renderActions(report)}
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-emerald-600"
+                          onClick={() => handleShareWhatsApp(report)}
+                          title="WhatsApp"
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleDownloadPDF(report)}
+                          title="PDF"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        {renderActions(report)}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary" className="capitalize font-normal">{report.type}</Badge>
-                      <Badge variant="outline" className="text-xs">Tamamlandi</Badge>
+                      {report.isg_data?.findings?.some((f) => f.riskLevel === 'high') && (
+                        <Badge variant="destructive" className="text-xs">Kritik Risk</Badge>
+                      )}
+                      <Badge variant="outline" className="text-xs">Tamamlandı</Badge>
                     </div>
                   </div>
                 ))}
@@ -406,11 +639,11 @@ export default function ReportsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent bg-muted/50">
-                      <TableHead className="w-[400px]">Rapor Basligi</TableHead>
-                      <TableHead>Tur</TableHead>
+                      <TableHead className="w-[400px]">Rapor Başlığı</TableHead>
+                      <TableHead>Tür</TableHead>
                       <TableHead>Tarih</TableHead>
                       <TableHead>Durum</TableHead>
-                      <TableHead className="text-right">Islemler</TableHead>
+                      <TableHead className="text-right">İşlemler</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -425,7 +658,12 @@ export default function ReportsPage() {
                             <div className="h-9 w-9 rounded-md bg-muted flex items-center justify-center border">
                               <FileText className="h-4 w-4 text-muted-foreground" />
                             </div>
-                            <span>{report.title}</span>
+                            <div>
+                              <span>{report.title}</span>
+                              {report.isg_data?.projectInfo?.projectName && (
+                                <p className="text-xs text-muted-foreground font-normal">{report.isg_data.projectInfo.projectName}</p>
+                              )}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -439,11 +677,33 @@ export default function ReportsPage() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="border-green-200 text-green-700 bg-green-50">
-                            Tamamlandi
+                            Tamamlandı
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                          {renderActions(report)}
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 px-2 text-xs"
+                              onClick={() => handleDownloadPDF(report)}
+                              title="PDF İndir"
+                            >
+                              <Download className="h-3.5 w-3.5 mr-1" />
+                              PDF
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 px-2 text-xs text-emerald-600 hover:text-emerald-700"
+                              onClick={() => handleShareWhatsApp(report)}
+                              title="WhatsApp ile Paylaş"
+                            >
+                              <MessageSquare className="h-3.5 w-3.5 mr-1" />
+                              WhatsApp
+                            </Button>
+                            {renderActions(report)}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -557,7 +817,7 @@ export default function ReportsPage() {
                       </a>
                     </Button>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-200">
+                  <div className="flex items-center gap-2 text-xs text-field-gold bg-field-yellow/15 p-2 rounded border border-field-gold/40">
                     <Lock className="h-3 w-3" />
                     Rapor internetteki herkes tarafindan goruntulenebilir hale gelir.
                   </div>

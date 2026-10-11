@@ -1,414 +1,269 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import {
+  ArrowDownRight,
   ArrowRight,
-  FileText,
-  Share2,
-  HardHat,
+  BookOpen,
   Check,
-  Building2,
-  Camera,
-  Scale,
+  ClipboardCheck,
+  FileText,
+  HardHat,
+  Lock,
+  ShieldCheck,
+  Upload,
+  UsersRound,
 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { MobileMenu } from '@/components/features/mobile-menu'
+
+const features = [
+  {
+    number: '01',
+    icon: ClipboardCheck,
+    title: 'Fotoğraftan risk tespiti',
+    body: 'Saha fotoğraflarını yükleyin. Görünen tehlikeleri, risk düzeyini ve önerilen düzeltici faaliyeti rapor taslağında inceleyin.',
+  },
+  {
+    number: '02',
+    icon: BookOpen,
+    title: 'Mevzuatla birlikte',
+    body: 'Tespitleri ilgili İSG mevzuat referanslarıyla aynı dosyada düzenleyin; sahadaki bulgu ile yasal dayanak birbirinden kopmasın.',
+  },
+  {
+    number: '03',
+    icon: FileText,
+    title: 'İmzaya hazır rapor',
+    body: 'Firma bilgileri, fotoğraflar ve imza alanlarıyla raporunuzu PDF olarak indirin veya süreli bağlantıyla paylaşın.',
+  },
+]
+
+const plans = [
+  {
+    name: 'Başlangıç',
+    audience: 'Platformu denemek isteyen uzmanlar için',
+    price: '0',
+    features: ['Ayda 3 saha raporu', 'Temel fotoğraf analizi', 'Standart PDF indirme'],
+    action: 'Ücretsiz başla',
+    href: '/login?tab=register',
+    featured: false,
+  },
+  {
+    name: 'İSG Uzmanı',
+    audience: 'Aktif sahada çalışan bağımsız uzmanlar için',
+    price: '399',
+    features: ['Sınırsız saha raporu', 'Firma ve OSGB logosu', 'İki imzalı kurumsal PDF', 'Süreli paylaşım bağlantısı'],
+    action: 'Hemen abone ol',
+    href: '/login?tab=register',
+    featured: true,
+  },
+  {
+    name: 'Kurumsal / OSGB',
+    audience: 'Ekipler ve çoklu şantiyeler için',
+    price: '1.490',
+    features: ['Çoklu uzman ve şantiye yönetimi', 'Merkezi görünüm', 'Öncelikli teknik destek'],
+    action: 'İletişime geç',
+    href: '/login?tab=register',
+    featured: false,
+  },
+]
+
+function InspectionSheet() {
+  return (
+    <div className="inspection-stack" role="img" aria-label="Resmi İSG Saha Denetim Raporu Örneği">
+      <div className="inspection-back inspection-back-one" />
+      <div className="inspection-back inspection-back-two" />
+      <article className="doc-sheet">
+        {/* Top Header with Dual Logos */}
+        <div className="doc-top-bar">
+          <div className="doc-company-badge">
+            <div className="doc-company-logo">Kİ</div>
+            <div className="doc-badge-text">
+              <strong>KUZEY İNŞAAT A.Ş.</strong>
+              <span>ANA YÜKLENİCİ</span>
+            </div>
+          </div>
+
+          <div className="doc-center-title">
+            <h3>İSG Saha Denetim Raporu</h3>
+            <span>EVRAK NO: 2026-0418/A</span>
+          </div>
+
+          <div className="doc-osgb-badge">
+            <div className="doc-osgb-logo">OSGB</div>
+            <div className="doc-badge-text">
+              <strong>KORU ORTAK SAĞLIK GÜV.</strong>
+              <span>YETKİLİ KURUM</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Technical Meta Grid */}
+        <div className="doc-meta-grid">
+          <div className="doc-meta-item">
+            <span>Şantiye / Proje</span>
+            <strong>Merkez Konutları · B Blok</strong>
+          </div>
+          <div className="doc-meta-item">
+            <span>İSG Denetmeni</span>
+            <strong>Murat K. (A Sınıfı · 48192)</strong>
+          </div>
+          <div className="doc-meta-item">
+            <span>Tarih & Saat</span>
+            <strong>14.04.2026 · 10:30</strong>
+          </div>
+          <div className="doc-meta-item">
+            <span>Saha Mevcudu</span>
+            <strong>142 Çalışan · Açık Hava</strong>
+          </div>
+        </div>
+
+        {/* Primary Finding Card */}
+        <div className="doc-finding-card">
+          <div className="doc-finding-header">
+            <span className="doc-risk-pill">🔴 YÜKSEK RİSK</span>
+            <span className="doc-finding-loc">12. Kat Dış Cephe İskelesi</span>
+            <span className="doc-finding-no">Bulgu 01 / 04</span>
+          </div>
+
+          <p className="doc-finding-body">
+            12. Kat çalışma iskelesinde çift sıra yatay koruma korkuluğu ve topuk levhası (tekmelik) bulunmuyor. Yüksekten malzeme ve çalışan düşme riski mevcut.
+          </p>
+
+          <div className="doc-finding-chips">
+            <span className="doc-law-chip">
+              <BookOpen size={12} />
+              Yapı İşlerinde İSG Yönetmeliği · Ek-4 / Md. 12
+            </span>
+          </div>
+
+          <div className="doc-dof-strip">
+            <span><strong>DÖF Aksiyonu:</strong> İskele derhal kullanıma kapatılmalı, korkuluklar ve emniyet ağları tamamlanmalıdır.</span>
+            <span className="doc-dof-deadline">Termin: 24 Saat (Acil)</span>
+          </div>
+        </div>
+
+        {/* Secondary Finding Preview */}
+        <div className="doc-mini-finding">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold text-amber-600 font-mono">🟡 ORTA RİSK</span>
+            <span>Bulgu 02: Seyyar panolarda kaçak akım rölesi test etiketi eksik.</span>
+          </div>
+          <span className="text-[10px] text-muted-foreground font-mono">Termin: 48 Saat</span>
+        </div>
+
+        {/* Dual Signatures */}
+        <div className="doc-signatures">
+          <div className="doc-sig-box">
+            <span className="doc-sig-role">Tebellüğ Eden (Şantiye Şefi)</span>
+            <span className="doc-sig-name">Engin V. (İnşaat Müh.)</span>
+            <div className="doc-sig-sign">
+              <span>Firma Kaşesi & Islak İmza</span>
+              <span>14.04.2026</span>
+            </div>
+          </div>
+
+          <div className="doc-sig-box">
+            <span className="doc-sig-role">Denetimi Yapan İSG Uzmanı</span>
+            <span className="doc-sig-name">Murat K. (A Sınıfı Uzman)</span>
+            <div className="doc-sig-sign">
+              <span>Bakanlık Kaşesi & Paraf</span>
+              <span>14.04.2026</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Official Stamp */}
+        <div className="doc-stamp">
+          RESMÎ İSG EVRAKI<br />6331 UYUMLU · DÖF TAKİBİ
+        </div>
+      </article>
+      <span className="paper-clip" aria-hidden="true" />
+    </div>
+  )
+}
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 overflow-hidden font-sans selection:bg-amber-500/30">
-      {/* Background Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#27272a_1px,transparent_1px),linear-gradient(to_bottom,#27272a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40 dark:opacity-20 pointer-events-none" />
-
-      {/* Glow Effects */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-gradient-to-tr from-amber-500/20 to-orange-500/20 blur-[120px] rounded-full pointer-events-none -z-10" />
-
-      {/* Header */}
-      <header className="px-6 lg:px-12 h-20 flex items-center justify-between border-b border-zinc-200/50 dark:border-zinc-800/50 backdrop-blur-md sticky top-0 z-50 bg-white/70 dark:bg-zinc-950/70">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 bg-amber-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-600/20">
-            <HardHat className="h-5 w-5" />
-          </div>
-          <span className="font-extrabold text-xl tracking-tight">İSG Saha Asistanı</span>
-        </div>
-        <nav className="hidden md:flex gap-8 text-sm font-medium text-zinc-600 dark:text-zinc-400">
-          <Link href="#features" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
-            Özellikler
-          </Link>
-          <Link href="#how-it-works" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
-            Nasıl Çalışır?
-          </Link>
-          <Link href="#pricing" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
-            Fiyatlandırma
-          </Link>
+    <div className="landing-page">
+      <header className="landing-header">
+        <Link href="/" className="brand-lockup" aria-label="İSG Saha Asistanı ana sayfa">
+          <span className="brand-mark"><HardHat size={20} strokeWidth={2.2} /></span>
+          <span>İSG <b>SAHA ASİSTANI</b></span>
+        </Link>
+        <nav className="landing-nav" aria-label="Ana menü">
+          <Link href="#nasil-calisir">Nasıl çalışır</Link>
+          <Link href="#araclar">Araçlar</Link>
+          <Link href="#fiyatlar">Fiyatlar</Link>
         </nav>
-        <div className="flex items-center gap-3">
-          <Link href="/login">
-            <Button variant="ghost" className="text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-full px-5">
-              Giriş Yap
-            </Button>
-          </Link>
-          <Link href="/login?tab=register">
-            <Button className="text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white rounded-full px-5 shadow-sm">
-              Ücretsiz Başla
-            </Button>
-          </Link>
+        <div className="header-actions">
+          <Link className="sign-in-link" href="/login">Giriş yap</Link>
+          <Link className="safety-button header-cta" href="/login?tab=register">Ücretsiz başla <ArrowRight size={16} /></Link>
+          <MobileMenu />
         </div>
       </header>
 
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative pt-20 pb-20 md:pt-32 md:pb-28 px-4 md:px-6">
-          <div className="container mx-auto max-w-5xl text-center flex flex-col items-center">
-            <div className="inline-flex items-center px-3.5 py-1.5 rounded-full border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 text-xs font-semibold mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 shadow-sm">
-              <span className="flex h-2 w-2 rounded-full bg-amber-500 mr-2 animate-pulse"></span>
-              6331 Sayılı Kanun & Yapı İşleri Mevzuatı Uyumlu
+      <main>
+        <section className="landing-hero">
+          <div className="hero-copy">
+            <div className="eyebrow"><span /> SAHA NOTLARI · 01 / DENETİM</div>
+            <h1>Sahada tespit et.<br />Mevzuatla eşleştir.<br /><em>Raporla.</em></h1>
+            <p className="hero-description">Saha fotoğraflarını yükleyin; riskleri, mevzuat referanslarını ve düzeltici faaliyetleri tek raporda toplayın.</p>
+            <div className="hero-actions">
+              <Link className="safety-button hero-button" href="/login?tab=register">Denetim başlat <ArrowRight size={17} /></Link>
+              <Link className="text-link" href="#nasil-calisir">Nasıl çalıştığını gör <ArrowDownRight size={16} /></Link>
             </div>
-
-            <h1 className="max-w-4xl text-5xl md:text-7xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-6 leading-[1.1]">
-              Saha Denetimlerini ve İSG Raporlarını <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-br from-amber-600 to-orange-600 dark:from-amber-400 dark:to-orange-400">
-                Otopilot&apos;a Alın.
-              </span>
-            </h1>
-
-            <p className="max-w-2xl text-lg md:text-xl text-zinc-600 dark:text-zinc-400 mb-10 leading-relaxed">
-              Saha fotoğraflarını çekin, yükleyin. Yapay zeka uygunsuzlukları, kanun maddelerini ve risk derecelerini
-              otomatik tespit etsin. Çift logolu ve resmi imzalı PDF raporunuz saniyeler içinde hazır.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center mb-16">
-              <Link href="/dashboard/isg-denetim">
-                <Button
-                  size="lg"
-                  className="h-14 px-8 text-lg rounded-full bg-amber-600 hover:bg-amber-700 text-white shadow-xl shadow-amber-600/20 transition-all duration-300 hover:scale-105 font-semibold"
-                >
-                  Saha Denetimi Başlat <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="#pricing">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="h-14 px-8 text-lg rounded-full border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                >
-                  Paketleri İncele
-                </Button>
-              </Link>
+            <div className="hero-proof">
+              <span><ShieldCheck size={16} /> 6331 & Yapı İşleri Mevzuatı</span>
+              <span><FileText size={16} /> Çift Logolu Resmî PDF</span>
+              <span><Lock size={16} /> WhatsApp & Süreli Paylaşım</span>
             </div>
+          </div>
+          <div className="hero-visual"><InspectionSheet /></div>
+          <div className="hero-caption"><span>ŞANTİYE DEFTERİ</span><span>İSG / 2026</span></div>
+        </section>
 
-            {/* Mock Report Card Preview */}
-            <div className="relative w-full max-w-4xl mx-auto rounded-2xl shadow-2xl shadow-amber-500/10 border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-900 text-left p-6 md:p-8">
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold">
-                    <Building2 className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-base">Bölen Otomotiv Yeni Depo İnşaatı</h3>
-                    <p className="text-xs text-muted-foreground">Saha Gözetim ve Denetim Raporu • RAPOR-2026-052</p>
-                  </div>
-                </div>
-                <Badge className="bg-red-500/10 text-red-600 border-red-200 dark:border-red-900">
-                  🔴 1 YÜKSEK RİSK TESPİT EDİLDİ
-                </Badge>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-3 bg-muted/30 p-4 rounded-xl border">
-                <div>
-                  <span className="text-[11px] text-muted-foreground block">Konum</span>
-                  <span className="font-semibold text-xs">A Blok 3. Kat / Asansör Boşluğu</span>
-                </div>
-                <div>
-                  <span className="text-[11px] text-muted-foreground block">Yasal Mevzuat Referansı</span>
-                  <span className="font-mono text-xs text-amber-600 dark:text-amber-400">
-                    Yapı İşlerinde İSG Yön. Ek-4 Md. 12
-                  </span>
-                </div>
-                <div>
-                  <span className="text-[11px] text-muted-foreground block">Sorumlu & Termin</span>
-                  <span className="font-semibold text-xs">Saha Şefi • 24 Saat İçinde</span>
-                </div>
-              </div>
-            </div>
+        <section className="process-strip" id="nasil-calisir">
+          <div className="section-label"><span>01 — İŞ AKIŞI</span><span>SAHADAN RAPORA, 3 ADIMDA</span></div>
+          <div className="process-grid">
+            <article className="process-step"><span className="step-number">1</span><div><h2>Fotoğrafları yükle</h2><p>Telefonundan saha görüntülerini ekle, gerekli notları iliştir.</p></div><Upload className="step-icon" size={21} /></article>
+            <article className="process-step"><span className="step-number">2</span><div><h2>Riskleri gözden geçir</h2><p>Bulgu taslaklarını ve mevzuat eşleşmelerini kontrol et.</p></div><ClipboardCheck className="step-icon" size={21} /></article>
+            <article className="process-step"><span className="step-number">3</span><div><h2>Raporu paylaş</h2><p>PDF çıktını indir veya rapor bağlantısını ekibine gönder.</p></div><ArrowRight className="step-icon" size={21} /></article>
           </div>
         </section>
 
-        {/* Bento Grid Features Section */}
-        <section id="features" className="w-full py-24 bg-zinc-50 dark:bg-zinc-900/30 border-t border-zinc-200 dark:border-zinc-800">
-          <div className="container px-4 md:px-6 mx-auto max-w-6xl">
-            <div className="text-center mb-16 max-w-2xl mx-auto">
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-zinc-900 dark:text-zinc-100">
-                İSG Uzmanları İçin Tasarlandı
-              </h2>
-              <p className="text-zinc-600 dark:text-zinc-400 text-lg">
-                Sahadaki her dakikanızı verimli kılacak, akşamları evde saatlerce Word/Excel ile uğraşmayı tarihe gömecek araçlar.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Feature 1 */}
-              <div className="md:col-span-2 bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm relative overflow-hidden">
-                <div className="h-12 w-12 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mb-6 text-amber-600 dark:text-amber-400">
-                  <Camera className="h-6 w-6" />
-                </div>
-                <h3 className="text-2xl font-bold mb-3">Fotoğraftan Otomatik Tehlike Analizi</h3>
-                <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-md">
-                  Sahada çektiğiniz fotoğrafları sisteme yükleyin; Gemini Vision uygunsuzluğu analiz eder, risk derecesini
-                  belirler ve uygulanması gereken düzeltici faaliyeti anında yazar.
-                </p>
-              </div>
-
-              {/* Feature 2 */}
-              <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-                <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mb-6 text-blue-600 dark:text-blue-400">
-                  <Scale className="h-6 w-6" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">6331 Sayılı Mevzuat Eşleme</h3>
-                <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
-                  Tespit edilen her eksikliğin yanına Türkiye mevzuatındaki ilgili yönetmelik maddesi (Yapı İşleri, İş
-                  Ekipmanları vb.) otomatik eklenir.
-                </p>
-              </div>
-
-              {/* Feature 3 */}
-              <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-                <div className="h-12 w-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mb-6 text-emerald-600 dark:text-emerald-400">
-                  <FileText className="h-6 w-6" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">Resmi Çift İmzalı PDF Çıktısı</h3>
-                <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
-                  Firma ve OSGB logolarınızın yer aldığı, fotoğraflı renkli risk tablosu ve Uzman + İşveren imza kutulu resmi
-                  A4 çıktısı.
-                </p>
-              </div>
-
-              {/* Feature 4 */}
-              <div className="md:col-span-2 bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-                <div className="h-12 w-12 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mb-6 text-purple-600 dark:text-purple-400">
-                  <Share2 className="h-6 w-6" />
-                </div>
-                <h3 className="text-2xl font-bold mb-3">Süreli & Güvenli Paylaşım Bağlantısı</h3>
-                <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-md">
-                  Raporu tek tıkla canlı linke dönüştürün, şantiye şefine veya taşeronlara WhatsApp üzerinden gönderin. 7 gün
-                  sonra otomatik geçerliliğini yitirir.
-                </p>
-              </div>
-            </div>
+        <section className="tools-section" id="araclar">
+          <div className="section-intro"><span className="section-overline">02 — SAHA ARAÇLARI</span><h2>Denetimin her adımı<br />aynı dosyada.</h2><p>Sahadaki bulguyu, yasal dayanağı ve aksiyonu birlikte tut. Akşam raporu baştan yazmak zorunda kalma.</p></div>
+          <div className="feature-list">
+            {features.map(({ number, icon: Icon, title, body }) => (
+              <article className="feature-row" key={number}><span className="feature-number">{number}</span><span className="feature-icon"><Icon size={19} /></span><div><h3>{title}</h3><p>{body}</p></div><ArrowRight className="feature-arrow" size={17} /></article>
+            ))}
           </div>
         </section>
 
-        {/* How It Works */}
-        <section id="how-it-works" className="w-full py-24 bg-white dark:bg-zinc-950">
-          <div className="container px-4 md:px-6 mx-auto max-w-6xl">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-              <div className="max-w-xl">
-                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-zinc-900 dark:text-zinc-100">
-                  Nasıl Çalışır?
-                </h2>
-                <p className="text-zinc-600 dark:text-zinc-400 text-lg">
-                  Sahadan ofise gitmeye gerek kalmadan 3 basit adımda resmi raporlama.
-                </p>
-              </div>
-              <Link href="/dashboard/isg-denetim">
-                <Button variant="outline" className="rounded-full gap-2">
-                  Hemen Dene <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Link>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  step: '01',
-                  title: 'Sahada Fotoğraf Çek',
-                  desc: 'Şantiyede uygunsuz gördüğün yerlerin fotoğraflarını telefonundan sisteme yükle.',
-                },
-                {
-                  step: '02',
-                  title: 'Yapay Zeka Analiz Etsin',
-                  desc: 'Gemini Vision fotoğraftaki tehlikeyi, yönetmelik maddesini ve risk derecesini çıkarsın.',
-                },
-                {
-                  step: '03',
-                  title: 'İmzalı PDF İndir / Paylaş',
-                  desc: 'Logolu, fotoğraflı ve çift imza kutulu resmi PDF çıktısını al veya link olarak ilet.',
-                },
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  className="group relative p-8 rounded-3xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800"
-                >
-                  <div className="text-6xl font-bold text-zinc-200 dark:text-zinc-800 mb-6 group-hover:text-amber-200 dark:group-hover:text-amber-900/30 transition-colors select-none">
-                    {item.step}
-                  </div>
-                  <h3 className="text-2xl font-bold mb-3">{item.title}</h3>
-                  <p className="text-zinc-600 dark:text-zinc-400 text-base leading-relaxed">{item.desc}</p>
-                </div>
-              ))}
-            </div>
+        <section className="pricing-section" id="fiyatlar">
+          <div className="pricing-heading"><div><span className="section-overline">03 — PLANLAR</span><h2>Sahanın ölçeğine göre.</h2></div><p>İster bağımsız uzman ol, ister birden fazla şantiyeyi yönet.</p></div>
+          <div className="pricing-grid">
+            {plans.map((plan) => (
+              <article className={`price-sheet${plan.featured ? ' price-sheet-featured' : ''}`} key={plan.name}>
+                {plan.featured && <span className="plan-stamp">UZMANLAR İÇİN</span>}
+                <h3>{plan.name}</h3><p className="plan-audience">{plan.audience}</p>
+                <div className="plan-price"><strong>{plan.price}</strong><span>₺ / ay</span></div>
+                <ul>{plan.features.map((item) => <li key={item}><Check size={15} />{item}</li>)}</ul>
+                <Link className={plan.featured ? 'safety-button plan-button' : 'plan-link'} href={plan.href}>{plan.action}<ArrowRight size={15} /></Link>
+              </article>
+            ))}
           </div>
         </section>
 
-        {/* Pricing Section */}
-        <section id="pricing" className="w-full py-24 bg-zinc-50 dark:bg-zinc-900/40 border-t border-zinc-200 dark:border-zinc-800">
-          <div className="container px-4 md:px-6 mx-auto max-w-6xl">
-            <div className="text-center mb-16 max-w-2xl mx-auto">
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-zinc-900 dark:text-zinc-100">
-                Şeffaf ve Uygun Fiyatlandırma
-              </h2>
-              <p className="text-zinc-600 dark:text-zinc-400 text-lg">
-                İster bağımsız uzman olun, ister yüzlerce şantiyesi olan bir OSGB.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {/* Plan 1 */}
-              <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 flex flex-col justify-between">
-                <div>
-                  <h3 className="font-bold text-xl mb-1">Başlangıç</h3>
-                  <p className="text-xs text-muted-foreground mb-4">Sistemi denemek isteyen uzmanlar için</p>
-                  <div className="text-4xl font-extrabold mb-6">
-                    0 ₺ <span className="text-sm font-normal text-muted-foreground">/ ay</span>
-                  </div>
-                  <ul className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400 mb-8">
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" /> Ayda 3 Saha Raporu
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" /> Temel AI Fotoğraf Analizi
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" /> Standart PDF İndirme
-                    </li>
-                  </ul>
-                </div>
-                <Link href="/login?tab=register">
-                  <Button variant="outline" className="w-full rounded-full">
-                    Ücretsiz Başla
-                  </Button>
-                </Link>
-              </div>
-
-              {/* Plan 2 (Popular) */}
-              <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border-2 border-amber-500 shadow-xl shadow-amber-500/10 flex flex-col justify-between relative">
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  En Çok Tercih Edilen
-                </div>
-                <div>
-                  <h3 className="font-bold text-xl mb-1">İSG Uzmanı</h3>
-                  <p className="text-xs text-muted-foreground mb-4">Aktif sahada çalışan bağımsız uzmanlar için</p>
-                  <div className="text-4xl font-extrabold mb-6 text-amber-600 dark:text-amber-400">
-                    399 ₺ <span className="text-sm font-normal text-muted-foreground">/ ay</span>
-                  </div>
-                  <ul className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400 mb-8">
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" /> Sınırsız Saha Raporu
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" /> Sınırsız Gemini Vision Analizi
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" /> Özel Firma & OSGB Logosu Ekleme
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" /> İki İmzalı Resmi Kurumsal PDF
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" /> 7 Gün Süreli Paylaşım Linkleri
-                    </li>
-                  </ul>
-                </div>
-                <Link href="/login?tab=register">
-                  <Button className="w-full rounded-full bg-amber-600 hover:bg-amber-700 text-white font-semibold">
-                    Hemen Abone Ol
-                  </Button>
-                </Link>
-              </div>
-
-              {/* Plan 3 */}
-              <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 flex flex-col justify-between">
-                <div>
-                  <h3 className="font-bold text-xl mb-1">Kurumsal / OSGB</h3>
-                  <p className="text-xs text-muted-foreground mb-4">Büyük ekipler ve OSGB firmaları için</p>
-                  <div className="text-4xl font-extrabold mb-6">
-                    1.490 ₺ <span className="text-sm font-normal text-muted-foreground">/ ay</span>
-                  </div>
-                  <ul className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400 mb-8">
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" /> Çoklu Uzman & Şantiye Yönetimi
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" /> Tüm Profesyonel Özellikler
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" /> Merkezi OSGB Dashboard
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" /> 7/24 Öncelikli Teknik Destek
-                    </li>
-                  </ul>
-                </div>
-                <Link href="/login?tab=register">
-                  <Button variant="outline" className="w-full rounded-full">
-                    İletişime Geç
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="w-full py-16 px-4 md:px-6">
-          <div className="container mx-auto max-w-5xl">
-            <div className="relative rounded-[2.5rem] overflow-hidden bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-6 py-20 text-center">
-              <div className="relative z-10 max-w-3xl mx-auto space-y-6">
-                <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight">
-                  Saatlerce Rapor Yazmaya <br /> Son Verin.
-                </h2>
-                <p className="text-zinc-400 dark:text-zinc-600 text-lg max-w-xl mx-auto">
-                  Bugün ücretsiz başlayın. İlk saha denetim raporunuzu 5 dakika içinde oluşturup PDF olarak indirin.
-                </p>
-                <div className="pt-2">
-                  <Link href="/dashboard/isg-denetim">
-                    <Button
-                      size="lg"
-                      className="h-14 px-10 text-lg font-semibold bg-amber-600 hover:bg-amber-700 text-white rounded-full shadow-2xl hover:scale-105 transition-transform"
-                    >
-                      Hemen Başlayın
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
+        <section className="closing-note">
+          <div className="closing-symbol"><UsersRound size={22} /></div>
+          <div><span className="section-overline">SAHA EKİBİNE NOT</span><h2>Bir sonraki denetimin<br />raporu hazır olsun.</h2></div>
+          <Link className="safety-button" href="/login?tab=register">Ücretsiz dene <ArrowRight size={17} /></Link>
         </section>
       </main>
 
-      <footer className="py-12 w-full border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-        <div className="container px-4 md:px-6 mx-auto max-w-6xl">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-amber-600 rounded-lg flex items-center justify-center text-white">
-                <HardHat className="h-4 w-4" />
-              </div>
-              <span className="font-bold text-lg">İSG Saha Asistanı</span>
-            </div>
-
-            <div className="flex gap-8 text-sm font-medium text-zinc-500">
-              <Link href="#" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
-                Gizlilik
-              </Link>
-              <Link href="#" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
-                Şartlar
-              </Link>
-              <Link href="#pricing" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
-                Fiyatlar
-              </Link>
-            </div>
-
-            <p className="text-xs text-zinc-400">© 2026 İSG Saha Asistanı. Tüm hakları saklıdır.</p>
-          </div>
-        </div>
+      <footer className="landing-footer">
+        <Link href="/" className="brand-lockup"><span className="brand-mark"><HardHat size={17} /></span><span>İSG <b>SAHA ASİSTANI</b></span></Link>
+        <span>SAHADA DAHA AZ EVRAK, DAHA ÇOK GÖRÜNÜRLÜK.</span>
+        <span>© 2026 İSG Saha Asistanı</span>
       </footer>
     </div>
   )

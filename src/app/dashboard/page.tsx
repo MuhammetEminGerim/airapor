@@ -1,15 +1,13 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileText, Clock, Upload, Search, TrendingUp, ArrowRight, HardHat } from 'lucide-react'
+import { FileText, Clock, Search, ArrowRight, HardHat, ClipboardCheck, FolderOpen, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { createDevTimer } from '@/lib/dev-timing'
+import type { ISGReportData } from '@/types/isg'
 
 interface DashboardReport {
   id: string
@@ -17,22 +15,21 @@ interface DashboardReport {
   type: string
   created_at: string
   status: string
+  isg_data?: ISGReportData | null
 }
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState({ total: 0, savedTime: 0 })
+  const [stats, setStats] = useState({ total: 0, month: 0, savedTime: 0 })
   const [recentReports, setRecentReports] = useState<DashboardReport[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [userName, setUserName] = useState('Kullanici')
+  const [userName, setUserName] = useState('Kullanıcı')
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
     const fetchData = async () => {
       const timer = createDevTimer('dashboard-home')
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser()
+        const { data: { user } } = await supabase.auth.getUser()
         timer.mark('auth-ready', { hasUser: Boolean(user) })
 
         if (!user) {
@@ -47,9 +44,7 @@ export default function DashboardPage() {
           .eq('id', user.id)
           .single()
 
-        if (!profileError) {
-          setUserName(profile?.full_name || 'Kullanici')
-        }
+        if (!profileError) setUserName(profile?.full_name || 'Kullanıcı')
         timer.mark('profile-ready', { hasProfile: !profileError })
 
         const { count, error: countError } = await supabase
@@ -57,31 +52,31 @@ export default function DashboardPage() {
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id)
 
-        if (countError) {
-          toast.error('Istatistikler yuklenemedi.')
-        } else if (count !== null) {
-          setStats({
-            total: count,
-            savedTime: count * 2,
-          })
+        if (countError) toast.error('İstatistikler yüklenemedi.')
+        else if (count !== null) {
+          const monthStart = new Date()
+          monthStart.setDate(1)
+          const { count: monthCount } = await supabase
+            .from('reports')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .gte('created_at', monthStart.toISOString())
+          setStats({ total: count, month: monthCount ?? 0, savedTime: count * 2 })
         }
         timer.mark('stats-ready', { total: count ?? 0, hasError: Boolean(countError) })
 
         const { data: reports, error: reportsError } = await supabase
           .from('reports')
-          .select('id, title, type, created_at, status')
+          .select('id, title, type, created_at, status, isg_data')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(8)
 
-        if (reportsError) {
-          toast.error('Raporlar yuklenirken bir hata olustu.')
-        } else {
-          setRecentReports(reports || [])
-        }
+        if (reportsError) toast.error('Raporlar yüklenirken bir hata oluştu.')
+        else setRecentReports(reports || [])
         timer.mark('reports-ready', { reports: reports?.length ?? 0, hasError: Boolean(reportsError) })
       } catch {
-        toast.error('Panel verileri alinamadi.')
+        toast.error('Panel verileri alınamadı.')
         timer.mark('fetch-error')
       } finally {
         setIsLoading(false)
@@ -93,158 +88,104 @@ export default function DashboardPage() {
   }, [])
 
   const filteredReports = useMemo(() => {
-    const normalizedSearch = searchTerm.trim().toLowerCase()
+    const normalizedSearch = searchTerm.trim().toLocaleLowerCase('tr-TR')
     if (!normalizedSearch) return recentReports
-    return recentReports.filter((report) => report.title.toLowerCase().includes(normalizedSearch))
+    return recentReports.filter((report) => report.title.toLocaleLowerCase('tr-TR').includes(normalizedSearch))
   }, [recentReports, searchTerm])
 
   const isFirstUse = !isLoading && stats.total === 0
+  const greetingName = userName.trim().split(/\s+/)[0] || 'Kullanıcı'
+
+  const latestReport = recentReports[0]
+  const today = new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: 'long', weekday: 'long' }).format(new Date())
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Genel Bakis</h1>
-          <p className="text-sm text-muted-foreground">Hos geldiniz, {userName}. Bugunku durumunuz burada.</p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Son raporlarda ara..."
-              className="pl-9 bg-background"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+    <div className="dashboard-home">
+      <section className="dashboard-command-hero">
+        <div className="dashboard-command-copy">
+          <p className="field-page-kicker">SAHA PANELİ <span>/</span> GÜNLÜK BRİFİNG</p>
+          <p className="dashboard-today">{today}</p>
+          <h1>Merhaba,<br /><em>{greetingName}.</em></h1>
+          <p className="dashboard-command-description">Denetimlerini başlat, son saha kayıtlarını gözden geçir ve raporlarını tek merkezden yönet.</p>
+          <div className="dashboard-command-actions">
+            <Link href="/dashboard/isg-denetim" className="dashboard-primary-action"><HardHat size={17} /> Yeni denetim <ArrowRight size={16} /></Link>
+            <Link href="/dashboard/reports" className="dashboard-secondary-action"><FileText size={16} /> Rapor arşivi</Link>
           </div>
-          <Button asChild className="bg-amber-600 text-white hover:bg-amber-700 font-medium shadow-sm">
-            <Link href="/dashboard/isg-denetim">
-              <HardHat className="mr-2 h-4 w-4" /> Saha Denetimi
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/dashboard/upload">
-              <Upload className="mr-2 h-4 w-4" /> Hızlı Not
-            </Link>
-          </Button>
-          {/*
-            <Link href="/dashboard/upload">
-              <Upload className="mr-2 h-4 w-4" /> Yeni Rapor
-            </Link>
-          </Button> */}
+          {isFirstUse ? <p className="dashboard-first-use"><ClipboardCheck size={15} /> İlk denetim dosyanı oluşturduğunda özetlerin burada görünecek.</p> : null}
         </div>
-      </div>
 
-      {isFirstUse ? (
-        <Card className="border-border/50 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-background">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <HardHat className="h-4 w-4 text-amber-600" />
-              İlk İSG Saha Denetiminiz İçin Hızlı Başlangıç
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-lg border bg-background p-3 text-sm">1. Şantiye ve saha fotoğraflarını yükleyin.</div>
-              <div className="rounded-lg border bg-background p-3 text-sm">2. AI ile 6331 ve Yapı İSG yönetmeliğine göre analiz edin.</div>
-              <div className="rounded-lg border bg-background p-3 text-sm">3. Kurumsal logolu resmi PDF denetim raporunu indirin.</div>
+        <article className="dashboard-preview-card">
+          <div className="dashboard-preview-top"><span><i /> SAHA DOSYASI / SON KAYIT</span><span>{latestReport ? '01 / 08' : 'HAZIR'}</span></div>
+          {isLoading ? (
+            <div className="dashboard-preview-loading" aria-label="Son rapor yükleniyor"><span /><span /><span /></div>
+          ) : latestReport ? (
+            <>
+            <div className="dashboard-preview-sheet">
+                <div className="dashboard-preview-meta"><span>RAPOR ÖNİZLEMESİ</span><span>{new Date(latestReport.created_at).toLocaleDateString('tr-TR')}</span></div>
+                {latestReport.isg_data?.findings?.[0]?.photoUrl ? <img className="dashboard-preview-photo" src={latestReport.isg_data.findings[0].photoUrl} alt="Son saha raporundaki bulgu fotoğrafı" /> : <div className="dashboard-preview-scene" aria-hidden="true"><span /><i /><b /></div>}
+                <span className="dashboard-preview-icon"><FileText size={23} /></span>
+                <h2>{latestReport.title}</h2>
+                <div className="dashboard-preview-tags"><span>{latestReport.type.toLocaleUpperCase('tr-TR')}</span><span>{latestReport.status || 'Tamamlandı'}</span></div>
+                <div className="dashboard-preview-rule" />
+                <p>Son raporunu arşivden açıp inceleyebilir, indirebilir veya ekibinle paylaşabilirsin.</p>
+              </div>
+              <Link href="/dashboard/reports" className="dashboard-preview-open">Raporu aç <ArrowRight size={15} /></Link>
+            </>
+          ) : (
+            <div className="dashboard-preview-empty">
+              <span className="dashboard-preview-icon"><FolderOpen size={24} /></span>
+              <h2>İlk saha dosyan için hazır.</h2>
+              <p>Yeni bir denetim başlat; oluşturduğun raporun özeti burada görünsün.</p>
+              <Link href="/dashboard/isg-denetim">Denetime geç <ArrowRight size={14} /></Link>
             </div>
-            <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white font-medium">
-              <Link href="/dashboard/isg-denetim">
-                <HardHat className="mr-2 h-4 w-4" /> İSG Saha Denetimi Başlat <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      ) : null}
+          )}
+        </article>
+      </section>
 
-      <div className="grid grid-cols-12 gap-4">
-        <Card className="col-span-12 md:col-span-4 border-border/50 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Toplam Rapor</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? <div className="h-7 w-16 rounded bg-muted animate-pulse" /> : <div className="text-2xl font-bold">{stats.total}</div>}
-          </CardContent>
-        </Card>
+      <section className="dashboard-metrics" aria-label="Saha özeti">
+        <article className="dashboard-metric"><span className="dashboard-metric-icon"><FileText size={19} /></span><div><strong>{isLoading ? '—' : stats.month}</strong><b>Bu ay</b><small>oluşturulan rapor</small></div></article>
+        <article className="dashboard-metric"><span className="dashboard-metric-icon"><ClipboardCheck size={19} /></span><div><strong>{isLoading ? '—' : stats.total}</strong><b>Toplam rapor</b><small>tüm zamanlar</small></div></article>
+        <article className="dashboard-metric"><span className="dashboard-metric-icon"><Clock size={19} /></span><div><strong>{isLoading ? '—' : `${stats.savedTime} saat`}</strong><b>Kazanılan zaman</b><small>yaklaşık hesaplama</small></div></article>
+      </section>
 
-        <Card className="col-span-12 md:col-span-4 border-border/50 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Kazanilan Saat</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? <div className="h-7 w-16 rounded bg-muted animate-pulse" /> : <div className="text-2xl font-bold">{stats.savedTime}</div>}
-          </CardContent>
-        </Card>
-
-        <Card className="col-span-12 md:col-span-4 border-border/50 shadow-sm bg-gradient-to-br from-indigo-50 to-background dark:from-indigo-950/20 dark:to-background">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Verimlilik</CardTitle>
-            <TrendingUp className="h-4 w-4 text-indigo-500" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? <div className="h-7 w-20 rounded bg-indigo-200/60 dark:bg-indigo-800/40 animate-pulse" /> : <div className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">Yuksek</div>}
-          </CardContent>
-        </Card>
-
-        <Card className="col-span-12 md:col-span-8 border-border/50 shadow-sm min-h-[350px]">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">Son Raporlar</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="p-4 space-y-3">
-                <div className="h-12 w-full rounded-lg border bg-muted/40 animate-pulse" />
-                <div className="h-12 w-full rounded-lg border bg-muted/40 animate-pulse" />
-                <div className="h-12 w-full rounded-lg border bg-muted/40 animate-pulse" />
-              </div>
-            ) : filteredReports.length > 0 ? (
-              <div className="space-y-3">
-                {filteredReports.map((report) => (
-                  <Link href="/dashboard/reports" key={report.id} className="block">
-                    <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="h-9 w-9 rounded-md bg-muted flex items-center justify-center">
-                          <FileText className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium truncate">{report.title}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {report.type.toUpperCase()} • {new Date(report.created_at).toLocaleDateString('tr-TR')}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge variant="outline" className="text-xs whitespace-nowrap">
-                        {report.status || 'Tamamlandi'}
-                      </Badge>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-10 text-muted-foreground">
-                <p>{searchTerm ? 'Aramanızla eşleşen rapor bulunamadı.' : 'Henüz bir İSG denetim raporu oluşturmadınız.'}</p>
-                <Button variant="link" asChild className="mt-2 text-amber-600">
-                  <Link href="/dashboard/isg-denetim">Saha Denetimi Başlat</Link>
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="col-span-12 md:col-span-4 border-border/50 shadow-sm flex flex-col justify-center items-center text-center p-6 bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900">
-          <div className="h-14 w-14 bg-white/10 dark:bg-black/10 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm text-amber-400">
-            <HardHat className="h-7 w-7" />
+      <section className="dashboard-bento-grid" aria-label="Çalışma alanı">
+        <article className="dashboard-bento-card dashboard-reports-card">
+          <div className="dashboard-bento-heading">
+            <div><span className="field-page-kicker">DOSYA KAYITLARI / SON 08</span><h2>Son raporlar</h2></div>
+            <Link href="/dashboard/reports">Tüm arşiv <ArrowRight size={14} /></Link>
           </div>
-          <h3 className="font-semibold text-lg mb-2">Saha Denetimi</h3>
-          <p className="text-sm text-zinc-400 dark:text-zinc-600 mb-6 px-2">Fotoğraf çekin, AI uygunsuzlukları analiz etsin ve imzalı resmi raporu oluştursun.</p>
-          <Button variant="secondary" className="w-full" asChild>
-            <Link href="/dashboard/isg-denetim">Denetime Başla</Link>
-          </Button>
-        </Card>
-      </div>
+          <label className="dashboard-report-search"><Search size={15} /><Input placeholder="Son raporlarda ara..." value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} aria-label="Son raporlarda ara" /></label>
+          {isLoading ? (
+            <div className="dashboard-report-loading"><span /><span /><span /></div>
+          ) : filteredReports.length ? (
+            <div className="dashboard-report-list">
+              {filteredReports.map((report, index) => (
+                <Link href="/dashboard/reports" className="dashboard-report-row" key={report.id}>
+                  <span className="dashboard-report-number">{String(index + 1).padStart(2, '0')}</span>
+                  <span className="dashboard-report-icon"><FileText size={16} /></span>
+                  <span className="dashboard-report-copy"><strong>{report.title}</strong><small>{report.type.toLocaleUpperCase('tr-TR')} · {new Date(report.created_at).toLocaleDateString('tr-TR')}</small></span>
+                  <span className="dashboard-report-status">{report.status || 'Tamamlandı'}</span><ArrowRight size={14} />
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="dashboard-report-empty"><FolderOpen size={21} /><strong>{searchTerm ? 'Eşleşen rapor yok.' : 'Henüz rapor oluşturmadın.'}</strong><span>{searchTerm ? 'Arama ifadesini değiştirip tekrar dene.' : 'İlk raporun burada listelenecek.'}</span></div>
+          )}
+        </article>
+
+        <article className="dashboard-bento-card dashboard-tools-card">
+          <div className="dashboard-bento-heading"><div><span className="field-page-kicker">HIZLI ERİŞİM / 02</span><h2>Saha araçları</h2></div></div>
+          <Link href="/dashboard/isg-denetim" className="dashboard-tool-link"><span><HardHat size={18} /></span><div><strong>Saha denetimi</strong><small>Fotoğraf ve bulgularla başla</small></div><ArrowRight size={15} /></Link>
+          <Link href="/dashboard/settings" className="dashboard-tool-link"><span><Building2 size={18} /></span><div><strong>Firma & OSGB ayarları</strong><small>Logoları ve uzman unvanını yönet</small></div><ArrowRight size={15} /></Link>
+        </article>
+
+        <article className="dashboard-bento-card dashboard-date-card">
+          <span className="dashboard-bento-overline">BUGÜN SAHADA</span>
+          <strong>{today}</strong>
+          <p>Raporlarını kaydet, ekibinle paylaş ve tüm saha geçmişini arşivde tut.</p>
+          <Link href="/dashboard/reports">Arşivi görüntüle <ArrowRight size={14} /></Link>
+        </article>
+      </section>
     </div>
   )
 }

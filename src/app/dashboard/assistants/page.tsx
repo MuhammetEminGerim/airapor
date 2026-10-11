@@ -271,10 +271,11 @@ export default function AssistantsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
+    <div className="field-page field-assistants-page flex flex-col gap-6">
+      <div className="field-page-heading flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Asistanlarım</h1>
+          <p className="field-page-kicker">ARAÇLAR / ŞABLONLAR</p>
+          <h1 className="field-page-title">Asistanların</h1>
           <p className="text-sm text-muted-foreground mt-1">Kendi özel raporlama asistanlarınızı oluşturun ve yönetin.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -391,6 +392,12 @@ export default function AssistantsPage() {
         </Dialog>
       </div>
 
+      <section className="assistant-catalog-strip" aria-label="Asistan kataloğu özeti">
+        <div className="assistant-catalog-icon"><Bot size={21} /></div>
+        <div className="assistant-catalog-copy"><span className="field-page-kicker">KİŞİSEL ARAÇ KÜTÜPHANESİ</span><p>İş akışına göre asistan seç veya kendi uzmanını oluştur.</p></div>
+        <div className="assistant-catalog-count"><strong>{loading ? '—' : templates.length.toString().padStart(2, '0')}</strong><span>KAYITLI ASİSTAN</span></div>
+      </section>
+
       {banner ? <StatusBanner state={banner.state} title={banner.title} message={banner.message} /> : null}
 
       {loading ? (
@@ -413,9 +420,9 @@ export default function AssistantsPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="assistant-catalog-list">
           {templates.map((template) => (
-            <Card key={template.id} className="group relative transition-all hover:shadow-md border-border/50">
+            <Card key={template.id} className="assistant-file-card group relative transition-all border-border/50">
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                   <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-xl">

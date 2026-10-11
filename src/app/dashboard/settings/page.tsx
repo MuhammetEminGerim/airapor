@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -53,7 +52,6 @@ export default function SettingsPage() {
   const [certificateNo, setCertificateNo] = useState('')
   const [isgUpdating, setIsgUpdating] = useState(false)
   const [isgBanner, setIsgBanner] = useState<BannerState | null>(null)
-  const { theme, setTheme } = useTheme()
 
   const trimmedName = fullName.trim()
   const trimmedApiKey = apiKey.trim()
@@ -334,107 +332,60 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Ayarlar</h1>
-        <p className="text-sm text-muted-foreground mt-1">Hesabınızı ve uygulama tercihlerinizi yönetin.</p>
+    <div className="flex flex-col gap-6 max-w-5xl">
+      {/* Sayfa Başlığı */}
+      <div className="flex flex-col gap-1 pb-4 border-b border-border">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Ayarlar</h1>
+        <p className="text-sm text-muted-foreground">
+          İSG kurumsal ve firma profilinizi, imza/kaşe bilgilerinizi ve hesap tercihlerinizi yönetin.
+        </p>
       </div>
 
-      <Tabs defaultValue="account" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:w-[580px] mb-6">
-          <TabsTrigger value="account" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" /> Hesap
+      <Tabs defaultValue="isg" className="w-full space-y-6">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 max-w-2xl h-auto p-1.5 bg-muted/70 rounded-xl border border-border gap-1">
+          <TabsTrigger
+            value="isg"
+            className="py-2.5 px-3 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+          >
+            <HardHat className="h-4 w-4 text-amber-600" />
+            İSG & Firma
           </TabsTrigger>
-          <TabsTrigger value="isg" className="flex items-center gap-2">
-            <HardHat className="h-4 w-4" /> İSG & Firma
+          <TabsTrigger
+            value="account"
+            className="py-2.5 px-3 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+          >
+            <Settings className="h-4 w-4" />
+            Hesap
           </TabsTrigger>
-          <TabsTrigger value="app" className="flex items-center gap-2">
-            <Palette className="h-4 w-4" /> Görünüm
+          <TabsTrigger
+            value="app"
+            className="py-2.5 px-3 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+          >
+            <Palette className="h-4 w-4" />
+            Görünüm
           </TabsTrigger>
-          <TabsTrigger value="api" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" /> API
+          <TabsTrigger
+            value="api"
+            className="py-2.5 px-3 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+          >
+            <Shield className="h-4 w-4" />
+            API
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="account">
-          <Card className="border-border/50 shadow-sm">
-            <CardHeader>
-              <CardTitle>Hesap Bilgileri</CardTitle>
-              <CardDescription>Profil bilgilerinizi buradan güncelleyebilirsiniz.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {profileBanner ? (
-                <StatusBanner state={profileBanner.state} title={profileBanner.title} message={profileBanner.message} />
-              ) : null}
-
-              <div className="flex items-center gap-6">
-                <Avatar className="h-20 w-20 border-2 border-border">
-                  <AvatarImage src="" />
-                  <AvatarFallback className="text-xl bg-muted">
-                    {trimmedName ? trimmedName[0].toUpperCase() : 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col gap-2">
-                  <h3 className="font-medium">Profil Fotoğrafı</h3>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="text-sm text-muted-foreground flex items-center gap-2 cursor-help bg-muted/50 px-3 py-1 rounded-full w-fit">
-                          <Info className="h-3 w-3" />
-                          Otomatik Yönetilir
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Profil fotoğrafı Gravatar üzerinden e-posta adresinize göre otomatik çekilir.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-              </div>
-
-              <div className="grid gap-4 max-w-sm">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Ad Soyad</Label>
-                  <Input
-                    id="name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="bg-background"
-                    maxLength={80}
-                  />
-                  <div className="flex items-center justify-between">
-                    {nameError ? <p className="text-xs text-red-600">{nameError}</p> : <span />}
-                    <p className="text-xs text-muted-foreground">{trimmedName.length}/80</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">E-posta</Label>
-                  <Input id="email" value={email} disabled className="bg-muted text-muted-foreground" />
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="bg-muted/20 border-t border-border/50 py-4">
-              <Button onClick={updateProfile} disabled={profileUpdating || Boolean(nameError)}>
-                {profileUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Değişiklikleri Kaydet
-              </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="isg">
-          <Card className="border-border/50 shadow-sm">
-            <CardHeader>
+        {/* 1. SEKME: İSG & KURUMSAL AYARLAR */}
+        <TabsContent value="isg" className="space-y-6 mt-0">
+          <Card className="border shadow-sm">
+            <CardHeader className="pb-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center border border-amber-500/20 shrink-0">
                     <HardHat className="h-5 w-5" />
                   </div>
                   <div>
-                    <CardTitle>İSG & Kurumsal Ayarlar</CardTitle>
-                    <CardDescription>
-                      Saha raporlarınızın üst bilgisinde (Header) ve imza bölümünde yer alacak firma, OSGB ve uzman bilgileri.
+                    <CardTitle className="text-lg font-bold">İSG & Kurumsal Ayarlar</CardTitle>
+                    <CardDescription className="text-xs mt-0.5">
+                      Saha raporlarınızın resmi PDF başlığında (Header) ve imza/kaşe bölümünde yer alacak bilgiler.
                     </CardDescription>
                   </div>
                 </div>
@@ -444,21 +395,23 @@ export default function SettingsPage() {
                   size="sm"
                   onClick={fillSampleISGData}
                   disabled={isgUpdating}
-                  className="gap-2 border-amber-500/50 text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-950/40 shrink-0"
+                  className="gap-2 border-amber-500/40 text-amber-600 hover:bg-amber-500/10 dark:text-amber-400 font-medium shrink-0"
                 >
                   <Sparkles className="h-4 w-4 text-amber-500" />
                   Örnek Bilgileri Doldur
                 </Button>
               </div>
             </CardHeader>
+
             <CardContent className="space-y-6">
               {isgBanner ? (
                 <StatusBanner state={isgBanner.state} title={isgBanner.title} message={isgBanner.message} />
               ) : null}
 
-              <div className="space-y-4 border p-4 rounded-xl bg-card/50">
-                <h3 className="font-semibold text-sm flex items-center gap-2">
-                  <HardHat className="h-4 w-4 text-amber-500" /> İSG Uzmanı Bilgileri
+              {/* BÖLÜM 1: İSG Uzmanı Bilgileri */}
+              <div className="space-y-4 border p-4 sm:p-5 rounded-xl bg-card">
+                <h3 className="font-semibold text-sm flex items-center gap-2 text-foreground">
+                  <HardHat className="h-4 w-4 text-amber-600" /> İSG Uzmanı Bilgileri
                 </h3>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
@@ -482,44 +435,45 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="space-y-4 border p-4 rounded-xl bg-card/50">
-                <h3 className="font-semibold text-sm flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-blue-500" /> Hizmet Verilen Firma (Müşteri)
+              {/* BÖLÜM 2: Hizmet Verilen Firma (Müşteri) */}
+              <div className="space-y-4 border p-4 sm:p-5 rounded-xl bg-card">
+                <h3 className="font-semibold text-sm flex items-center gap-2 text-foreground">
+                  <Building2 className="h-4 w-4 text-blue-600" /> Hizmet Verilen Firma (Ana Müteahhit / İşveren)
                 </h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="company-name">Firma / Şirket Adı</Label>
                     <Input
                       id="company-name"
-                      placeholder="Örn: ABC İnşaat Sanayi ve Ticaret A.Ş."
+                      placeholder="Örn: Bölen İnşaat ve Taahhüt A.Ş."
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Firma Logosu (PDF Sol Üst Başlık)</Label>
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-4">
                       {companyLogoUrl ? (
-                        <div className="relative h-16 w-32 border rounded-lg overflow-hidden bg-white flex items-center justify-center p-1">
+                        <div className="relative h-16 w-32 border rounded-lg overflow-hidden bg-white flex items-center justify-center p-1.5 shadow-sm">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={companyLogoUrl} alt="Firma Logosu" className="max-h-full max-w-full object-contain" />
                           <button
                             type="button"
                             onClick={() => setCompanyLogoUrl('')}
-                            className="absolute top-1 right-1 p-1 bg-red-500/80 hover:bg-red-600 text-white rounded-full text-xs"
+                            className="absolute top-1 right-1 p-1 bg-red-500/90 hover:bg-red-600 text-white rounded-full text-xs shadow"
                             title="Logoyu kaldır"
                           >
                             <Trash2 className="h-3 w-3" />
                           </button>
                         </div>
                       ) : (
-                        <div className="h-16 w-32 border border-dashed rounded-lg flex items-center justify-center text-xs text-muted-foreground bg-muted/30">
+                        <div className="h-16 w-32 border border-dashed rounded-lg flex items-center justify-center text-xs text-muted-foreground bg-muted/40">
                           Logo Yok
                         </div>
                       )}
                       <div>
-                        <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md border bg-background hover:bg-muted transition-colors">
-                          <UploadCloud className="h-4 w-4" /> Logo Yükle
+                        <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg border bg-background hover:bg-muted transition-colors shadow-sm">
+                          <UploadCloud className="h-4 w-4 text-blue-600" /> Logo Yükle
                           <input
                             type="file"
                             accept="image/*"
@@ -527,16 +481,17 @@ export default function SettingsPage() {
                             onChange={(e) => handleLogoUpload(e, 'company')}
                           />
                         </label>
-                        <p className="text-[11px] text-muted-foreground mt-1">PNG veya JPEG, max 2MB</p>
+                        <p className="text-[11px] text-muted-foreground mt-1">PNG veya JPEG, max 2MB (A4 sol üst köşede yer alır)</p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-4 border p-4 rounded-xl bg-card/50">
-                <h3 className="font-semibold text-sm flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-emerald-500" /> OSGB Bilgileri (Varsa)
+              {/* BÖLÜM 3: OSGB Bilgileri */}
+              <div className="space-y-4 border p-4 sm:p-5 rounded-xl bg-card">
+                <h3 className="font-semibold text-sm flex items-center gap-2 text-foreground">
+                  <Shield className="h-4 w-4 text-emerald-600" /> OSGB Bilgileri (Varsa)
                 </h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -550,28 +505,28 @@ export default function SettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>OSGB Logosu (PDF Sağ Üst Başlık)</Label>
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-4">
                       {osgbLogoUrl ? (
-                        <div className="relative h-16 w-32 border rounded-lg overflow-hidden bg-white flex items-center justify-center p-1">
+                        <div className="relative h-16 w-32 border rounded-lg overflow-hidden bg-white flex items-center justify-center p-1.5 shadow-sm">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={osgbLogoUrl} alt="OSGB Logosu" className="max-h-full max-w-full object-contain" />
                           <button
                             type="button"
                             onClick={() => setOsgbLogoUrl('')}
-                            className="absolute top-1 right-1 p-1 bg-red-500/80 hover:bg-red-600 text-white rounded-full text-xs"
+                            className="absolute top-1 right-1 p-1 bg-red-500/90 hover:bg-red-600 text-white rounded-full text-xs shadow"
                             title="Logoyu kaldır"
                           >
                             <Trash2 className="h-3 w-3" />
                           </button>
                         </div>
                       ) : (
-                        <div className="h-16 w-32 border border-dashed rounded-lg flex items-center justify-center text-xs text-muted-foreground bg-muted/30">
+                        <div className="h-16 w-32 border border-dashed rounded-lg flex items-center justify-center text-xs text-muted-foreground bg-muted/40">
                           Logo Yok
                         </div>
                       )}
                       <div>
-                        <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md border bg-background hover:bg-muted transition-colors">
-                          <UploadCloud className="h-4 w-4" /> Logo Yükle
+                        <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg border bg-background hover:bg-muted transition-colors shadow-sm">
+                          <UploadCloud className="h-4 w-4 text-emerald-600" /> Logo Yükle
                           <input
                             type="file"
                             accept="image/*"
@@ -579,15 +534,16 @@ export default function SettingsPage() {
                             onChange={(e) => handleLogoUpload(e, 'osgb')}
                           />
                         </label>
-                        <p className="text-[11px] text-muted-foreground mt-1">PNG veya JPEG, max 2MB</p>
+                        <p className="text-[11px] text-muted-foreground mt-1">PNG veya JPEG, max 2MB (A4 sağ üst köşede yer alır)</p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="bg-muted/20 border-t border-border/50 py-4">
-              <Button onClick={updateIsgProfile} disabled={isgUpdating}>
+
+            <CardFooter className="bg-muted/20 border-t py-4 flex justify-end">
+              <Button onClick={updateIsgProfile} disabled={isgUpdating} className="bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-sm">
                 {isgUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 İSG Ayarlarını Kaydet
               </Button>
@@ -595,24 +551,85 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="app">
-          <Card className="border-border/50 shadow-sm">
+        {/* 2. SEKME: HESAP BİLGİLERİ */}
+        <TabsContent value="account" className="space-y-6 mt-0">
+          <Card className="border shadow-sm">
             <CardHeader>
-              <CardTitle>Uygulama Tercihleri</CardTitle>
-              <CardDescription>Uygulamanın görünümünü ve davranışını özelleştirin.</CardDescription>
+              <CardTitle className="text-lg font-bold">Hesap Bilgileri</CardTitle>
+              <CardDescription>Profil bilgilerinizi buradan güncelleyebilirsiniz.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center justify-between space-x-2 border p-4 rounded-lg bg-card">
-                <Label htmlFor="dark-mode" className="flex flex-col space-y-1 cursor-pointer">
-                  <span className="font-medium">Karanlık Mod</span>
-                  <span className="font-normal text-xs text-muted-foreground">Koyu temaya geçiş yap.</span>
-                </Label>
-                <Switch id="dark-mode" checked={theme === 'dark'} onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')} />
+              {profileBanner ? (
+                <StatusBanner state={profileBanner.state} title={profileBanner.title} message={profileBanner.message} />
+              ) : null}
+
+              <div className="flex items-center gap-6">
+                <Avatar className="h-16 w-16 border-2 border-border">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="text-lg font-bold bg-muted">
+                    {trimmedName ? trimmedName[0].toUpperCase() : 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col gap-1.5">
+                  <h3 className="font-semibold text-sm">Profil Fotoğrafı</h3>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="text-xs text-muted-foreground flex items-center gap-1.5 cursor-help bg-muted/60 px-2.5 py-1 rounded-md w-fit border">
+                          <Info className="h-3 w-3" />
+                          Gravatar Otomatik Yönetilir
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Profil fotoğrafı Gravatar üzerinden e-posta adresinize göre otomatik çekilir.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </div>
-              <div className="flex items-center justify-between space-x-2 border p-4 rounded-lg bg-card">
+
+              <div className="grid gap-4 max-w-md">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Ad Soyad</Label>
+                  <Input
+                    id="name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    maxLength={80}
+                  />
+                  <div className="flex items-center justify-between">
+                    {nameError ? <p className="text-xs text-red-600">{nameError}</p> : <span />}
+                    <p className="text-xs text-muted-foreground">{trimmedName.length}/80</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">E-posta</Label>
+                  <Input id="email" value={email} disabled className="bg-muted text-muted-foreground" />
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="bg-muted/20 border-t py-4 flex justify-end">
+              <Button onClick={updateProfile} disabled={profileUpdating || Boolean(nameError)} className="bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-sm">
+                {profileUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Değişiklikleri Kaydet
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        {/* 3. SEKME: GÖRÜNÜM & UYGULAMA TERCİHLERİ */}
+        <TabsContent value="app" className="space-y-6 mt-0">
+          <Card className="border shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold">Uygulama Tercihleri</CardTitle>
+              <CardDescription>Uygulamanın bildirim ve davranış ayarlarını yapılandırın.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between space-x-2 border p-4 rounded-xl bg-card">
                 <Label htmlFor="notifications" className="flex flex-col space-y-1 cursor-pointer">
-                  <span className="font-medium">E-posta Bildirimleri</span>
-                  <span className="font-normal text-xs text-muted-foreground">Rapor tamamlandığında e-posta al.</span>
+                  <span className="font-semibold text-sm">E-posta Bildirimleri</span>
+                  <span className="font-normal text-xs text-muted-foreground">Saha denetim raporu üretildiğinde e-posta özeti al.</span>
                 </Label>
                 <Switch id="notifications" defaultChecked />
               </div>
@@ -620,16 +637,17 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="api">
-          <Card className="border-border/50 shadow-sm">
+        {/* 4. SEKME: API YAPILANDIRMASI */}
+        <TabsContent value="api" className="space-y-6 mt-0">
+          <Card className="border shadow-sm">
             <CardHeader>
-              <CardTitle>API Yapılandırması</CardTitle>
-              <CardDescription>Kendi Gemini API anahtarınızı kullanabilirsiniz.</CardDescription>
+              <CardTitle className="text-lg font-bold">API Yapılandırması</CardTitle>
+              <CardDescription>Kendi özel Google Gemini API anahtarınızı kullanabilirsiniz (isteğe bağlı).</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {apiBanner ? <StatusBanner state={apiBanner.state} title={apiBanner.title} message={apiBanner.message} /> : null}
 
-              <div className="space-y-2">
+              <div className="space-y-2 max-w-lg">
                 <Label htmlFor="api-key">Google Gemini API Key</Label>
                 <div className="relative">
                   <Input
@@ -638,27 +656,27 @@ export default function SettingsPage() {
                     placeholder="AIzaSy..."
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
-                    className="font-mono bg-background pr-10"
+                    className="font-mono pr-10"
                   />
                   <Shield className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                 </div>
 
                 {apiKeyError ? <p className="text-xs text-red-600">{apiKeyError}</p> : null}
 
-                <p className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 p-3 rounded-md flex gap-2 items-start mt-2">
-                  <Info className="h-4 w-4 shrink-0 mt-0.5" />
-                  Anahtarınız veritabanında şifreli saklanır. Boş bırakıp güncellerseniz kayıtlı anahtar kaldırılır.
+                <p className="text-xs text-muted-foreground bg-muted/60 p-3 rounded-lg border flex gap-2 items-start mt-2">
+                  <Info className="h-4 w-4 shrink-0 mt-0.5 text-blue-500" />
+                  Anahtarınız veritabanında şifreli saklanır. Boş bırakıp güncellerseniz sistem varsayılan anahtarı kullanılır.
                 </p>
 
                 {hasStoredApiKey && !trimmedApiKey ? (
-                  <p className="text-xs text-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-300 p-3 rounded-md">
-                    Kayıtlı bir API anahtarı mevcut.
+                  <p className="text-xs text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-400 p-3 rounded-lg border border-emerald-200 dark:border-emerald-900">
+                    ✓ Kayıtlı bir API anahtarınız mevcut.
                   </p>
                 ) : null}
               </div>
             </CardContent>
-            <CardFooter className="bg-muted/20 border-t border-border/50 py-4">
-              <Button onClick={updateApiKey} disabled={apiUpdating || Boolean(apiKeyError)}>
+            <CardFooter className="bg-muted/20 border-t py-4 flex justify-end">
+              <Button onClick={updateApiKey} disabled={apiUpdating || Boolean(apiKeyError)} className="bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-sm">
                 {apiUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Anahtarı Güncelle
               </Button>
@@ -669,4 +687,5 @@ export default function SettingsPage() {
     </div>
   )
 }
+
 
