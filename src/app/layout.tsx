@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rapor Asistanı",
-  description: "AI destekli rapor oluşturma ve paylaşım platformu.",
+  title: "İSG Saha Asistanı | Yapay Zeka Destekli Saha Denetimi ve Raporlama",
+  description: "Şantiye ve işletmeler için 6331 sayılı kanuna ve Yapı İşlerinde İSG Yönetmeliğine uygun yapay zeka destekli saha denetim ve raporlama platformu.",
 };
 
 export default function RootLayout({
@@ -28,6 +28,7 @@ export default function RootLayout({
     <html lang="tr" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         <ThemeProvider
           attribute="class"

@@ -3,12 +3,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileText, Clock, Upload, Search, TrendingUp, Zap, ArrowRight, Sparkles } from 'lucide-react'
+import { FileText, Clock, Upload, Search, TrendingUp, ArrowRight, HardHat } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
+import { createDevTimer } from '@/lib/dev-timing'
 
 interface DashboardReport {
   id: string
@@ -27,13 +28,16 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
+      const timer = createDevTimer('dashboard-home')
       try {
         const {
           data: { user },
         } = await supabase.auth.getUser()
+        timer.mark('auth-ready', { hasUser: Boolean(user) })
 
         if (!user) {
           setIsLoading(false)
+          timer.end({ reason: 'no-user' })
           return
         }
 
@@ -46,6 +50,7 @@ export default function DashboardPage() {
         if (!profileError) {
           setUserName(profile?.full_name || 'Kullanici')
         }
+        timer.mark('profile-ready', { hasProfile: !profileError })
 
         const { count, error: countError } = await supabase
           .from('reports')
@@ -60,6 +65,7 @@ export default function DashboardPage() {
             savedTime: count * 2,
           })
         }
+        timer.mark('stats-ready', { total: count ?? 0, hasError: Boolean(countError) })
 
         const { data: reports, error: reportsError } = await supabase
           .from('reports')
@@ -73,10 +79,13 @@ export default function DashboardPage() {
         } else {
           setRecentReports(reports || [])
         }
+        timer.mark('reports-ready', { reports: reports?.length ?? 0, hasError: Boolean(reportsError) })
       } catch {
         toast.error('Panel verileri alinamadi.')
+        timer.mark('fetch-error')
       } finally {
         setIsLoading(false)
+        timer.end()
       }
     }
 
@@ -108,31 +117,41 @@ export default function DashboardPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button asChild className="bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 shadow-none">
+          <Button asChild className="bg-amber-600 text-white hover:bg-amber-700 font-medium shadow-sm">
+            <Link href="/dashboard/isg-denetim">
+              <HardHat className="mr-2 h-4 w-4" /> Saha Denetimi
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/dashboard/upload">
+              <Upload className="mr-2 h-4 w-4" /> Hızlı Not
+            </Link>
+          </Button>
+          {/*
             <Link href="/dashboard/upload">
               <Upload className="mr-2 h-4 w-4" /> Yeni Rapor
             </Link>
-          </Button>
+          </Button> */}
         </div>
       </div>
 
       {isFirstUse ? (
-        <Card className="border-border/50 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-background">
+        <Card className="border-border/50 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-background">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-blue-600" />
-              Ilk raporunuz icin hizli baslangic
+              <HardHat className="h-4 w-4 text-amber-600" />
+              İlk İSG Saha Denetiminiz İçin Hızlı Başlangıç
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-lg border bg-background p-3 text-sm">1. Not yazin veya dosya yukleyin.</div>
-              <div className="rounded-lg border bg-background p-3 text-sm">2. Rapor turunu secip AI analizini baslatin.</div>
-              <div className="rounded-lg border bg-background p-3 text-sm">3. Ciktilari duzenleyip kaydedin ve paylasin.</div>
+              <div className="rounded-lg border bg-background p-3 text-sm">1. Şantiye ve saha fotoğraflarını yükleyin.</div>
+              <div className="rounded-lg border bg-background p-3 text-sm">2. AI ile 6331 ve Yapı İSG yönetmeliğine göre analiz edin.</div>
+              <div className="rounded-lg border bg-background p-3 text-sm">3. Kurumsal logolu resmi PDF denetim raporunu indirin.</div>
             </div>
-            <Button asChild>
-              <Link href="/dashboard/upload">
-                Ilk Raporu Olustur <ArrowRight className="ml-2 h-4 w-4" />
+            <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white font-medium">
+              <Link href="/dashboard/isg-denetim">
+                <HardHat className="mr-2 h-4 w-4" /> İSG Saha Denetimi Başlat <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </CardContent>
@@ -206,9 +225,9 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="text-center py-10 text-muted-foreground">
-                <p>{searchTerm ? 'Aramanizla eslesen rapor bulunamadi.' : 'Henuz rapor olusturmadiniz.'}</p>
-                <Button variant="link" asChild className="mt-2">
-                  <Link href="/dashboard/upload">Rapor Olusturmaya Basla</Link>
+                <p>{searchTerm ? 'Aramanızla eşleşen rapor bulunamadı.' : 'Henüz bir İSG denetim raporu oluşturmadınız.'}</p>
+                <Button variant="link" asChild className="mt-2 text-amber-600">
+                  <Link href="/dashboard/isg-denetim">Saha Denetimi Başlat</Link>
                 </Button>
               </div>
             )}
@@ -216,13 +235,13 @@ export default function DashboardPage() {
         </Card>
 
         <Card className="col-span-12 md:col-span-4 border-border/50 shadow-sm flex flex-col justify-center items-center text-center p-6 bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900">
-          <div className="h-14 w-14 bg-white/10 dark:bg-black/10 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
-            <Zap className="h-7 w-7" />
+          <div className="h-14 w-14 bg-white/10 dark:bg-black/10 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm text-amber-400">
+            <HardHat className="h-7 w-7" />
           </div>
-          <h3 className="font-semibold text-lg mb-2">Hizli Olustur</h3>
-          <p className="text-sm text-zinc-400 dark:text-zinc-600 mb-6 px-2">Fotograf, ses veya metinle hizli rapor akisini baslatin.</p>
+          <h3 className="font-semibold text-lg mb-2">Saha Denetimi</h3>
+          <p className="text-sm text-zinc-400 dark:text-zinc-600 mb-6 px-2">Fotoğraf çekin, AI uygunsuzlukları analiz etsin ve imzalı resmi raporu oluştursun.</p>
           <Button variant="secondary" className="w-full" asChild>
-            <Link href="/dashboard/upload">Simdi Basla</Link>
+            <Link href="/dashboard/isg-denetim">Denetime Başla</Link>
           </Button>
         </Card>
       </div>

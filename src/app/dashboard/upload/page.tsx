@@ -28,6 +28,7 @@ import { Badge } from '@/components/ui/badge'
 import jsPDF from 'jspdf'
 import { getReadableErrorMessage } from '@/lib/user-feedback'
 import { StatusBanner } from '@/components/features/status-banner'
+import { createDevTimer } from '@/lib/dev-timing'
 
 interface Template {
   id: string
@@ -49,7 +50,7 @@ const TEMPLATE_LOADING_TITLE = 'Sablonlar yukleniyor'
 
 export default function UploadPage() {
   const [input, setInput] = useState('')
-  const [reportType, setReportType] = useState('genel')
+  const [reportType, setReportType] = useState('isg')
   const [templates, setTemplates] = useState<Template[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [isUploadLoading, setIsUploadLoading] = useState(false)
@@ -84,7 +85,14 @@ export default function UploadPage() {
   }, [])
 
   useEffect(() => {
+    const timer = createDevTimer('dashboard-upload')
+    let hasEnded = false
     let isMounted = true
+    const finishTimer = () => {
+      if (hasEnded) return
+      hasEnded = true
+      timer.end()
+    }
     const loadingBannerTimer = setTimeout(() => {
       if (!isMounted) return
       setBanner({
@@ -109,11 +117,15 @@ export default function UploadPage() {
           }
           return current
         })
+        timer.mark('templates-ready', { count: data.templates?.length ?? 0 })
       } catch (error) {
         clearTimeout(loadingBannerTimer)
         if (!isMounted) return
         const message = getReadableErrorMessage(error, 'Sablonlar getirilemedi.')
         setBanner({ state: 'error', title: 'Sablonlar yuklenemedi', message })
+        timer.mark('templates-error')
+      } finally {
+        finishTimer()
       }
     }
 
@@ -122,6 +134,7 @@ export default function UploadPage() {
     return () => {
       isMounted = false
       clearTimeout(loadingBannerTimer)
+      finishTimer()
     }
   }, [])
 
@@ -138,17 +151,18 @@ export default function UploadPage() {
 
   const insertSampleInput = () => {
     const sample = [
-      'Toplanti Notlari:',
-      '- Musteri sunumunda rapor formatinin haftalik olmasi istendi.',
-      '- Finans bolumu toplam gider kalemlerini daha net istemektedir.',
-      '- Bir sonraki toplanti tarihi 14 Mart olarak belirlendi.',
+      'Saha Denetim Notları (3. Kat Kalıp & İskele):',
+      '- Cephe iskelesinde çalışan personelin paraşüt tipi emniyet kemerleri yaşam hattına bağlı değil.',
+      '- Merdiven kova boşluklarında 1 metre yüksekliğinde standart korkuluk ve topukluk eksik.',
+      '- Elektrik panosu önünde yalıtkan paspas bulunmuyor ve kaçak akım rölesi test etiketi yok.',
+      '- Zemin kat malzeme alanında yanıcı tiner bidonları ile açık elektrik kabloları yan yana depolanmış.',
     ].join('\n')
 
     setInput(sample)
     setBanner({
       state: 'info',
-      title: 'Ornek icerik eklendi',
-      message: 'Hizli deneme icin rapor olusturabilirsiniz.',
+      title: 'Örnek İSG saha notları eklendi',
+      message: 'Hızlı deneme için rapor oluştur butonuna basabilirsiniz.',
     })
   }
 
@@ -309,7 +323,7 @@ export default function UploadPage() {
     })
 
     try {
-      const isStandard = ['genel', 'isg', 'finans'].includes(reportType)
+      const isStandard = ['genel', 'isg', 'risk', 'ramak_kala', 'finans'].includes(reportType)
       const body = isStandard ? { text: trimmedInput, reportType } : { text: trimmedInput, templateId: reportType }
 
       const res = await fetch('/api/generate', {
@@ -532,7 +546,7 @@ export default function UploadPage() {
             />
 
             <Textarea
-              placeholder="Notlarinizi yazin veya ustteki butonlari kullanarak icerik ekleyin..."
+              placeholder="Saha denetim notlarınızı yazın veya üstteki butonları kullanarak ses kaydı / fotoğraf / dosya ekleyin..."
               className="flex-1 resize-none border-0 focus-visible:ring-0 p-4 text-base font-mono bg-transparent rounded-none"
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -552,10 +566,11 @@ export default function UploadPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectLabel>Standart Raporlar</SelectLabel>
-                        <SelectItem value="genel">Genel Rapor</SelectItem>
-                        <SelectItem value="isg">Is Guvenligi (ISG)</SelectItem>
-                        <SelectItem value="finans">Finansal Analiz</SelectItem>
+                        <SelectLabel>İSG Rapor Türleri</SelectLabel>
+                        <SelectItem value="isg">İSG Saha Denetim Raporu (6331)</SelectItem>
+                        <SelectItem value="risk">Risk Değerlendirme & Analiz</SelectItem>
+                        <SelectItem value="ramak_kala">Ramak Kala & Olay Bildirimi</SelectItem>
+                        <SelectItem value="genel">Genel İSG Değerlendirmesi</SelectItem>
                       </SelectGroup>
                       {templates.length > 0 ? (
                         <SelectGroup>

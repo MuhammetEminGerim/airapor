@@ -1,5 +1,6 @@
 import { Sidebar } from '@/components/features/Sidebar'
 import { Header } from '@/components/features/Header'
+import { DashboardContentTransition } from '@/components/features/dashboard-content-transition'
 
 export default function DashboardLayout({
   children,
@@ -14,7 +15,7 @@ export default function DashboardLayout({
       <div className="flex flex-col">
         <Header />
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          {children}
+          <DashboardContentTransition>{children}</DashboardContentTransition>
         </main>
       </div>
     </div>

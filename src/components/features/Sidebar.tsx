@@ -2,14 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, FileText, Upload, Settings, PieChart, LogOut, Bot } from 'lucide-react'
+import { LayoutDashboard, FileText, Upload, Settings, PieChart, LogOut, Bot, HardHat } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: 'Panel', href: '/dashboard' },
-  { icon: Upload, label: 'Yeni Rapor', href: '/dashboard/upload' },
+  { icon: HardHat, label: 'İSG Saha Denetimi', href: '/dashboard/isg-denetim' },
+  { icon: Upload, label: 'Hızlı Not/Rapor', href: '/dashboard/upload' },
   { icon: FileText, label: 'Raporlarım', href: '/dashboard/reports' },
   { icon: Bot, label: 'Asistanlarım', href: '/dashboard/assistants' },
   { icon: PieChart, label: 'İstatistikler', href: '/dashboard/stats' },
@@ -31,10 +32,10 @@ export function Sidebar({ className }: { className?: string }) {
       <div className="space-y-4 py-4 flex-1">
         <div className="px-3 py-2">
           <h2 className="mb-6 px-4 text-lg font-bold tracking-tight flex items-center gap-2">
-            <div className="h-6 w-6 rounded bg-primary flex items-center justify-center">
-                <FileText className="h-4 w-4 text-primary-foreground" />
+            <div className="h-6 w-6 rounded bg-amber-600 flex items-center justify-center">
+                <HardHat className="h-4 w-4 text-white" />
             </div>
-            Rapor Asistanı
+            İSG Asistanı
           </h2>
           <div className="space-y-1">
             {sidebarItems.map((item) => (

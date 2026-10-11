@@ -54,6 +54,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import jsPDF from 'jspdf'
 import Link from 'next/link'
+import { createDevTimer } from '@/lib/dev-timing'
+import { generateISGReportPDF } from '@/lib/isg-pdf'
+import type { ISGReportData } from '@/types/isg'
 
 type Report = {
   id: string
@@ -66,6 +69,8 @@ type Report = {
   is_public?: boolean
   share_token?: string
   share_expires_at?: string | null
+  report_number?: string
+  isg_data?: ISGReportData | null
 }
 
 export default function ReportsPage() {
@@ -84,25 +89,32 @@ export default function ReportsPage() {
   const [typeFilter, setTypeFilter] = useState('all')
 
   const fetchReports = async () => {
+    const timer = createDevTimer('dashboard-reports')
     setIsLoading(true)
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      timer.mark('auth-ready', { hasUser: Boolean(user) })
 
-    if (user) {
-      const { data, error } = await supabase
-        .from('reports')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+      if (user) {
+        const { data, error } = await supabase
+          .from('reports')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
 
-      if (error) {
-        toast.error('Raporlar yuklenirken hata olustu.')
-      } else {
-        setReports(data || [])
+        if (error) {
+          toast.error('Raporlar yuklenirken hata olustu.')
+        } else {
+          setReports(data || [])
+        }
+        timer.mark('reports-ready', { count: data?.length ?? 0, hasError: Boolean(error) })
       }
+    } finally {
+      setIsLoading(false)
+      timer.end()
     }
-    setIsLoading(false)
   }
 
   useEffect(() => {
@@ -187,6 +199,17 @@ export default function ReportsPage() {
   }
 
   const handleDownloadPDF = async (report: Report) => {
+    if (report.isg_data) {
+      toast.loading('Kurumsal İSG PDF raporu hazırlanıyor...', { id: 'isg-pdf' })
+      try {
+        const isgDoc = await generateISGReportPDF(report.isg_data)
+        isgDoc.save(`${report.title || 'ISG_Saha_Denetim_Raporu'}.pdf`)
+        toast.success('Resmi İSG Denetim Raporu PDF olarak indirildi.', { id: 'isg-pdf' })
+      } catch (err) {
+        toast.error('İSG PDF oluşturulurken hata: ' + (err as Error).message, { id: 'isg-pdf' })
+      }
+      return
+    }
     const doc = new jsPDF()
 
     try {
@@ -314,10 +337,11 @@ export default function ReportsPage() {
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tumu</SelectItem>
+              <SelectItem value="all">Tümü</SelectItem>
+              <SelectItem value="isg">İSG Saha Denetimi</SelectItem>
+              <SelectItem value="risk">Risk Değerlendirme</SelectItem>
+              <SelectItem value="ramak_kala">Ramak Kala</SelectItem>
               <SelectItem value="genel">Genel</SelectItem>
-              <SelectItem value="isg">ISG</SelectItem>
-              <SelectItem value="finans">Finans</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -343,9 +367,9 @@ export default function ReportsPage() {
                   : 'Ilk raporunuzu olusturarak listede gormeye baslayabilirsiniz.'}
               </p>
               {!hasActiveFilters ? (
-                <Button asChild>
-                  <Link href="/dashboard/upload">
-                    Yeni Rapor Olustur <ArrowRight className="ml-2 h-4 w-4" />
+                <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white font-medium">
+                  <Link href="/dashboard/isg-denetim">
+                    Saha Denetimi Başlat <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               ) : (

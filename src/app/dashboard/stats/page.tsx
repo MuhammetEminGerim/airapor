@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { TrendingUp, PieChart as PieChartIcon, ArrowRight, Lightbulb } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { createDevTimer } from '@/lib/dev-timing'
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
 
@@ -34,13 +35,16 @@ export default function StatsPage() {
 
   useEffect(() => {
     const fetchData = async () => {
+      const timer = createDevTimer('dashboard-stats')
       try {
         const {
           data: { user },
         } = await supabase.auth.getUser()
+        timer.mark('auth-ready', { hasUser: Boolean(user) })
 
         if (!user) {
           setIsLoading(false)
+          timer.end({ reason: 'no-user' })
           return
         }
 
@@ -68,9 +72,11 @@ export default function StatsPage() {
           }, {})
 
           setWeeklyData(days.map((day) => ({ name: day, rapor: dayCounts[day] || 0 })))
+          timer.mark('stats-ready', { reports: typedReports.length, typeBuckets: Object.keys(typeCounts).length })
         }
       } finally {
         setIsLoading(false)
+        timer.end()
       }
     }
 
@@ -112,9 +118,9 @@ export default function StatsPage() {
               <div className="rounded-lg border p-3 bg-muted/20">2. En az bir farkli rapor turu olusturun.</div>
               <div className="rounded-lg border p-3 bg-muted/20">3. Bu sayfayi yenileyip grafikleri inceleyin.</div>
             </div>
-            <Button asChild>
-              <Link href="/dashboard/upload">
-                Rapor Olusturmaya Basla <ArrowRight className="ml-2 h-4 w-4" />
+            <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white font-medium">
+              <Link href="/dashboard/isg-denetim">
+                Saha Denetimi Başlat <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </CardContent>

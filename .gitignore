@@ -41,3 +41,11 @@ supabasesifre.txt
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local / scratch / sensitive
+boktanisgai/
+tmp/
+*.jpg
+dogru_rapor_icerigi.txt
+.maestro/
+.manager/

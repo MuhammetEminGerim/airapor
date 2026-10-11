@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>İSG SaaS - Sayfa Yapısı & Layout Karşılaştırma Masası</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(150, 150, 150, 0.3); border-radius: 4px; }
+    .layout-btn.active {
+      box-shadow: 0 0 0 2px #f97316, 0 10px 15px -3px rgba(249, 115, 22, 0.2);
+      border-color: #f97316 !important;
+      background-color: #1e293b !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-orange-500 selection:text-white">
+
+  <!-- TOP BAR: DÜZEN SEÇİCİ -->
+  <header class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-6 py-4 shadow-xl">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
+      
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-orange-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-orange-600/30">
+          🏗️
+        </div>
+        <div>
+          <h1 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
+            İSG SaaS Mimari & Ekran Düzeni (Layout) Masası
+          </h1>
+          <p class="text-xs text-slate-400">Renk teması değil; gerçek sayfa düzeni, iş akışı ve ekran ergonomisi</p>
+        </div>
+      </div>
+
+      <!-- Layout Selector Buttons -->
+      <div class="flex flex-wrap items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+        <button onclick="setLayout('workbench')" id="btn-workbench" class="layout-btn active px-3.5 py-2 rounded-lg text-xs font-semibold transition-all border border-transparent text-white flex items-center gap-2">
+          <span>📐</span> 1. Saha Masası (3 Sütunlu Canlı Masa)
+        </button>
+
+        <button onclick="setLayout('kanban')" id="btn-kanban" class="layout-btn px-3.5 py-2 rounded-lg text-xs font-semibold transition-all border border-transparent text-slate-400 hover:text-white flex items-center gap-2">
+          <span>📋</span> 2. DÖF & Şantiye Kokpiti (Kanban)
+        </button>
+
+        <button onclick="setLayout('station')" id="btn-station" class="layout-btn px-3.5 py-2 rounded-lg text-xs font-semibold transition-all border border-transparent text-slate-400 hover:text-white flex items-center gap-2">
+          <span>📱</span> 3. Tablet Saha İstasyonu (Büyük Kartlar)
+        </button>
+
+        <div class="h-4 w-px bg-slate-800 mx-1"></div>
+
+        <button onclick="setLayout('landing')" id="btn-landing" class="layout-btn px-3.5 py-2 rounded-lg text-xs font-semibold transition-all border border-transparent text-slate-400 hover:text-white flex items-center gap-2">
+          <span>🌐</span> Sade Kurumsal Landing Page
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MİMARİ AÇIKLAMA BİLGİ KUTUSU -->
+  <section class="max-w-7xl mx-auto px-6 pt-5">
+    <div id="layout-description" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-xs transition-all">
+      <!-- Dinamik açıklama -->
+    </div>
+  </section>
+
+  <!-- CANLI EKRAN ÖNİZLEMESİ -->
+  <main class="max-w-7xl mx-auto px-6 py-5">
+    <div id="screen-container" class="rounded-2xl border border-slate-800 bg-white text-slate-900 shadow-2xl overflow-hidden min-h-[680px]">
+      <!-- Layout içeriği buraya yüklenecek -->
+    </div>
+  </main>
+
+  <script>
+    let currentLayout = 'workbench';
+
+    const LAYOUT_INFOS = {
+      workbench: {
+        title: "1. Düzen: 'Saha Masası' (3-Sütunlu Senkronize Tezgah)",
+        why: "Sayfa Değiştirmeyi Sıfırlayan Mimari:",
+        detail: "Sol tarafta şantiyeler, ortada yüklenen fotoğraflar ve AI risk analiz kartları, sağ tarafta ise anlık oluşan resmi A4 kağıdı. Kullanıcı menülerde kaybolmaz; ortada bir bulguyu düzenlediği anda sağdaki resmi evrakta anında güncellendiğini görür. 'Raporu oluşturup indirmeden önce nasıl göründüğünü' tek ekranda kontrol eder.",
+        badge: "En Hızlı Raporlama UX"
+      },
+      kanban: {
+        title: "2. Düzen: 'DÖF & Şantiye Kokpiti' (İş Takip & Taşeron Yönetimi)",
+        why: "Rapor Yazmanın Ötesine Geçen Mimari:",
+        detail: "Bir İSG uzmanının asıl derdi sadece PDF basmak değil, kusurların şantiyede düzeltilip düzeltilmediğidir. Bu düzende üstte gerçek İSG metrikleri (Kritik Açık Riskler, Süresi Dolan DÖF'ler), ortada ise Trello/Jira tarzı 3 kolonlu takip panosu bulunur: 'Açık Tehlikeler', 'Taşeron Düzeltti / Onay Bekliyor', 'Kapatılanlar'.",
+        badge: "Kurumsal OSGB & Müteahhit Standardı"
+      },
+      station: {
+        title: "3. Düzen: 'Tablet Saha İstasyonu' (Mobil Öncelikli Büyük Butonlar)",
+        why: "Sahada Tozda ve Eldivenle Kullanım Ergonomisi:",
+        detail: "Karmaşık tablolar ve küçük linkler yerine ekranda 4 dev odaklı buton yer alır: [Yeni Saha Denetimi Başlat], [Son Tutanaklar & PDF], [Açık Uygunsuzluklar], [Şantiye ve Taşeron Rehberi]. Sahada ayakta yürürken tek parmakla doğrudan amaca ulaşılır.",
+        badge: "Şantiye Tableti Ergonomisi"
+      },
+      landing: {
+        title: "Sade & Kurumsal B2B Landing Page (Gereksiz Oyuncaksız)",
+        why: "Doğrudan Değer Önerisi & Kurumsal Güven:",
+        detail: "Karmaşık interaktif oyuncaklar yerine doğrudan ürünün ekran görüntüsü, çözdüğü dert (Word çilesi vs 90 saniye), 6331 mevzuat uyumluluğu, çift logolu resmi A4 örneği ve şeffaf fiyatlandırma. Gelen ziyaretçi 5 saniyede ne satın alacağını anlar.",
+        badge: "Yüksek Dönüşümlü B2B Vitrin"
+      }
+    };
+
+    function updateDescription() {
+      const info = LAYOUT_INFOS[currentLayout];
+      document.getElementById('layout-description').innerHTML = `
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-bold text-white text-sm">${info.title}</span>
+              <span class="px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20 text-[10px] font-bold">${info.badge}</span>
+            </div>
+            <p class="text-slate-300 leading-relaxed text-xs">
+              <strong class="text-orange-400">${info.why}</strong> ${info.detail}
+            </p>
+          </div>
+        </div>
+      `;
+    }
+
+    function setLayout(l) {
+      currentLayout = l;
+      document.querySelectorAll('.layout-btn').forEach(btn => {
+        btn.classList.remove('active', 'text-white');
+        btn.classList.add('text-slate-400');
+      });
+
+      const activeBtn = document.getElementById(`btn-${l}`);
+      activeBtn.classList.add('active', 'text-white');
+      activeBtn.classList.remove('text-slate-400');
+
+      updateDescription();
+      renderLayout();
+    }
+
+    function renderLayout() {
+      const container = document.getElementById('screen-container');
+      if (currentLayout === 'workbench') {
+        container.innerHTML = getWorkbenchHTML();
+      } else if (currentLayout === 'kanban') {
+        container.innerHTML = getKanbanHTML();
+      } else if (currentLayout === 'station') {
+        container.innerHTML = getStationHTML();
+      } else if (currentLayout === 'landing') {
+        container.innerHTML = getLandingHTML();
+      }
+    }
+
+    // ==========================================
+    // 1. DÜZEN: 3 SÜTUNLU CANLI SAHA MASASI
+    // ==========================================
+    function getWorkbenchHTML() {
+      return `
+        <div class="bg-slate-900 text-slate-100 min-h-[700px] flex flex-col font-sans">
+          
+          <!-- Üst İnce Çalışma Barı -->
+          <div class="h-12 border-b border-slate-800 bg-slate-950 px-4 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-3">
+              <span class="font-bold text-orange-500 flex items-center gap-1.5">
+                <span class="h-2 w-2 rounded-full bg-orange-500 animate-pulse"></span>
+                Saha Masası
+              </span>
+              <span class="text-slate-600">/</span>
+              <span class="font-semibold text-white">Bolu Tabaklar Konut Projesi</span>
+              <span class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-400 border border-slate-700">Denetim #RAP-2026-052</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] text-slate-400">Son senkronizasyon: 10 saniye önce</span>
+              <button class="bg-orange-600 hover:bg-orange-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shadow-sm">
+                <span>⬇️</span> Resmi PDF İndir
+              </button>
+            </div>
+          </div>
+
+          <!-- 3 Sütunlu Gövde -->
+          <div class="grid grid-cols-12 flex-1">
+            
+            <!-- SÜTUN 1: Şantiyeler & Tutanaklar (%22 Genişlik) -->
+            <div class="col-span-3 border-r border-slate-800 bg-slate-950/70 p-3.5 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between pb-2.5 border-b border-slate-800 mb-3">
+                  <span class="font-bold text-slate-200 text-xs uppercase tracking-wider">Şantiyelerim (3)</span>
+                  <button class="text-orange-400 hover:text-orange-300 font-bold text-xs">+ Yeni Şantiye</button>
+                </div>
+
+                <div class="space-y-2">
+                  <!-- Seçili Şantiye Kartı -->
+                  <div class="p-3 rounded-xl bg-orange-600/10 border border-orange-500/40 cursor-pointer">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-white text-xs">Bolu Tabaklar Konutları</span>
+                      <span class="h-2 w-2 rounded-full bg-orange-500"></span>
+                    </div>
+                    <span class="text-[11px] text-slate-400 block mt-0.5">Kaba Yapı • Blok A ve C</span>
+                    <div class="flex items-center gap-2 mt-2">
+                      <span class="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 text-[10px] font-bold">2 Kritik Tehlike</span>
+                      <span class="text-[10px] text-slate-500">Bugün 10:15</span>
+                    </div>
+                  </div>
+
+                  <!-- Diğer Şantiye -->
+                  <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 cursor-pointer transition-colors">
+                    <span class="font-semibold text-slate-300 text-xs block">Yeni Lojistik Depo</span>
+                    <span class="text-[11px] text-slate-500 block mt-0.5">Çelik Montaj Etabı</span>
+                    <div class="flex items-center gap-2 mt-2">
+                      <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">DÖF Tamam</span>
+                      <span class="text-[10px] text-slate-500">3 gün önce</span>
+                    </div>
+                  </div>
+
+                  <!-- Diğer Şantiye -->
+                  <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 cursor-pointer transition-colors">
+                    <span class="font-semibold text-slate-300 text-xs block">Kuzey Çevre Yolu Viyadük</span>
+                    <span class="text-[11px] text-slate-500 block mt-0.5">Altyapı & Kazı</span>
+                    <div class="flex items-center gap-2 mt-2">
+                      <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px]">Arşivlendi</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Alt Kullanıcı Bilgisi -->
+              <div class="pt-3 border-t border-slate-800 flex items-center gap-2.5">
+                <div class="h-8 w-8 rounded-full bg-orange-600/20 text-orange-400 font-bold flex items-center justify-center text-xs">EG</div>
+                <div>
+                  <p class="text-xs font-bold text-white">Emin Gerim</p>
+                  <p class="text-[10px] text-slate-400">A Sınıfı İSG Uzmanı</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- SÜTUN 2: Saha Fotoğrafları & AI Tespitleri (%45 Genişlik) -->
+            <div class="col-span-5 border-r border-slate-800 bg-slate-900 p-4 overflow-y-auto max-h-[660px]">
+              
+              <!-- Üst Eylem Alanı: Fotoğraf Yükle -->
+              <div class="border-2 border-dashed border-slate-700 hover:border-orange-500/60 rounded-xl p-4 text-center bg-slate-950/40 cursor-pointer transition-all mb-4">
+                <div class="flex items-center justify-center gap-2 text-xs font-bold text-orange-400">
+                  <span class="text-base">📸</span> Fotoğraf Çekin veya Buraya Bırakın
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1">Yapay zeka şantiye ihlalini, 6331 kanun maddesini ve DÖF önerisini 5 saniyede çıkarır.</p>
+              </div>
+
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-white">Tespit Edilen Bulgular (2)</span>
+                <span class="text-[11px] text-orange-400 cursor-pointer hover:underline">+ Manuel Madde Ekle</span>
+              </div>
+
+              <!-- BULGU 1 KARTI -->
+              <div class="p-3.5 rounded-xl border border-red-500/30 bg-slate-950/80 mb-3 space-y-2.5 shadow-sm">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="h-5 w-5 rounded-md bg-red-500/20 text-red-400 font-bold text-[11px] flex items-center justify-center">1</span>
+                    <h4 class="font-bold text-white text-xs">Döşeme Kenarı Korkuluksuz</h4>
+                  </div>
+                  <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-bold text-[10px] border border-red-500/30">🔴 YÜKSEK RİSK</span>
+                </div>
+
+                <div class="flex gap-3">
+                  <div class="h-16 w-16 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xl shrink-0 text-slate-500">
+                    🏗️
+                  </div>
+                  <div class="text-[11px] text-slate-300 leading-relaxed">
+                    3. kat döşeme kenarında düşmeyi önleyici standart korkuluk bulunmuyor. Çalışanlar kemersiz kenarda işlem yapıyor.
+                  </div>
+                </div>
+
+                <!-- AI Mevzuat Kutusu -->
+                <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300 flex items-center gap-2">
+                  <span class="font-bold text-orange-400">Mevzuat:</span>
+                  <span>Yapı İşlerinde İSG Yön. Ek-4 Bölüm II Madde 4 (Korkuluk ve Güvenlik Ağı)</span>
+                </div>
+
+                <div class="flex items-center justify-between text-[11px] pt-1 text-slate-400">
+                  <span>Termin: <strong>Derhal / 24 Saat</strong></span>
+                  <span>Sorumlu: <strong>Kaba Yapı Taşeronu</strong></span>
+                </div>
+              </div>
+
+              <!-- BULGU 2 KARTI -->
+              <div class="p-3.5 rounded-xl border border-red-500/30 bg-slate-950/80 space-y-2.5 shadow-sm">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="h-5 w-5 rounded-md bg-red-500/20 text-red-400 font-bold text-[11px] flex items-center justify-center">2</span>
+                    <h4 class="font-bold text-white text-xs">Elektrik Ana Dağıtım Panosu Açık</h4>
+                  </div>
+                  <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-bold text-[10px] border border-red-500/30">🔴 YÜKSEK RİSK</span>
+                </div>
+
+                <div class="flex gap-3">
+                  <div class="h-16 w-16 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xl shrink-0 text-slate-500">
+                    ⚡
+                  </div>
+                  <div class="text-[11px] text-slate-300 leading-relaxed">
+                    Şantiye elektrik panosunun dış kapağı açık, sigortalar ve kablo bağlantıları doğrudan fiziksel temasa müsait.
+                  </div>
+                </div>
+
+                <!-- AI Mevzuat Kutusu -->
+                <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300 flex items-center gap-2">
+                  <span class="font-bold text-orange-400">Mevzuat:</span>
+                  <span>Elektrik İç Tesisleri Yön. Madde 25 & Yapı İSG Ek-4</span>
+                </div>
+
+                <div class="flex items-center justify-between text-[11px] pt-1 text-slate-400">
+                  <span>Termin: <strong>Aynı Gün</strong></span>
+                  <span>Sorumlu: <strong>Elektrik Taşeronu</strong></span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- SÜTUN 3: Canlı Senkronize Resmi A4 Belgesi (%33 Genişlik) -->
+            <div class="col-span-4 bg-slate-950 p-4 flex flex-col justify-between">
+              
+              <div>
+                <div class="flex items-center justify-between pb-2 border-b border-slate-800 mb-3">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-bold text-white">Canlı Resmi A4 Önizleme</span>
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                  </div>
+                  <span class="text-[10px] font-mono text-emerald-400">● 100% EŞLEŞTİ</span>
+                </div>
+
+                <!-- BİREBİR A4 KAĞIDI GÖRÜNÜMÜ -->
+                <div class="bg-white text-slate-900 p-4 rounded shadow-2xl border border-slate-300 text-[9px] font-sans space-y-2 select-none">
+                  
+                  <!-- Çift Logo & Başlık -->
+                  <div class="flex items-center justify-between border-b pb-1.5">
+                    <div class="text-[10px] font-extrabold text-blue-900 leading-tight">
+                      🏢 BÖLEN İNŞAAT<br/>
+                      <span class="text-[7px] text-slate-500 font-normal">YAPI & TAAHHÜT A.Ş.</span>
+                    </div>
+                    <div class="text-center">
+                      <div class="font-black text-[9px] uppercase tracking-wider text-slate-800">SAHA DENETİM TUTANAĞI</div>
+                      <div class="text-[7px] text-slate-500">6331 Sayılı Kanun Uyarınca</div>
+                    </div>
+                    <div class="text-right text-[10px] font-extrabold text-emerald-800 leading-tight">
+                      ✚ KUZEY OSGB<br/>
+                      <span class="text-[7px] text-slate-500 font-normal">İŞ SAĞLIĞI VE GÜV. LTD.</span>
+                    </div>
+                  </div>
+
+                  <!-- Proje Bilgi Tablosu -->
+                  <div class="bg-slate-50 border p-1 rounded grid grid-cols-2 gap-x-2 gap-y-0.5 text-[7.5px]">
+                    <div><span class="text-slate-500">Şantiye:</span> <strong>Bolu Tabaklar Konut Projesi</strong></div>
+                    <div><span class="text-slate-500">Tarih:</span> <strong>11.10.2026</strong></div>
+                    <div><span class="text-slate-500">İSG Uzmanı:</span> <strong>M. Emin Gerim (A Sınıfı)</strong></div>
+                    <div><span class="text-slate-500">Rapor No:</span> <strong>RAP-2026-052</strong></div>
+                  </div>
+
+                  <!-- Bulgular Listesi -->
+                  <div class="space-y-1">
+                    <div class="p-1 border-l-2 border-l-red-600 bg-red-50/50 rounded text-[7.5px] leading-tight">
+                      <strong class="text-red-700">Bulgu 1:</strong> Döşeme kenarı korkuluksuz. Yüksekten düşme riski.<br/>
+                      <span class="text-[7px] text-slate-600">Yasal Dayanak: Yapı İSG Yön. Ek-4 Bölüm II Md. 4</span>
+                    </div>
+                    <div class="p-1 border-l-2 border-l-red-600 bg-red-50/50 rounded text-[7.5px] leading-tight">
+                      <strong class="text-red-700">Bulgu 2:</strong> Elektrik ana panosu açıkta, fiziksel temas riski.<br/>
+                      <span class="text-[7px] text-slate-600">Yasal Dayanak: Elektrik İç Tesisleri Yön. Md. 25</span>
+                    </div>
+                  </div>
+
+                  <!-- Islak İmza Kutuları -->
+                  <div class="grid grid-cols-2 gap-2 pt-2 border-t text-[7px] text-center text-slate-600">
+                    <div class="border border-dashed p-1.5 rounded bg-slate-50">
+                      <strong>İSG Uzmanı Kaşe / İmza</strong>
+                      <div class="h-4"></div>
+                      <span>M. Emin Gerim</span>
+                    </div>
+                    <div class="border border-dashed p-1.5 rounded bg-slate-50">
+                      <strong>Şantiye Yetkilisi / Şefi</strong>
+                      <div class="h-4"></div>
+                      <span>Tebellüğ Eden İmza</span>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Alt Hızlı Eylemler -->
+              <div class="pt-3 border-t border-slate-800 space-y-2">
+                <button class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 rounded-lg text-xs shadow-lg shadow-orange-600/30 flex items-center justify-center gap-1.5">
+                  <span>📄</span> Resmi İmzalı A4 PDF İndir
+                </button>
+                <button class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-1.5 rounded-lg text-xs flex items-center justify-center gap-1.5">
+                  <span>💬</span> WhatsApp ile Şantiye Şefine Gönder
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // 2. DÜZEN: DÖF & ŞANTİYE KOKPİTİ (KANBAN)
+    // ==========================================
+    function getKanbanHTML() {
+      return `
+        <div class="bg-slate-900 text-slate-100 min-h-[700px] flex font-sans">
+          
+          <!-- Sol Sidebar Menü -->
+          <aside class="w-56 border-r border-slate-800 bg-slate-950 p-4 flex flex-col justify-between shrink-0">
+            <div>
+              <div class="flex items-center gap-2 mb-6">
+                <div class="h-7 w-7 rounded-lg bg-orange-600 text-white flex items-center justify-center font-bold text-xs">⛑️</div>
+                <span class="font-extrabold text-white text-sm">İSG Kokpit</span>
+              </div>
+
+              <nav class="space-y-1 text-xs">
+                <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-orange-600 text-white font-bold">
+                  <span>📋</span> DÖF & Aksiyon Panosu
+                </a>
+                <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 font-medium">
+                  <span>🏗️</span> Şantiyeler & Ekipler
+                </a>
+                <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 font-medium">
+                  <span>📑</span> Rapor Arşivi
+                </a>
+                <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 font-medium">
+                  <span>🏢</span> OSGB & Firma Bilgileri
+                </a>
+              </nav>
+            </div>
+
+            <div class="pt-3 border-t border-slate-800 text-[11px] text-slate-500">
+              Bölen İnşaat A.Ş. • Lisanslı
+            </div>
+          </aside>
+
+          <!-- Ana İçerik -->
+          <main class="flex-1 p-6 flex flex-col gap-5 overflow-y-auto max-h-[700px]">
+            
+            <!-- Üst Bar: Başlık & Yeni Denetim Butonu -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div>
+                <h2 class="text-lg font-bold text-white">Düzeltici ve Önleyici Faaliyet (DÖF) Masası</h2>
+                <p class="text-xs text-slate-400">Şantiyelerdeki açık ihlaller, taşeron süreleri ve kapatma onayları</p>
+              </div>
+              <button class="bg-orange-600 hover:bg-orange-500 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-orange-600/25">
+                <span>➕</span> Sahadan Yeni Denetim Başlat
+              </button>
+            </div>
+
+            <!-- Gerçek İSG KPI Sayaçları -->
+            <div class="grid grid-cols-4 gap-3.5">
+              <div class="bg-slate-950 p-3.5 rounded-xl border border-red-500/30">
+                <span class="text-[11px] font-semibold text-red-400">Açık Hayati Tehlike</span>
+                <p class="text-2xl font-black text-red-400 mt-1">3 Adet</p>
+              </div>
+              <div class="bg-slate-950 p-3.5 rounded-xl border border-amber-500/30">
+                <span class="text-[11px] font-semibold text-amber-400">Süresi Dolan / Az Kalan</span>
+                <p class="text-2xl font-black text-amber-400 mt-1">5 DÖF</p>
+              </div>
+              <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                <span class="text-[11px] font-semibold text-slate-400">Aktif Denetlenen Şantiye</span>
+                <p class="text-2xl font-black text-white mt-1">4 Saha</p>
+              </div>
+              <div class="bg-slate-950 p-3.5 rounded-xl border border-emerald-500/30">
+                <span class="text-[11px] font-semibold text-emerald-400">Düzeltme Başarı Oranı</span>
+                <p class="text-2xl font-black text-emerald-400 mt-1">%94</p>
+              </div>
+            </div>
+
+            <!-- KANBAN KOLONLARI -->
+            <div class="grid grid-cols-3 gap-4 flex-1">
+              
+              <!-- Kolon 1: AÇIK TEHLİKELER -->
+              <div class="bg-slate-950/70 rounded-xl border border-slate-800 p-3 flex flex-col">
+                <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-800">
+                  <span class="text-xs font-bold text-red-400 flex items-center gap-1.5">
+                    <span class="h-2 w-2 rounded-full bg-red-500"></span>
+                    🔴 Açık Tehlikeler (3)
+                  </span>
+                  <span class="text-[10px] text-slate-500">Aksiyon Bekliyor</span>
+                </div>
+
+                <div class="space-y-2.5">
+                  <div class="bg-slate-900 p-3 rounded-lg border border-red-500/40 text-xs space-y-1.5 shadow-sm">
+                    <div class="flex justify-between items-start">
+                      <strong class="text-white">İskele Korkuluksuz</strong>
+                      <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 font-bold">24 Saati Kaldı</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Bolu Tabaklar • 3. Kat Kenar</p>
+                    <div class="flex justify-between items-center text-[10px] pt-1 text-slate-500 border-t border-slate-800">
+                      <span>Taşeron: Akın Çelik</span>
+                      <button class="text-orange-400 hover:underline">İhtar Gönder</button>
+                    </div>
+                  </div>
+
+                  <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 text-xs space-y-1.5">
+                    <div class="flex justify-between items-start">
+                      <strong class="text-white">Açık Elektrik Panosu</strong>
+                      <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">Bugün</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Yeni Depo • Zemin Giriş</p>
+                    <div class="flex justify-between items-center text-[10px] pt-1 text-slate-500 border-t border-slate-800">
+                      <span>Taşeron: Özkan Elektrik</span>
+                      <button class="text-orange-400 hover:underline">Detay</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Kolon 2: TAŞERON DÜZELTTİ / ONAY BEKLİYOR -->
+              <div class="bg-slate-950/70 rounded-xl border border-slate-800 p-3 flex flex-col">
+                <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-800">
+                  <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                    <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+                    🟡 Onay Bekleyenler (2)
+                  </span>
+                  <span class="text-[10px] text-slate-500">Fotoğraf Geldi</span>
+                </div>
+
+                <div class="space-y-2.5">
+                  <div class="bg-slate-900 p-3 rounded-lg border border-amber-500/30 text-xs space-y-1.5">
+                    <div class="flex justify-between items-start">
+                      <strong class="text-white">Şaft Boşluğu Kapatıldı</strong>
+                      <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">İncele</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Bolu Tabaklar • Asansör Boşluğu</p>
+                    <div class="p-1.5 bg-slate-950 rounded text-[10px] text-slate-300">
+                      📸 Taşeron usta sağlam ahşap kapak fotoğrafı yükledi.
+                    </div>
+                    <div class="flex gap-2 pt-1">
+                      <button class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1 rounded text-[10px]">Onayla & Kapat</button>
+                      <button class="bg-slate-800 hover:bg-slate-700 text-slate-300 py-1 px-2 rounded text-[10px]">Reddet</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Kolon 3: KAPATILAN VE ARŞİVLENENLER -->
+              <div class="bg-slate-950/70 rounded-xl border border-slate-800 p-3 flex flex-col">
+                <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-800">
+                  <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                    🟢 Çözülenler (14)
+                  </span>
+                  <span class="text-[10px] text-slate-500">Bu Ay</span>
+                </div>
+
+                <div class="space-y-2.5">
+                  <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800 text-xs space-y-1">
+                    <strong class="text-slate-300">Vinç Periyodik Kontrol Belgesi</strong>
+                    <p class="text-[11px] text-slate-500">Kuzey Otoyolu • 09.10.2026</p>
+                    <span class="text-[10px] text-emerald-400 block">✓ Makine mühendisi raporu yüklendi</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </main>
+
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // 3. DÜZEN: TABLET SAHA İSTASYONU
+    // ==========================================
+    function getStationHTML() {
+      return `
+        <div class="bg-slate-900 text-slate-100 min-h-[700px] p-8 flex flex-col justify-between font-sans">
+          
+          <div>
+            <!-- Üst Başlık -->
+            <div class="flex items-center justify-between pb-6 border-b border-slate-800">
+              <div>
+                <span class="text-xs font-bold text-orange-500 uppercase tracking-widest">Saha Tablet Kokpiti</span>
+                <h2 class="text-2xl font-black text-white mt-1">Hoş Geldiniz, Emin Bey</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Aktif Saha: <strong>Bolu Tabaklar Konut Şantiyesi</strong></p>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-medium text-slate-300">
+                  🔋 Saha Modu: Açık
+                </div>
+              </div>
+            </div>
+
+            <!-- 4 BÜYÜK DOKUNMATİK SAHA BUTONU (GRID) -->
+            <div class="grid grid-cols-2 gap-5 mt-8">
+              
+              <!-- 1. YENİ DENETİM (ANA EYLEM) -->
+              <div class="bg-gradient-to-br from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white p-7 rounded-2xl shadow-xl shadow-orange-600/20 cursor-pointer transition-all hover:scale-[1.01] flex flex-col justify-between min-h-[200px]">
+                <div>
+                  <div class="h-12 w-12 rounded-xl bg-white/20 flex items-center justify-center text-2xl mb-4 backdrop-blur-sm">
+                    📸
+                  </div>
+                  <h3 class="text-xl font-black">YENİ SAHA DENETİMİ BAŞLAT</h3>
+                  <p class="text-xs text-orange-100 mt-2 leading-relaxed">
+                    Telefondan veya tabletten fotoğraf çekin. AI uygunsuzlukları, mevzuat maddelerini ve A4 raporu saniyeler içinde oluştursun.
+                  </p>
+                </div>
+                <div class="text-xs font-bold uppercase tracking-wider flex items-center gap-2 pt-4">
+                  Kamerayı Aç / Fotoğraf Yükle →
+                </div>
+              </div>
+
+              <!-- 2. SON TUTANAKLAR & PDF -->
+              <div class="bg-slate-950 hover:bg-slate-800/80 border border-slate-800 p-7 rounded-2xl cursor-pointer transition-all hover:scale-[1.01] flex flex-col justify-between min-h-[200px]">
+                <div>
+                  <div class="h-12 w-12 rounded-xl bg-slate-800 text-orange-400 flex items-center justify-center text-2xl mb-4">
+                    📄
+                  </div>
+                  <h3 class="text-xl font-black text-white">RESMİ RAPORLAR & PDF İNDİR</h3>
+                  <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                    Daha önce oluşturulmuş 28 denetim tutanağını inceleyin, ıslak imzalı PDF indirin veya WhatsApp ile doğrudan şantiye şefine atın.
+                  </p>
+                </div>
+                <div class="text-xs font-bold text-orange-400 uppercase tracking-wider flex items-center gap-2 pt-4">
+                  Rapor Arşivine Git (28 Rapor) →
+                </div>
+              </div>
+
+              <!-- 3. AÇIK UYGUNSUZLUKLAR (DÖF) -->
+              <div class="bg-slate-950 hover:bg-slate-800/80 border border-slate-800 p-7 rounded-2xl cursor-pointer transition-all hover:scale-[1.01] flex flex-col justify-between min-h-[200px]">
+                <div>
+                  <div class="h-12 w-12 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center text-2xl mb-4">
+                    ⚠️
+                  </div>
+                  <h3 class="text-xl font-black text-white">AÇIK DÖF & TEHLİKE TAKİBİ</h3>
+                  <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                    Şantiyede tebliğ edilen ihlaller düzeltildi mi? Taşeronların yüklediği düzeltme fotoğraflarını inceleyin ve onaylayın.
+                  </p>
+                </div>
+                <div class="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center gap-2 pt-4">
+                  3 Açık Tehlikeyi İncele →
+                </div>
+              </div>
+
+              <!-- 4. ŞANTİYE VE FİRMA PROFİLİ -->
+              <div class="bg-slate-950 hover:bg-slate-800/80 border border-slate-800 p-7 rounded-2xl cursor-pointer transition-all hover:scale-[1.01] flex flex-col justify-between min-h-[200px]">
+                <div>
+                  <div class="h-12 w-12 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center text-2xl mb-4">
+                    🏢
+                  </div>
+                  <h3 class="text-xl font-black text-white">ŞANTİYE & FİRMA AYARLARI</h3>
+                  <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                    İnşaat firması ve OSGB logolarını, A Sınıfı/B Sınıfı sertifika numaralarınızı ve resmi şantiye iletişim bilgilerini yönetin.
+                  </p>
+                </div>
+                <div class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2 pt-4">
+                  Firma Profili & Logolar →
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="text-center text-[11px] text-slate-500 pt-6">
+            6331 Sayılı İş Sağlığı ve Güvenliği Kanunu & Yapı İşlerinde İSG Yönetmeliği Uyumlu Altyapı
+          </div>
+
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // 4. SADE & KURUMSAL B2B LANDING PAGE
+    // ==========================================
+    function getLandingHTML() {
+      return `
+        <div class="bg-white text-slate-900 min-h-[700px] font-sans">
+          
+          <!-- Kurumsal Navbar -->
+          <header class="border-b border-slate-200 px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="h-9 w-9 rounded-xl bg-orange-600 text-white flex items-center justify-center font-black text-lg shadow-sm">
+                ⛑️
+              </div>
+              <span class="font-extrabold text-slate-900 text-lg tracking-tight">SahaİSG<span class="text-orange-600">.ai</span></span>
+              <span class="hidden md:inline-block ml-3 px-2.5 py-0.5 text-[11px] font-semibold bg-slate-100 text-slate-700 rounded-md border border-slate-200">
+                6331 & Yapı İSG Standartı
+              </span>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-8 text-xs font-semibold text-slate-600">
+              <a href="#" class="hover:text-slate-900">Nasıl Çalışır?</a>
+              <a href="#" class="hover:text-slate-900">Örnek A4 Rapor</a>
+              <a href="#" class="hover:text-slate-900">Mevzuat Motoru</a>
+              <a href="#" class="hover:text-slate-900">Fiyatlandırma</a>
+            </nav>
+
+            <div class="flex items-center gap-3">
+              <button class="text-xs font-semibold text-slate-700 px-3 py-2 hover:text-slate-900">Giriş Yap</button>
+              <button class="text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg shadow-sm">
+                Ücretsiz Deneyin
+              </button>
+            </div>
+          </header>
+
+          <!-- Hero Section: Net & Sade -->
+          <section class="max-w-5xl mx-auto px-8 pt-16 pb-12 text-center">
+            
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold mb-6">
+              <span class="w-2 h-2 rounded-full bg-orange-600"></span>
+              Türkiye'deki İSG Uzmanları ve OSGB'ler İçin Tasarlandı
+            </div>
+
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+              Saha Denetimlerini ve İSG Raporlarını<br/>
+              <span class="text-orange-600">Otopilota Alın.</span>
+            </h1>
+
+            <p class="text-base text-slate-600 max-w-2xl mx-auto mt-5 leading-relaxed">
+              Şantiyede çektiğiniz fotoğrafları yükleyin. Yapay zeka uygunsuzlukları, 6331 kanun maddesini ve risk derecesini tespit etsin. Çift logolu, ıslak imzaya hazır resmi A4 PDF raporunuz saniyeler içinde masanızda.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+              <button class="w-full sm:w-auto px-7 py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-orange-600/25">
+                ⚡ Saha Denetimi Başlat (Ücretsiz)
+              </button>
+              <button class="w-full sm:w-auto px-7 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm rounded-xl border border-slate-200">
+                📄 Örnek Bakanlık A4 Raporunu İncele
+              </button>
+            </div>
+
+          </section>
+
+          <!-- ÜRÜN EKRAN GÖRÜNTÜSÜ MOCKUP'I (OYUNCAKSIZ) -->
+          <section class="max-w-5xl mx-auto px-8 pb-16">
+            <div class="rounded-2xl border border-slate-200 shadow-2xl overflow-hidden bg-slate-900 p-2">
+              <div class="bg-slate-950 rounded-xl p-4 text-white text-xs flex items-center justify-between border-b border-slate-800">
+                <span class="font-bold flex items-center gap-2">
+                  <span class="h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                  <span class="h-2.5 w-2.5 rounded-full bg-amber-500"></span>
+                  <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+                  SahaİSG Denetim Masası Ekranı
+                </span>
+                <span class="text-slate-400">Canlı Eşleme & A4 Export</span>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4 p-6 bg-slate-900 text-slate-200 text-xs">
+                <!-- Sol: Yüklenen Fotoğraf & AI Bulgusu -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                  <span class="text-orange-400 font-bold block">1. Saha Fotoğrafı Analizi</span>
+                  <div class="h-32 bg-slate-800 rounded-lg flex items-center justify-center text-4xl">
+                    🚧
+                  </div>
+                  <div class="p-2.5 bg-slate-900 rounded border border-slate-800 text-[11px] space-y-1">
+                    <strong class="text-red-400">Bulgu:</strong> Döşeme kenarı korumasız.<br/>
+                    <strong class="text-slate-400">Yasal Dayanak:</strong> Yapı İSG Yön. Ek-4 Md. 4
+                  </div>
+                </div>
+
+                <!-- Sağ: Çift Logolu Çıktı -->
+                <div class="bg-white text-slate-900 p-4 rounded-xl shadow-lg border border-slate-300 space-y-2 text-[10px]">
+                  <span class="text-slate-500 font-bold block">2. Çift Logolu Resmi A4 Çıktısı</span>
+                  <div class="border-b pb-2 flex justify-between items-center text-[9px] font-bold">
+                    <span>🏢 MÜTEAHHİT LOGO</span>
+                    <span class="text-orange-600">İSG SAHA TUTANAĞI</span>
+                    <span>✚ OSGB LOGO</span>
+                  </div>
+                  <div class="bg-slate-50 p-2 rounded border text-[8px] space-y-1">
+                    <p><strong>Şantiye:</strong> Bolu Tabaklar Konut İnşaatı</p>
+                    <p><strong>İSG Uzmanı:</strong> M. Emin Gerim (A Sınıfı)</p>
+                  </div>
+                  <div class="p-2 border-l-2 border-red-600 bg-red-50 text-[8px]">
+                    <strong>İhlal:</strong> Korkuluksuz kenar çalışması. 24 saat içinde giderilmelidir.
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- ESKİ ÇİLE VS. YENİ YOL KARŞILAŞTIRMASI -->
+          <section class="bg-slate-50 border-t border-slate-200 py-16 px-8">
+            <div class="max-w-4xl mx-auto">
+              <h2 class="text-2xl font-extrabold text-center text-slate-900 mb-10">
+                Neden Word ve Excel ile Saatlerinizi Harcayasınız?
+              </h2>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Eski Yol -->
+                <div class="bg-white p-6 rounded-2xl border border-red-200 shadow-sm space-y-3">
+                  <span class="text-xs font-bold px-2 py-0.5 rounded bg-red-100 text-red-700">ESKİ YÖNTEM (2-3 SAAT)</span>
+                  <h3 class="font-bold text-slate-900 text-sm">Akşam Ofiste Mesai Çilesi</h3>
+                  <ul class="text-xs text-slate-600 space-y-2">
+                    <li>❌ Sahada deftere karalama notlar alma</li>
+                    <li>❌ Fotoğrafları WhatsApp ile tek tek bilgisayara aktarma</li>
+                    <li>❌ Word şablonlarında tablo kaymalarıyla boğuşma</li>
+                    <li>❌ Kanun ve yönetmelik maddesini internette arama</li>
+                  </ul>
+                </div>
+
+                <!-- Yeni Yol -->
+                <div class="bg-white p-6 rounded-2xl border border-emerald-300 shadow-sm space-y-3">
+                  <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">SAHAİSG İLE (90 SANİYE)</span>
+                  <h3 class="font-bold text-slate-900 text-sm">Sahadan Ayrılmadan Resmi Tutanak</h3>
+                  <ul class="text-xs text-slate-700 space-y-2">
+                    <li>✓ Sahada tek tıkla fotoğrafı yükleyin</li>
+                    <li>✓ Yapay zeka 6331 kanun maddesini saniyesinde bağlasın</li>
+                    <li>✓ Çift logolu, ıslak imzaya hazır resmi A4 PDF hazır</li>
+                    <li>✓ WhatsApp ile doğrudan şantiye şefine ve taşerona tebliğ</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      `;
+    }
+
+    // İlk açılış
+    setLayout('workbench');
+  </script>
+</body>
+</html>

@@ -21,6 +21,7 @@ import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { StatusBanner } from '@/components/features/status-banner'
 import { getReadableErrorMessage } from '@/lib/user-feedback'
+import { createDevTimer } from '@/lib/dev-timing'
 
 interface Template {
   id: string
@@ -40,52 +41,64 @@ const INITIAL_LOADING_DELAY_MS = 600
 const INITIAL_LOADING_TITLE = 'Asistanlar yukleniyor'
 
 const QUICK_PROMPTS = {
-  business: [
+  field: [
     {
-      title: 'Toplantı Özeti',
-      icon: '📝',
+      title: 'Toolbox İSG Konuşması',
+      icon: '👷',
       prompt:
-        'Profesyonel toplantı asistanı gibi davran. Notları; gündem, kararlar, sorumlular ve tarih başlıklarıyla düzenli bir özet rapora dönüştür.',
+        'Kıdemli İSG Uzmanı gibi davran. Günlük iş öncesi 5-10 dakikalık Toolbox (İSG bilgilendirme) konuşma metni hazırla. Tehlikeler, KKD gereksinimleri, güvenli çalışma adımları ve çalışanların dikkat etmesi gereken kritik noktaları madde madde yaz.',
     },
     {
-      title: 'Sözleşme Analisti',
-      icon: '⚖️',
+      title: 'Saha Denetim Kontrol Listesi',
+      icon: '📋',
       prompt:
-        'Kıdemli hukuk danışmanı gibi davran. Metindeki kritik riskleri, fesih şartlarını ve belirsiz maddeleri sade bir dille listele.',
+        'Yapı işleri İSG baş denetçisi gibi davran. 6331 sayılı Kanun ve Yapı İşlerinde İSG Yönetmeliği kapsamında şantiye/fabrika için kontrol listesi ve risk değerlendirme maddeleri oluştur.',
     },
     {
-      title: 'SWOT Analizi',
+      title: 'İskele Güvenlik Denetimi',
+      icon: '🏗️',
+      prompt:
+        'İskele yetkin denetçisi gibi davran. Cephe iskelelerinin kurulumu, ankraj aralıkları, korkuluklar, topukluklar, platform kilitleri ve yeşil etiket onay kriterlerini listeleyen teknik denetim formu hazırla.',
+    },
+  ],
+  risk: [
+    {
+      title: 'Ramak Kala & Olay Analizi',
+      icon: '⚠️',
+      prompt:
+        'İSG kaza önleme uzmanı gibi davran. Bildirilen ramak kala olayını analiz et; olası risk derecesini, potansiyel sonuçlarını, kök nedenlerini ve tekrarlanmaması için acil DÖF aksiyonlarını listele.',
+    },
+    {
+      title: 'Kaza Kök Neden Analizi (5 Neden)',
+      icon: '🔍',
+      prompt:
+        'İSG kaza araştırma uzmanı gibi davran. Meydana gelen iş kazası/olayı için 5 Neden (5 Why) ve Balık Kılçığı metodolojisiyle kök nedenleri ve Düzeltici Önleyici Faaliyet (DÖF) planını çıkar.',
+    },
+    {
+      title: '5x5 Risk Matrisi Değerlendirmesi',
       icon: '📊',
       prompt:
-        'Stratejik proje yöneticisi gibi davran. Verilen fikir için SWOT analizi üret ve uygulanabilir aksiyon önerileri sun.',
+        'İSG risk analisti gibi davran. Verilen çalışma ortamı için tehlikeleri belirle, Olasılık x Şiddet (1-5) matrisiyle risk skorlarını hesapla ve kabul edilebilir seviyeye indirme tedbirlerini listele.',
     },
   ],
-  education: [
+  training: [
     {
-      title: 'Sınav Değerlendirici',
-      icon: '💯',
+      title: 'Acil Durum Tatbikat Senaryosu',
+      icon: '🚨',
       prompt:
-        'Titiz bir öğretmen gibi davran. Cevabı değerlendir, güçlü/zayıf noktaları belirt, puan önerisi ver ve geliştirme adımları yaz.',
+        'Acil durum kriz yöneticisi gibi davran. Yangın, deprem veya kimyasal sızıntı için tatbikat senaryosu, söndürme/kurtarma/koruma/ilkyardım ekiplerinin görevleri ve tahliye süre değerlendirme formu hazırla.',
     },
     {
-      title: 'Akademik Özet',
-      icon: '🧠',
+      title: 'KKD Seçim ve Kullanım Rehberi',
+      icon: '🦺',
       prompt:
-        'Bilim iletişimcisi gibi davran. Teknik metni sadeleştir, ana fikirleri madde madde açıkla ve gereksiz jargondan kaçın.',
-    },
-  ],
-  creative: [
-    {
-      title: 'Sosyal Medya Uzmanı',
-      icon: '🚀',
-      prompt:
-        'Sosyal medya editörü gibi davran. Konu için LinkedIn, X ve Instagram formatlarında farklı tonlarda içerik üret.',
+        'İSG teknik uzmanı gibi davran. İlgili iş kolu ve fiziksel/kimyasal maruziyetler için CE ve EN standartlarına uygun Kişisel Koruyucu Donanım (KKD) teknik şartnamesi ve çalışan talimatı oluştur.',
     },
     {
-      title: 'Kod Denetçisi',
-      icon: '💻',
+      title: 'Sıcak Çalışma İzin Prosedürü',
+      icon: '🔥',
       prompt:
-        'Kıdemli yazılım mimarı gibi davran. Kodu güvenlik, performans ve bakım maliyeti açısından değerlendirip net öneriler yaz.',
+        'İSG saha emniyet uzmanı gibi davran. Kaynak, kesme ve kıvılcım çıkaran sıcak işler için yangın gözlemcisi, gaz ölçümü, yangın tüpü konuşlandırması ve çalışma izni formu adımlarını hazırla.',
     },
   ],
 }
@@ -122,6 +135,7 @@ export default function AssistantsPage() {
   const canCreate = !creating && !nameError && !promptError && !iconError
 
   useEffect(() => {
+    const timer = createDevTimer('dashboard-assistants')
     let isMounted = true
     const loadingBannerTimer = setTimeout(() => {
       if (!isMounted) return
@@ -147,15 +161,18 @@ export default function AssistantsPage() {
           }
           return current
         })
+        timer.mark('templates-ready', { count: data.templates?.length ?? 0 })
       } catch (error) {
         clearTimeout(loadingBannerTimer)
         if (!isMounted) return
         const message = getReadableErrorMessage(error, 'Asistanlar yuklenemedi.')
         setBanner({ state: 'error', title: 'Asistanlar yuklenemedi', message })
         toast.error(message)
+        timer.mark('templates-error')
       } finally {
         if (!isMounted) return
         setLoading(false)
+        timer.end()
       }
     }
 
@@ -278,7 +295,7 @@ export default function AssistantsPage() {
                   <Label htmlFor="name">Asistan Adı</Label>
                   <Input
                     id="name"
-                    placeholder="Örn: Emlak Danışmanı"
+                    placeholder="Örn: İskele Güvenlik Denetçisi"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     maxLength={60}
@@ -314,16 +331,16 @@ export default function AssistantsPage() {
 
               <div className="space-y-3">
                 <Label>Hızlı Başlangıç Şablonları</Label>
-                <Tabs defaultValue="business" className="w-full">
+                <Tabs defaultValue="field" className="w-full">
                   <TabsList className="w-full h-auto grid grid-cols-1 sm:grid-cols-3 mb-4 gap-2 bg-transparent p-0">
-                    <TabsTrigger value="business" className="w-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background">
-                      İş ve Kurumsal
+                    <TabsTrigger value="field" className="w-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background">
+                      Saha Denetimi
                     </TabsTrigger>
-                    <TabsTrigger value="education" className="w-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background">
-                      Eğitim
+                    <TabsTrigger value="risk" className="w-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background">
+                      Risk & Olay Analizi
                     </TabsTrigger>
-                    <TabsTrigger value="creative" className="w-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background">
-                      Teknik
+                    <TabsTrigger value="training" className="w-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background">
+                      Eğitim & Prosedür
                     </TabsTrigger>
                   </TabsList>
 

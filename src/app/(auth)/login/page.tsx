@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { FileText, Loader2, AlertCircle, Mail, Lock, CheckCircle2 } from 'lucide-react'
+import { HardHat, Loader2, AlertCircle, Mail, Lock, CheckCircle2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -99,7 +99,7 @@ export default function LoginPage() {
         return
       }
 
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -111,6 +111,12 @@ export default function LoginPage() {
       })
 
       if (signUpError) throw signUpError
+
+      if (signUpData?.session) {
+        router.push('/dashboard')
+        router.refresh()
+        return
+      }
 
       setSuccess('Kayıt başarılı. E-posta doğrulaması sonrası giriş yapabilirsiniz.')
       setFormErrors({})
@@ -127,18 +133,18 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-zinc-900" />
         <div className="relative z-20 flex items-center text-lg font-medium">
           <Link href="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded bg-white text-zinc-900 flex items-center justify-center">
-              <FileText className="h-5 w-5" />
+            <div className="h-8 w-8 rounded bg-amber-600 text-white flex items-center justify-center">
+              <HardHat className="h-5 w-5" />
             </div>
-            <span>Rapor Asistanı</span>
+            <span>İSG Asistanı</span>
           </Link>
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;Rapor Asistanı ile toplantı notlarımı saniyeler içinde düzenli raporlara dönüştürebiliyorum.&rdquo;
+              &ldquo;Şantiyede çektiğim uygunsuzluk fotoğraflarını 6331 sayılı kanuna ve Yapı İşleri Yönetmeliğine uygun resmi denetim raporlarına saniyeler içinde dönüştürüyor.&rdquo;
             </p>
-            <footer className="text-sm">Sofia Davis, Ürün Yöneticisi</footer>
+            <footer className="text-sm">Murat Yıldırım, A Sınıfı İSG Baş Denetçisi</footer>
           </blockquote>
         </div>
       </div>
@@ -147,10 +153,10 @@ export default function LoginPage() {
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center lg:hidden">
             <Link href="/" className="flex items-center justify-center gap-2 font-bold text-xl mb-4">
-              <div className="h-8 w-8 rounded bg-primary flex items-center justify-center">
-                <FileText className="h-5 w-5 text-primary-foreground" />
+              <div className="h-8 w-8 rounded bg-amber-600 text-white flex items-center justify-center">
+                <HardHat className="h-5 w-5" />
               </div>
-              <span>Rapor Asistanı</span>
+              <span>İSG Asistanı</span>
             </Link>
           </div>
 

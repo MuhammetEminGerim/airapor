@@ -1,9 +1,21 @@
 {
-  "name": "temp-app",
+  "name": "airapor",
   "version": "0.1.0",
+  "description": "AI destekli, çok kaynaklı rapor oluşturma ve dışa aktarma platformu.",
   "private": true,
+  "license": "MIT",
+  "homepage": "https://airapor.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MuhammetEminGerim/airapor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MuhammetEminGerim/airapor/issues"
+  },
   "scripts": {
-    "dev": "next dev",
+    "clean:next": "node -e \"require('fs').rmSync('.next',{ recursive: true, force: true }); console.log('cleaned .next')\"",
+    "dev:reset": "npm run clean:next && next dev --webpack",
+    "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
