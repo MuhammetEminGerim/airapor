@@ -337,7 +337,7 @@ export default function DashboardPage() {
                   <span className="dashboard-report-number">{String(index + 1).padStart(2, '0')}</span>
                   <span className="dashboard-report-icon"><FileText size={16} /></span>
                   <span className="dashboard-report-copy"><strong>{report.title}</strong><small>{report.type.toLocaleUpperCase('tr-TR')} · {new Date(report.created_at).toLocaleDateString('tr-TR')}</small></span>
-                  <span className="dashboard-report-status">{report.status || 'Tamamlandı'}</span><ArrowRight size={14} />
+                  <span className="dashboard-report-status">{report.status === 'completed' || !report.status ? 'Tamamlandı' : report.status === 'draft' ? 'Taslak' : report.status}</span><ArrowRight size={14} />
                 </Link>
               ))}
             </div>
