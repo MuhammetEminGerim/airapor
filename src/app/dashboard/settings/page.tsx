@@ -376,11 +376,12 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-5xl">
+    <div className="field-page field-settings-page flex flex-col gap-6 max-w-5xl">
       {/* Sayfa Başlığı */}
-      <div className="flex flex-col gap-1 pb-4 border-b border-border">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Ayarlar</h1>
-        <p className="text-sm text-muted-foreground">
+      <div className="field-page-heading flex flex-col gap-1">
+        <p className="field-page-kicker">ÇALIŞMA ALANI / 04</p>
+        <h1 className="field-page-title">Ayarlar</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           İSG kurumsal ve firma profilinizi, imza/kaşe bilgilerinizi ve hesap tercihlerinizi yönetin.
         </p>
       </div>
