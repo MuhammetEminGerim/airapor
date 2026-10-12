@@ -256,13 +256,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           ======================================================== */}
       {mode === 'raycast' && (
         <div className="flex-1 flex w-full relative">
-          <aside className="fixed left-4 top-1/2 -translate-y-1/2 z-40 bg-card/85 backdrop-blur-2xl border border-border/80 rounded-2xl p-2 flex flex-col gap-2 shadow-2xl shadow-black/20">
+          <aside className="group/dock fixed left-4 top-1/2 -translate-y-1/2 z-40 bg-card/85 backdrop-blur-2xl border border-border/80 rounded-2xl p-2 flex flex-col gap-2 shadow-2xl shadow-black/20 w-[56px] hover:w-56 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden">
             <Link
               href="/dashboard"
-              className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-600/30 mb-1"
+              className="h-10 rounded-xl bg-amber-600 text-white flex items-center shadow-md shadow-amber-600/30 mb-1 px-2.5 gap-3 overflow-hidden transition-all shrink-0 w-full"
               title="İSG Saha"
             >
-              <HardHat className="h-5 w-5" />
+              <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                <HardHat className="h-5 w-5" />
+              </div>
+              <span className="font-extrabold text-sm tracking-tight whitespace-nowrap opacity-0 group-hover/dock:opacity-100 transition-opacity duration-200 delay-75">
+                İSG SAHA
+              </span>
             </Link>
             {navItems.map((item) => {
               const isActive =
@@ -271,24 +276,34 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                  className={`h-10 rounded-xl flex items-center transition-all px-2.5 gap-3 overflow-hidden shrink-0 w-full ${
                     isActive
                       ? 'bg-primary text-primary-foreground shadow-md font-bold'
                       : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
                   }`}
                   title={item.label}
                 >
-                  <item.icon className="h-4 w-4" />
+                  <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                    <item.icon className="h-4 w-4" />
+                  </div>
+                  <span className="text-xs font-semibold whitespace-nowrap opacity-0 group-hover/dock:opacity-100 transition-opacity duration-200 delay-75">
+                    {item.label}
+                  </span>
                 </Link>
               )
             })}
             <div className="h-px bg-border/60 mx-1 my-1" />
             <button
               onClick={handleLogout}
-              className="w-10 h-10 rounded-xl text-muted-foreground hover:text-red-600 hover:bg-red-500/10 flex items-center justify-center transition-colors cursor-pointer"
+              className="h-10 rounded-xl text-muted-foreground hover:text-red-600 hover:bg-red-500/10 flex items-center transition-colors cursor-pointer px-2.5 gap-3 overflow-hidden shrink-0 w-full"
               title="Çıkış Yap"
             >
-              <LogOut className="h-4 w-4" />
+              <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                <LogOut className="h-4 w-4" />
+              </div>
+              <span className="text-xs font-semibold whitespace-nowrap opacity-0 group-hover/dock:opacity-100 transition-opacity duration-200 delay-75">
+                Çıkış Yap
+              </span>
             </button>
           </aside>
 
