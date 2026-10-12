@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
@@ -111,6 +111,31 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [userInitials, setUserInitials] = useState('K')
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false)
   const [isIslandExpanded, setIsIslandExpanded] = useState(false)
+  const islandRef = useRef<HTMLDivElement>(null)
+
+  // Dynamic Island dışına tıklandığında veya Esc tuşuna basıldığında pürüzsüzce geri toplanma
+  useEffect(() => {
+    if (!isIslandExpanded) return
+
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      if (islandRef.current && !islandRef.current.contains(e.target as Node)) {
+        setIsIslandExpanded(false)
+      }
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsIslandExpanded(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isIslandExpanded])
 
   useEffect(() => {
     const saved = localStorage.getItem('isg_design_mode') as DesignMode | null
@@ -320,149 +345,127 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           ======================================================== */}
       {mode === 'island' && (
         <div className="flex-1 flex flex-col w-full relative pt-20 sm:pt-24 selection:bg-amber-500 selection:text-black">
-          {/* Ambient Top Glow to create natural light refraction through frosted glass */}
-          <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[650px] h-[200px] bg-amber-500/12 blur-[120px] rounded-full pointer-events-none -z-10" />
+          {/* Gerçek Cam Kırılması İçin Çok Katmanlı Işık Difüzyon Atmosferi */}
+          <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[840px] h-[180px] pointer-events-none -z-10 overflow-hidden flex items-center justify-center opacity-75">
+            <div className="w-[380px] h-[100px] bg-amber-500/25 blur-[95px] rounded-full" />
+            <div className="w-[300px] h-[90px] bg-sky-500/20 blur-[100px] rounded-full -ml-32" />
+            <div className="w-[280px] h-[90px] bg-indigo-500/20 blur-[100px] rounded-full -mr-32" />
+          </div>
 
-          {/* Floating Frosted Glass Dynamic Island */}
-          <header className="fixed top-4 sm:top-5 left-1/2 -translate-x-1/2 z-50 transition-all duration-300">
+          {/* Floating Glass Dynamic Island */}
+          <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
             <div
-              className={`text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden select-none ${
+              ref={islandRef}
+              className={`glass-island dynamic-island-morph rounded-full relative overflow-hidden select-none flex items-center justify-center ${
                 isIslandExpanded
-                  ? 'w-[94vw] max-w-2xl rounded-3xl p-5 bg-zinc-950/65 backdrop-blur-[32px] saturate-[190%] border border-white/20 shadow-[0_30px_70px_rgba(0,0,0,0.6),_inset_0_1px_1px_rgba(255,255,255,0.4),_inset_0_-1px_1px_rgba(0,0,0,0.5)]'
-                  : 'px-3.5 sm:px-4 py-2 rounded-full flex items-center gap-2.5 sm:gap-3.5 cursor-pointer bg-zinc-950/50 hover:bg-zinc-950/65 backdrop-blur-[28px] saturate-[180%] border border-white/20 hover:border-amber-400/50 shadow-[0_20px_50px_rgba(0,0,0,0.5),_inset_0_1px_1px_rgba(255,255,255,0.35),_inset_0_-1px_1px_rgba(0,0,0,0.4)] group'
+                  ? 'w-[94vw] sm:w-[780px] lg:w-[840px] h-14 px-3 sm:px-4 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.85),0_0_35px_rgba(245,158,11,0.15)]'
+                  : 'w-[340px] sm:w-[410px] h-11 px-3 cursor-pointer hover:border-white/30 hover:scale-[1.01]'
               }`}
-              onClick={() => !isIslandExpanded && setIsIslandExpanded(true)}
+              onClick={() => {
+                if (!isIslandExpanded) setIsIslandExpanded(true)
+              }}
             >
-              {!isIslandExpanded ? (
-                // Compact Pill State (Gerçek Buz Efektli Kompakt Ada)
-                <div className="flex items-center gap-2.5 sm:gap-3.5 text-xs">
-                  {/* Glowing Logo Badge */}
-                  <div className="h-6 w-6 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-black flex items-center justify-center font-extrabold text-[11px] shadow-[0_0_12px_rgba(245,158,11,0.5)] shrink-0">
+              {/* COMPACT CAPSULE VIEW */}
+              <div
+                className={`absolute inset-0 px-3.5 flex items-center justify-between transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  isIslandExpanded
+                    ? 'opacity-0 scale-95 pointer-events-none translate-y-1'
+                    : 'opacity-100 scale-100 pointer-events-auto translate-y-0'
+                }`}
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 text-black flex items-center justify-center font-black text-[11px] shadow-[0_0_12px_rgba(245,158,11,0.6)] shrink-0">
                     ⚡
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="font-extrabold tracking-tight text-white group-hover:text-amber-300 transition-colors">
-                      İSG SAHA
-                    </span>
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
-                  </div>
-
-                  <span className="text-white/20 hidden sm:inline">|</span>
-
-                  {/* Active Page Pill */}
-                  <span className="text-zinc-200 font-semibold text-[11px] sm:text-xs bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10 hidden sm:inline-flex items-center gap-1">
-                    {navItems.find((i) => pathname === i.href)?.label || 'Çalışma Alanı'}
+                  <span className="font-extrabold tracking-tight text-white/95 text-xs shrink-0">
+                    İSG SAHA
                   </span>
+                  <span className="text-white/20 text-xs shrink-0">/</span>
+                  <span className="text-zinc-200 font-medium text-xs truncate max-w-[105px] sm:max-w-[150px]">
+                    {navItems.find((i) => pathname === i.href || (i.href !== '/dashboard' && pathname.startsWith(i.href)))?.label || 'Çalışma Alanı'}
+                  </span>
+                </div>
 
-                  <span className="text-white/20">|</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button
+                    asChild
+                    size="sm"
+                    onClick={(e) => e.stopPropagation()}
+                    className="h-6 px-2.5 text-[10px] font-bold bg-amber-500 hover:bg-amber-400 text-black rounded-full shadow-sm hidden sm:inline-flex"
+                  >
+                    <Link href="/dashboard/isg-denetim">
+                      <Plus className="h-3 w-3 mr-0.5" /> Denetim
+                    </Link>
+                  </Button>
 
-                  {/* Quick Shortcut + Avatar inside Island */}
-                  <div className="flex items-center gap-2">
-                    <Button
-                      asChild
-                      size="sm"
-                      onClick={(e) => e.stopPropagation()}
-                      className="h-6 px-2.5 text-[10px] font-bold bg-amber-500 hover:bg-amber-400 text-black rounded-full shadow-sm hidden md:inline-flex"
-                    >
-                      <Link href="/dashboard/isg-denetim">
-                        <Plus className="h-3 w-3 mr-0.5" /> Denetim
+                  <div className="h-6 w-6 rounded-full bg-white/12 border border-white/25 flex items-center justify-center text-[10px] font-bold text-amber-300 shadow-inner">
+                    {userInitials}
+                  </div>
+
+                  <ChevronDown className="h-3.5 w-3.5 text-white/60 transition-colors" />
+                </div>
+              </div>
+
+              {/* EXPANDED BAR VIEW */}
+              <div
+                className={`w-full h-full flex items-center justify-between gap-2 sm:gap-3 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  isIslandExpanded
+                    ? 'opacity-100 scale-100 pointer-events-auto translate-y-0 delay-100'
+                    : 'opacity-0 scale-95 pointer-events-none -translate-y-1'
+                }`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 shrink-0 no-underline text-white pl-1 group"
+                >
+                  <div className="h-7 w-7 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-400 text-black flex items-center justify-center font-black text-xs shadow-md shadow-amber-500/30 group-hover:scale-105 transition-transform">
+                    ⚡
+                  </div>
+                  <span className="font-extrabold text-xs tracking-tight hidden md:inline">
+                    İSG SAHA
+                  </span>
+                </Link>
+
+                <nav className="flex items-center gap-1 overflow-x-auto max-w-full scrollbar-none py-1">
+                  {navItems.map((item) => {
+                    const isActive =
+                      pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`))
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap flex items-center gap-1.5 transition-all ${
+                          isActive ? 'glass-pill-active' : 'glass-pill text-zinc-200'
+                        }`}
+                      >
+                        <item.icon className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">{item.label}</span>
                       </Link>
-                    </Button>
+                    )
+                  })}
+                </nav>
 
-                    <div className="h-6 w-6 rounded-full bg-white/15 border border-white/25 flex items-center justify-center text-[10px] font-bold text-amber-300">
-                      {userInitials}
-                    </div>
+                <div className="flex items-center gap-2 shrink-0 pr-1">
+                  <Button
+                    asChild
+                    size="sm"
+                    className="h-7 px-3 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-black rounded-full shadow-sm hidden lg:inline-flex"
+                  >
+                    <Link href="/dashboard/isg-denetim">
+                      <Plus className="h-3 w-3 mr-1" /> Yeni
+                    </Link>
+                  </Button>
 
-                    <ChevronDown className="h-3.5 w-3.5 text-white/60 group-hover:text-white group-hover:translate-y-0.5 transition-all" />
-                  </div>
+                  <button
+                    onClick={() => setIsIslandExpanded(false)}
+                    className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center text-xs transition-colors hover:scale-105"
+                    title="Daralt (Esc)"
+                  >
+                    ✕
+                  </button>
                 </div>
-              ) : (
-                // Expanded Island State (Genişletilmiş Akıllı Buz İstasyonu)
-                <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
-                  {/* Island Top Bar */}
-                  <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-7 w-7 rounded-xl bg-amber-500 text-black flex items-center justify-center font-extrabold text-xs shadow-md shadow-amber-500/30">
-                        ⚡
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-extrabold text-sm text-white">İSG SAHA DİNAMİK ADASI</span>
-                          <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                            VisionOS Cam
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-zinc-400">Şantiye ve denetim modülleri arasında hızlı geçiş</p>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => setIsIslandExpanded(false)}
-                      className="text-zinc-400 hover:text-white text-xs px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 transition-colors"
-                    >
-                      Kapat ✕
-                    </button>
-                  </div>
-
-                  {/* Frosted Navigation Tiles */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {navItems.map((item) => {
-                      const isActive =
-                        pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`))
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => setIsIslandExpanded(false)}
-                          className={`p-3 rounded-2xl text-xs font-semibold flex items-center gap-3 transition-all ${
-                            isActive
-                              ? 'bg-amber-500 text-black font-extrabold shadow-lg shadow-amber-500/30 border border-amber-300'
-                              : 'bg-white/5 hover:bg-white/10 text-zinc-200 border border-white/10 hover:border-white/20'
-                          }`}
-                        >
-                          <div
-                            className={`p-2 rounded-xl ${
-                              isActive ? 'bg-black/20 text-black' : 'bg-white/10 text-amber-400'
-                            }`}
-                          >
-                            <item.icon className="h-4 w-4" />
-                          </div>
-                          <span>{item.label}</span>
-                        </Link>
-                      )
-                    })}
-                  </div>
-
-                  {/* Island Footer Info Bar */}
-                  <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] text-zinc-400">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <span>Giriş Yapıldı: <strong className="text-white">{userName}</strong></span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Button
-                        asChild
-                        size="sm"
-                        className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs h-7 px-3 rounded-lg"
-                      >
-                        <Link href="/dashboard/isg-denetim" onClick={() => setIsIslandExpanded(false)}>
-                          <Plus className="h-3 w-3 mr-1" /> Yeni Denetim
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleLogout}
-                        className="h-7 text-xs text-zinc-400 hover:text-red-400 hover:bg-red-500/10 px-2"
-                      >
-                        Çıkış Yap
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
           </header>
 
