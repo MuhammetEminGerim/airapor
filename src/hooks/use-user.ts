@@ -13,6 +13,7 @@ export interface UserProfile {
   osgb_logo_url: string | null
   inspector_title: string | null
   certificate_no: string | null
+  plan?: string | null
   gemini_api_key?: string | null
 }
 

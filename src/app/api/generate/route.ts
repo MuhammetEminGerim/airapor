@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getGeminiModel } from '@/lib/gemini'
 import { createClient } from '@/lib/supabase-server'
-import { PLAN_LIMITS } from '@/lib/constants'
-import { rateLimit } from '@/lib/rate-limit'
+import { PlanType, PLAN_LIMITS } from '@/lib/constants'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { decryptSecret } from '@/lib/secrets'
 
 export async function POST(req: NextRequest) {
@@ -17,7 +17,12 @@ export async function POST(req: NextRequest) {
         )
     }
 
-    const limiter = rateLimit(`generate:${user.id}`, PLAN_LIMITS.free.limit, PLAN_LIMITS.free.window)
+    // Kullanıcının profilini, API Key'ini ve Plan bilgisini çek
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+    const userPlan = ((profile?.plan as PlanType) || 'free') in PLAN_LIMITS ? (profile?.plan as PlanType) : 'free'
+    const planConfig = PLAN_LIMITS[userPlan]
+
+    const limiter = await checkRateLimit(`generate:${user.id}`, planConfig.limit, planConfig.window)
     if (!limiter.success) {
       return NextResponse.json(
         { error: 'Çok fazla istek gönderildi. Lütfen biraz bekleyin.' },
@@ -25,8 +30,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Kullanıcının API Key'ini çek
-    const { data: profile } = await supabase.from('profiles').select('gemini_api_key').eq('id', user.id).single()
     let userApiKey: string | undefined
     try {
       userApiKey = decryptSecret(profile?.gemini_api_key)
