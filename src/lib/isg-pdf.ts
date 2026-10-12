@@ -2,7 +2,64 @@ import jsPDF from 'jspdf'
 import type { ISGReportData } from '@/types/isg'
 import { DEFAULT_ISG_DISCLAIMER } from '@/types/isg'
 
-// Helper to safely convert image URL or data URI to base64 for jsPDF
+// Helper to resize and compress photos in browser before embedding in jsPDF
+async function compressImageForPdf(
+  dataUri: string,
+  maxDimension = 1000,
+  quality = 0.75
+): Promise<{ data: string; format: 'JPEG' | 'PNG' }> {
+  if (typeof window === 'undefined') {
+    const isPng = dataUri.startsWith('data:image/png')
+    return { data: dataUri, format: isPng ? 'PNG' : 'JPEG' }
+  }
+
+  // Keep small PNG logos intact without lossy compression
+  if (dataUri.startsWith('data:image/png') && dataUri.length < 50000) {
+    return { data: dataUri, format: 'PNG' }
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      try {
+        let width = img.width
+        let height = img.height
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width)
+            width = maxDimension
+          } else {
+            width = Math.round((width * maxDimension) / height)
+            height = maxDimension
+          }
+        }
+
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          resolve({ data: dataUri, format: dataUri.startsWith('data:image/png') ? 'PNG' : 'JPEG' })
+          return
+        }
+
+        ctx.drawImage(img, 0, 0, width, height)
+        const compressedDataUri = canvas.toDataURL('image/jpeg', quality)
+        resolve({ data: compressedDataUri, format: 'JPEG' })
+      } catch {
+        resolve({ data: dataUri, format: dataUri.startsWith('data:image/png') ? 'PNG' : 'JPEG' })
+      }
+    }
+    img.onerror = () => {
+      resolve({ data: dataUri, format: dataUri.startsWith('data:image/png') ? 'PNG' : 'JPEG' })
+    }
+    img.src = dataUri
+  })
+}
+
+// Helper to safely convert image URL or data URI to optimized base64 for jsPDF
 async function getBase64Image(url?: string): Promise<{ data: string; format: 'JPEG' | 'PNG' } | null> {
   if (!url) return null
   try {
@@ -18,8 +75,7 @@ async function getBase64Image(url?: string): Promise<{ data: string; format: 'JP
         reader.readAsDataURL(blob)
       })
     }
-    const isPng = dataUri.startsWith('data:image/png')
-    return { data: dataUri, format: isPng ? 'PNG' : 'JPEG' }
+    return await compressImageForPdf(dataUri)
   } catch {
     return null
   }

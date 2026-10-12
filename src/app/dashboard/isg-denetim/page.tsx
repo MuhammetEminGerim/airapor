@@ -99,6 +99,17 @@ export default function IsgDenetimPage() {
         } = await supabase.auth.getUser()
         if (!user) return
 
+        // Calculate next sequential report number for this user
+        const { count } = await supabase
+          .from('reports')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+
+        if (count !== null && count !== undefined) {
+          const nextSeq = String(count + 1).padStart(3, '0')
+          setReportNumber(`RAPOR-${year}-${nextSeq}`)
+        }
+
         const { data: profile } = await supabase
           .from('profiles')
           .select('full_name, company_name, company_logo_url, osgb_name, osgb_logo_url, inspector_title, certificate_no')

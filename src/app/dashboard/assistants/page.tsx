@@ -38,7 +38,7 @@ type BannerState = {
 }
 
 const INITIAL_LOADING_DELAY_MS = 600
-const INITIAL_LOADING_TITLE = 'Asistanlar yukleniyor'
+const INITIAL_LOADING_TITLE = 'Asistanlar yükleniyor'
 
 const QUICK_PROMPTS = {
   field: [
@@ -142,7 +142,7 @@ export default function AssistantsPage() {
       setBanner({
         state: 'loading',
         title: INITIAL_LOADING_TITLE,
-        message: 'Kayitli sablonlar getiriliyor.',
+        message: 'Kayıtlı şablonlar getiriliyor.',
       })
     }, INITIAL_LOADING_DELAY_MS)
 
@@ -150,7 +150,7 @@ export default function AssistantsPage() {
       try {
         const res = await fetch('/api/templates')
         const data = await res.json()
-        if (!res.ok || data.error) throw new Error(data.error || 'Asistanlar yuklenemedi.')
+        if (!res.ok || data.error) throw new Error(data.error || 'Asistanlar yüklenemedi.')
 
         clearTimeout(loadingBannerTimer)
         if (!isMounted) return
@@ -165,8 +165,8 @@ export default function AssistantsPage() {
       } catch (error) {
         clearTimeout(loadingBannerTimer)
         if (!isMounted) return
-        const message = getReadableErrorMessage(error, 'Asistanlar yuklenemedi.')
-        setBanner({ state: 'error', title: 'Asistanlar yuklenemedi', message })
+        const message = getReadableErrorMessage(error, 'Asistanlar yüklenemedi.')
+        setBanner({ state: 'error', title: 'Asistanlar yüklenemedi', message })
         toast.error(message)
         timer.mark('templates-error')
       } finally {

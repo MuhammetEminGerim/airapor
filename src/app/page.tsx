@@ -37,28 +37,28 @@ const features = [
 
 const plans = [
   {
-    name: 'Başlangıç',
-    audience: 'Platformu denemek isteyen uzmanlar için',
+    name: 'Erken Erişim (Beta)',
+    audience: 'Lansman süresince tüm bağımsız uzmanlar için',
     price: '0',
-    features: ['Ayda 3 saha raporu', 'Temel fotoğraf analizi', 'Standart PDF indirme'],
+    features: ['Sınırsız saha denetim raporu', 'Gemini Vision fotoğraf ve risk analizi', 'Firma ve OSGB logolu resmî PDF', 'Süreli web paylaşım bağlantısı'],
     action: 'Ücretsiz başla',
-    href: '/login?tab=register',
-    featured: false,
-  },
-  {
-    name: 'İSG Uzmanı',
-    audience: 'Aktif sahada çalışan bağımsız uzmanlar için',
-    price: '399',
-    features: ['Sınırsız saha raporu', 'Firma ve OSGB logosu', 'İki imzalı kurumsal PDF', 'Süreli paylaşım bağlantısı'],
-    action: 'Hemen abone ol',
     href: '/login?tab=register',
     featured: true,
   },
   {
+    name: 'İSG Uzmanı (Gelecek)',
+    audience: 'Gelişmiş DÖF takibi ve otomasyonlar için',
+    price: '399',
+    features: ['Tüm erken erişim özellikleri', 'Otomatik mevzuat güncelleme alarmları', 'WhatsApp entegrasyonu', 'Öncelikli yapay zeka kotası'],
+    action: 'Beta süresince ücretsiz',
+    href: '/login?tab=register',
+    featured: false,
+  },
+  {
     name: 'Kurumsal / OSGB',
-    audience: 'Ekipler ve çoklu şantiyeler için',
-    price: '1.490',
-    features: ['Çoklu uzman ve şantiye yönetimi', 'Merkezi görünüm', 'Öncelikli teknik destek'],
+    audience: 'Çoklu şantiye ve uzman ekipleri için',
+    price: 'Özel',
+    features: ['Çoklu uzman ve şantiye yönetimi', 'Merkezi arşiv ve denetim görünümü', 'Şirkete özel şablonlar', 'Öncelikli teknik destek'],
     action: 'İletişime geç',
     href: '/login?tab=register',
     featured: false,
@@ -239,13 +239,13 @@ export default function LandingPage() {
         </section>
 
         <section className="pricing-section" id="fiyatlar">
-          <div className="pricing-heading"><div><span className="section-overline">03 — PLANLAR</span><h2>Sahanın ölçeğine göre.</h2></div><p>İster bağımsız uzman ol, ister birden fazla şantiyeyi yönet.</p></div>
+          <div className="pricing-heading"><div><span className="section-overline">03 — PLANLAR & ERKEN ERİŞİM</span><h2>Sahanın ölçeğine göre.</h2></div><p>Beta lansmanı boyunca tüm temel İSG denetim ve mevzuat özellikleri tamamen ücretsizdir.</p></div>
           <div className="pricing-grid">
             {plans.map((plan) => (
               <article className={`price-sheet${plan.featured ? ' price-sheet-featured' : ''}`} key={plan.name}>
-                {plan.featured && <span className="plan-stamp">UZMANLAR İÇİN</span>}
+                {plan.featured && <span className="plan-stamp">LANSMANA ÖZEL ÜCRETSİZ</span>}
                 <h3>{plan.name}</h3><p className="plan-audience">{plan.audience}</p>
-                <div className="plan-price"><strong>{plan.price}</strong><span>₺ / ay</span></div>
+                <div className="plan-price"><strong>{plan.price}</strong><span>{plan.price === 'Özel' ? 'Teklif' : '₺ / ay'}</span></div>
                 <ul>{plan.features.map((item) => <li key={item}><Check size={15} />{item}</li>)}</ul>
                 <Link className={plan.featured ? 'safety-button plan-button' : 'plan-link'} href={plan.href}>{plan.action}<ArrowRight size={15} /></Link>
               </article>

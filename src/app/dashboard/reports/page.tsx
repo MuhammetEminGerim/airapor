@@ -112,12 +112,12 @@ export default function ReportsPage() {
       if (user) {
         const { data, error } = await supabase
           .from('reports')
-          .select('*')
+          .select('id, title, type, created_at, status, content, is_public, share_token, share_expires_at, report_number, isg_data')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
 
         if (error) {
-          toast.error('Raporlar yuklenirken hata olustu.')
+          toast.error('Raporlar yüklenirken hata oluştu.')
         } else {
           setReports(data || [])
         }
@@ -171,7 +171,7 @@ export default function ReportsPage() {
         body: JSON.stringify({ action: enable ? 'enable' : 'disable' }),
       })
       const data = await res.json()
-      if (!res.ok || data.error) throw new Error(data.error || 'Paylasim islemi basarisiz.')
+      if (!res.ok || data.error) throw new Error(data.error || 'Paylaşım işlemi başarısız.')
 
       const updatedReport = {
         ...report,
@@ -182,7 +182,7 @@ export default function ReportsPage() {
       setReports((prev) => prev.map((r) => (r.id === report.id ? updatedReport : r)))
       setShareReport(updatedReport)
 
-      toast.success(enable ? 'Rapor paylasima acildi.' : 'Rapor paylasima kapatildi.')
+      toast.success(enable ? 'Rapor paylaşıma açıldı.' : 'Rapor paylaşıma kapatıldı.')
     } catch (error) {
       toast.error((error as Error).message)
     } finally {
@@ -194,11 +194,11 @@ export default function ReportsPage() {
     if (!token) return
     const url = `${window.location.origin}/r/${token}`
     navigator.clipboard.writeText(url)
-    toast.success('Baglanti kopyalandi.')
+    toast.success('Bağlantı kopyalandı.')
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Bu raporu silmek istediginize emin misiniz?')) return
+    if (!confirm('Bu raporu silmek istediğinize emin misiniz?')) return
 
     setDeletingId(id)
     const { error } = await supabase.from('reports').delete().eq('id', id)
@@ -206,7 +206,7 @@ export default function ReportsPage() {
       setReports((prev) => prev.filter((r) => r.id !== id))
       toast.success('Rapor silindi.')
     } else {
-      toast.error('Silme islemi basarisiz.')
+      toast.error('Silme işlemi başarısız.')
     }
     setDeletingId(null)
   }
@@ -220,7 +220,7 @@ export default function ReportsPage() {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-    toast.success('Rapor metin dosyasi olarak indirildi.')
+    toast.success('Rapor metin dosyası olarak indirildi.')
   }
 
   const handleDownloadPDF = async (report: Report) => {
@@ -256,7 +256,7 @@ export default function ReportsPage() {
         doc.setFont('Roboto')
       }
     } catch {
-      toast.error('Turkce font yuklenemedi, varsayilan font kullanilacak.')
+      toast.error('Türkçe font yüklenemedi, varsayılan font kullanılacak.')
     }
 
     doc.setFontSize(16)

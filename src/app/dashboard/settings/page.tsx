@@ -177,19 +177,63 @@ export default function SettingsPage() {
     }
   }
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>, target: 'company' | 'osgb') => {
+  const [emailNotifications, setEmailNotifications] = useState(true)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('isg_email_notifications')
+    if (saved !== null) {
+      setEmailNotifications(saved === 'true')
+    }
+  }, [])
+
+  const handleToggleNotifications = (checked: boolean) => {
+    setEmailNotifications(checked)
+    localStorage.setItem('isg_email_notifications', String(checked))
+    toast.success(checked ? 'E-posta bildirimleri aktif edildi.' : 'E-posta bildirimleri kapatıldı.')
+  }
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'company' | 'osgb') => {
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 2 * 1024 * 1024) {
       toast.error('Logo dosyası en fazla 2MB olabilir.')
       return
     }
+
+    const toastId = toast.loading(`${target === 'company' ? 'Firma' : 'OSGB'} logosu işleniyor...`)
+
+    try {
+      // 1. Try Supabase Storage upload first
+      const fileExt = file.name.split('.').pop() || 'png'
+      const filePath = `logos/${userId || 'anon'}-${target}-${Date.now()}.${fileExt}`
+
+      const { data, error } = await supabase.storage
+        .from('isg-photos')
+        .upload(filePath, file, {
+          contentType: file.type || 'image/png',
+          upsert: true,
+        })
+
+      if (!error && data) {
+        const { data: urlData } = supabase.storage.from('isg-photos').getPublicUrl(data.path)
+        if (urlData?.publicUrl) {
+          if (target === 'company') setCompanyLogoUrl(urlData.publicUrl)
+          else setOsgbLogoUrl(urlData.publicUrl)
+          toast.success(`${target === 'company' ? 'Firma' : 'OSGB'} logosu buluta yüklendi. Değişiklikleri kaydetmeyi unutmayın.`, { id: toastId })
+          return
+        }
+      }
+    } catch {
+      // Storage unavailable or failed - proceed to fallback
+    }
+
+    // 2. Graceful fallback to FileReader
     const reader = new FileReader()
     reader.onload = (event) => {
       const base64 = event.target?.result as string
       if (target === 'company') setCompanyLogoUrl(base64)
       else setOsgbLogoUrl(base64)
-      toast.success(`${target === 'company' ? 'Firma' : 'OSGB'} logosu seçildi. Kaydetmeyi unutmayın.`)
+      toast.success(`${target === 'company' ? 'Firma' : 'OSGB'} logosu seçildi. Kaydetmeyi unutmayın.`, { id: toastId })
     }
     reader.readAsDataURL(file)
   }
@@ -628,10 +672,19 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between space-x-2 border p-4 rounded-xl bg-card">
                 <Label htmlFor="notifications" className="flex flex-col space-y-1 cursor-pointer">
-                  <span className="font-semibold text-sm">E-posta Bildirimleri</span>
+                  <span className="font-semibold text-sm flex items-center gap-2">
+                    E-posta Bildirimleri
+                    <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                      Beta
+                    </span>
+                  </span>
                   <span className="font-normal text-xs text-muted-foreground">Saha denetim raporu üretildiğinde e-posta özeti al.</span>
                 </Label>
-                <Switch id="notifications" defaultChecked />
+                <Switch
+                  id="notifications"
+                  checked={emailNotifications}
+                  onCheckedChange={handleToggleNotifications}
+                />
               </div>
             </CardContent>
           </Card>

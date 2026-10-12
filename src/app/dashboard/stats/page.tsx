@@ -64,7 +64,7 @@ export default function StatsPage() {
 
           setTypeData(Object.keys(typeCounts).map((key) => ({ name: key.toUpperCase(), value: typeCounts[key] })))
 
-          const days = ['Paz', 'Pzt', 'Sal', 'Car', 'Per', 'Cum', 'Cmt']
+          const days = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt']
           const dayCounts = typedReports.reduce((acc: CountMap, curr) => {
             const day = days[new Date(curr.created_at).getDay()]
             acc[day] = (acc[day] || 0) + 1
@@ -109,15 +109,15 @@ export default function StatsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-serif text-xl">
               <Lightbulb className="h-4 w-4 text-primary" />
-              Henuz veri yok
+              Henüz veri yok
             </CardTitle>
-            <CardDescription>Paneli doldurmak icin once birkac rapor olusturmaniz yeterli.</CardDescription>
+            <CardDescription>Paneli doldurmak için önce birkaç rapor oluşturmanız yeterli.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-3 text-sm">
-              <div className="rounded-lg border p-3 bg-muted/20">1. Yeni rapor ekranina gidin.</div>
-              <div className="rounded-lg border p-3 bg-muted/20">2. En az bir farkli rapor turu olusturun.</div>
-              <div className="rounded-lg border p-3 bg-muted/20">3. Bu sayfayi yenileyip grafikleri inceleyin.</div>
+              <div className="rounded-lg border p-3 bg-muted/20">1. Yeni rapor ekranına gidin.</div>
+              <div className="rounded-lg border p-3 bg-muted/20">2. En az bir farklı rapor türü oluşturun.</div>
+              <div className="rounded-lg border p-3 bg-muted/20">3. Bu sayfayı yenileyip grafikleri inceleyin.</div>
             </div>
             <Button asChild className="bg-primary text-primary-foreground font-medium">
               <Link href="/dashboard/isg-denetim">
@@ -149,7 +149,7 @@ export default function StatsPage() {
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-primary" />
-              Gunluk Rapor Aktivitesi
+              Günlük Rapor Aktivitesi
             </CardTitle>
             <CardDescription>Arşivde rapor oluşturduğun günlerin dağılımı.</CardDescription>
           </CardHeader>
@@ -172,9 +172,9 @@ export default function StatsPage() {
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <PieChartIcon className="h-4 w-4 text-green-500" />
-              Rapor Turu Dagilimi
+              Rapor Türü Dağılımı
             </CardTitle>
-            <CardDescription>Hangi tur raporlari daha sik olusturuyorsunuz?</CardDescription>
+            <CardDescription>Hangi tür raporları daha sık oluşturuyorsunuz?</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[280px] w-full flex justify-center mt-2">

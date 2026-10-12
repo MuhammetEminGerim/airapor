@@ -74,18 +74,12 @@ export function getGeminiVisionModel(userApiKey?: string) {
   }
 }
 
-// Backward compatibility (uses env var only)
-// These are kept so existing code doesn't break immediately,
-// but we should migrate to getGeminiModel() in routes.
-const defaultGenAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-const defaultBaseModel = defaultGenAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
-
+// Backward compatibility (lazy evaluated to prevent module-level crash if env key is missing)
 export const geminiModel = {
-  ...defaultBaseModel,
-  generateContent: (...args: GenerateContentArgs) => generateWithRetry(defaultBaseModel, args)
+  generateContent: (...args: GenerateContentArgs) => getGeminiModel().generateContent(...args),
 }
 
 export const geminiVisionModel = {
-  ...defaultBaseModel, // Using same model for vision as it supports both
-  generateContent: (...args: GenerateContentArgs) => generateWithRetry(defaultBaseModel, args)
+  generateContent: (...args: GenerateContentArgs) => getGeminiVisionModel().generateContent(...args),
 }
+
