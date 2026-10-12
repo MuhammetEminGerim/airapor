@@ -252,34 +252,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       )}
 
       {/* ========================================================
-          1. RAYCAST / MACOS YÜZEN CAM DOCK (FLOATING DOCK)
+          1. RAYCAST / ARC YÜZEN SLIM DOCK (ORİJİNAL TASARIM)
           ======================================================== */}
       {mode === 'raycast' && (
-        <div className="flex-1 flex w-full relative selection:bg-amber-500 selection:text-black">
-          {/* Yüzen Cam Dock (Masaüstünde solda dikey, mobilde altta yatay) */}
-          <aside
-            aria-label="Yüzen İSG Dock Menüsü"
-            className="fixed z-40 raycast-dock rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 flex items-center shadow-2xl transition-all duration-300
-              bottom-4 left-1/2 -translate-x-1/2 flex-row gap-1 sm:gap-2
-              md:bottom-auto md:left-5 md:top-1/2 md:-translate-y-1/2 md:translate-x-0 md:flex-col"
-          >
-            {/* Logo Icon */}
+        <div className="flex-1 flex w-full relative">
+          <aside className="fixed left-4 top-1/2 -translate-y-1/2 z-40 bg-card/85 backdrop-blur-2xl border border-border/80 rounded-2xl p-2 flex flex-col gap-2 shadow-2xl shadow-black/20">
             <Link
               href="/dashboard"
-              className="raycast-dock-item w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 text-black flex items-center justify-center shadow-lg shadow-amber-500/30 group relative mb-0 md:mb-1 shrink-0"
+              className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-600/30 mb-1"
               title="İSG Saha"
             >
-              <span className="font-black text-sm">⚡</span>
-              {/* Desktop Tooltip */}
-              <span className="hidden md:inline-block absolute left-full ml-3 px-2.5 py-1 rounded-lg text-xs font-bold bg-zinc-900/95 text-white border border-white/20 shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-1 transition-all duration-150 pointer-events-none z-50">
-                İSG Saha Paneli
-              </span>
+              <HardHat className="h-5 w-5" />
             </Link>
-
-            {/* Separator */}
-            <div className="w-px h-6 md:w-6 md:h-px bg-white/15 my-0 md:my-1 shrink-0" />
-
-            {/* Nav Items */}
             {navItems.map((item) => {
               const isActive =
                 pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`))
@@ -287,104 +271,45 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`raycast-dock-item w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all group relative shrink-0 ${
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
                     isActive
-                      ? 'glass-pill-active text-black'
-                      : 'text-zinc-300 hover:text-white hover:bg-white/12 border border-transparent hover:border-white/15'
+                      ? 'bg-primary text-primary-foreground shadow-md font-bold'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
                   }`}
+                  title={item.label}
                 >
-                  <item.icon className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
-
-                  {/* Desktop Tooltip */}
-                  <span className="hidden md:inline-block absolute left-full ml-3 px-2.5 py-1 rounded-lg text-xs font-bold bg-zinc-900/95 text-white border border-white/20 shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-1 transition-all duration-150 pointer-events-none z-50">
-                    {item.label}
-                  </span>
-
-                  {/* macOS Dock Indicator Dot */}
-                  {isActive && (
-                    <span className="absolute -bottom-1 md:bottom-auto md:-right-1 w-1.5 h-1.5 rounded-full bg-amber-400 ring-2 ring-black" />
-                  )}
+                  <item.icon className="h-4 w-4" />
                 </Link>
               )
             })}
-
-            {/* Separator */}
-            <div className="w-px h-6 md:w-6 md:h-px bg-white/15 my-0 md:my-1 shrink-0" />
-
-            {/* Quick New Audit Button in Dock */}
-            <Link
-              href="/dashboard/isg-denetim"
-              className="raycast-dock-item w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 flex items-center justify-center transition-all group relative shrink-0"
-            >
-              <Plus className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
-              <span className="hidden md:inline-block absolute left-full ml-3 px-2.5 py-1 rounded-lg text-xs font-bold bg-zinc-900/95 text-white border border-white/20 shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-1 transition-all duration-150 pointer-events-none z-50">
-                + Yeni Denetim
-              </span>
-            </Link>
-
-            {/* Logout */}
+            <div className="h-px bg-border/60 mx-1 my-1" />
             <button
               onClick={handleLogout}
-              className="raycast-dock-item w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl text-zinc-400 hover:text-red-400 hover:bg-red-500/15 flex items-center justify-center transition-colors group relative shrink-0 cursor-pointer"
+              className="w-10 h-10 rounded-xl text-muted-foreground hover:text-red-600 hover:bg-red-500/10 flex items-center justify-center transition-colors cursor-pointer"
               title="Çıkış Yap"
             >
-              <LogOut className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
-              <span className="hidden md:inline-block absolute left-full ml-3 px-2.5 py-1 rounded-lg text-xs font-bold bg-zinc-900/95 text-red-300 border border-red-500/30 shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-1 transition-all duration-150 pointer-events-none z-50">
-                Çıkış Yap
-              </span>
+              <LogOut className="h-4 w-4" />
             </button>
           </aside>
 
-          {/* Main Content Area */}
-          <div className="flex-1 flex flex-col w-full px-4 sm:px-6 md:pl-28 lg:pl-32 md:pr-8 py-4 sm:py-6 pb-24 md:pb-6">
-            {/* Ambient Light for Soft Glass Glow */}
-            <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[160px] pointer-events-none -z-10 overflow-hidden flex items-center justify-center opacity-60">
-              <div className="w-[360px] h-[90px] bg-amber-500/20 blur-[90px] rounded-full" />
-              <div className="w-[280px] h-[80px] bg-sky-500/15 blur-[95px] rounded-full -ml-28" />
-            </div>
-
-            {/* Top Navigation & Utility Bar */}
-            <header className="h-14 flex items-center justify-between gap-4 border-b border-white/10 pb-3 mb-6">
-              <div className="flex items-center gap-2.5 text-xs text-zinc-400 font-semibold">
-                <span className="text-white font-extrabold flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                  İSG SAHA
-                </span>
-                <span className="text-white/20">/</span>
-                <span className="text-zinc-200 font-bold">
-                  {navItems.find((i) => pathname === i.href || (i.href !== '/dashboard' && pathname.startsWith(i.href)))?.label || 'Çalışma Alanı'}
+          <div className="flex-1 flex flex-col w-full pl-20 sm:pl-24 pr-4 sm:pr-8 py-4 sm:py-6">
+            <header className="h-12 flex items-center justify-between gap-4 border-b border-border/60 pb-3 mb-6">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold">
+                <span>İSG SAHA</span>
+                <span>/</span>
+                <span className="text-foreground font-bold">
+                  {navItems.find((i) => pathname === i.href)?.label || 'Çalışma Alanı'}
                 </span>
               </div>
-
-              <div className="flex items-center gap-2.5 sm:gap-3">
-                {/* Quick Search */}
-                <div className="hidden sm:flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-full text-xs text-zinc-400 w-52 md:w-64 shadow-inner transition-colors">
-                  <Search className="h-3.5 w-3.5 text-zinc-400" />
-                  <span>Hızlı ara...</span>
-                  <kbd className="ml-auto text-[10px] font-mono bg-white/10 border border-white/15 px-1.5 py-0.5 rounded text-zinc-300 font-semibold">⌘K</kbd>
-                </div>
-
-                <Button
-                  asChild
-                  size="sm"
-                  className="h-8 px-3 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-black rounded-full shadow-sm"
-                >
-                  <Link href="/dashboard/isg-denetim">
-                    <Plus className="h-3.5 w-3.5 mr-1" /> Yeni Denetim
-                  </Link>
-                </Button>
-
-                {/* User Avatar */}
-                <div
-                  className="h-8 w-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-xs font-bold text-amber-300 shadow-inner"
-                  title={userName}
-                >
-                  {userInitials}
-                </div>
+              <div className="flex items-center gap-2 bg-muted/60 border border-border/80 px-3 py-1.5 rounded-full text-xs text-muted-foreground w-64 shadow-inner">
+                <Search className="h-3.5 w-3.5 text-muted-foreground" />
+                <span>Hızlı arama...</span>
+                <kbd className="ml-auto text-[10px] font-mono bg-background border border-border px-1.5 py-0.5 rounded text-foreground font-semibold">
+                  ⌘K
+                </kbd>
               </div>
             </header>
-
-            <main className="flex-1 max-w-6xl w-full mx-auto">{children}</main>
+            <main className="flex-1 max-w-5xl w-full mx-auto">{children}</main>
           </div>
         </div>
       )}

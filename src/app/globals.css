@@ -1416,35 +1416,3 @@
   border: 1px solid rgba(251, 191, 36, 0.85);
   box-shadow: 0 4px 16px rgba(245, 158, 11, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
-
-/* Authentic Floating Glass Dock (Yüzen Cam Dock - Raycast / macOS) */
-.raycast-dock {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.14) 0%,
-    rgba(255, 255, 255, 0.04) 30%,
-    rgba(14, 18, 30, 0.78) 100%
-  );
-  backdrop-filter: blur(28px) saturate(220%) brightness(112%);
-  -webkit-backdrop-filter: blur(28px) saturate(220%) brightness(112%);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-top: 1px solid rgba(255, 255, 255, 0.42);
-  box-shadow: 
-    0 24px 50px -12px rgba(0, 0, 0, 0.8),
-    0 4px 16px rgba(0, 0, 0, 0.4),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 0 20px 0 rgba(255, 255, 255, 0.03);
-}
-
-.raycast-dock-item {
-  position: relative;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.raycast-dock-item:hover {
-  transform: scale(1.12);
-}
-
-.raycast-dock-item:active {
-  transform: scale(0.96);
-}
