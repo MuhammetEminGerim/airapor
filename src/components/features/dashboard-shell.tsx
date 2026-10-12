@@ -20,17 +20,11 @@ import {
   Download,
   Save,
   Command,
-  Radio,
-  Activity,
-  Clock,
   Compass,
-  Split,
-  Zap,
   CheckCircle2,
   Sliders,
   ExternalLink,
   ChevronRight,
-  Maximize2,
   Check,
 } from 'lucide-react'
 import { Sidebar } from '@/components/features/Sidebar'
@@ -44,10 +38,8 @@ export type DesignMode =
   | 'linear'      // 1. Üst Ada Navigasyon (Linear / Vercel)
   | 'raycast'     // 2. Yüzen İnce Dock (Raycast / Arc)
   | 'studio'      // 3. Belge Odaklı Çalışma Alanı (Notion / Figma)
-  | 'cockpit'     // 4. Taktik Komuta Merkezi (Palantir / Superhuman)
-  | 'island'      // 5. Dynamic Island / Genişleyen Yüzen Kapsül (Apple VisionOS / Cron)
-  | 'timeline'    // 6. Kronolojik Saha Yürüyüşü (Feed & Timeline)
-  | 'splitscreen' // 7. Canlı A4 PDF Stüdyosu (Overleaf & Canva Çift Ekran)
+  | 'island'      // 4. Dynamic Island / Genişleyen Yüzen Kapsül (Apple VisionOS / Cron)
+  | 'timeline'    // 5. Kronolojik Saha Yürüyüşü (Feed & Timeline)
   | 'classic'     // 0. Eski Klasik Sol Sidebar
 
 interface ConceptMeta {
@@ -61,52 +53,38 @@ interface ConceptMeta {
 export const CONCEPTS: ConceptMeta[] = [
   {
     id: 'linear',
-    title: 'Üst Ada (Linear / Vercel)',
+    title: '1. Üst Ada (Linear / Vercel)',
     subtitle: 'Sidebar yok, üstte cam efektli ada menü, tam ekran ferahlık',
     icon: '🏝️',
-    badge: 'Popüler',
+    badge: 'Önerilen',
   },
   {
     id: 'raycast',
-    title: 'Yüzen Dock (Raycast / Arc)',
+    title: '2. Yüzen Dock (Raycast / Arc)',
     subtitle: 'Sol kenarda asılı duran 50px yüzen ikon kapsülü ve ⌘K arama',
     icon: '🚀',
     badge: 'Hızlı',
   },
   {
     id: 'studio',
-    title: 'Belge Modu (Studio / Notion)',
+    title: '3. Belge Modu (Studio / Notion)',
     subtitle: 'Üstte minimal breadcrumb, ortada A4 çalışma kağıdı hissi',
     icon: '📐',
     badge: 'Belge',
   },
   {
-    id: 'cockpit',
-    title: 'Taktik Kokpit (Palantir / HUD)',
-    subtitle: 'Canlı telemetri, alt komuta şeridi ve yüksek veri yoğunluğu',
-    icon: '⚡',
-    badge: 'Endüstriyel',
-  },
-  {
     id: 'island',
-    title: 'Dynamic Island (Apple VisionOS)',
+    title: '4. Dynamic Island (Apple VisionOS)',
     subtitle: 'Sıfır arayüz kirliliği; sadece üstte genişleyen akıllı ada kapsülü',
     icon: '🛸',
     badge: 'Fütüristik',
   },
   {
     id: 'timeline',
-    title: 'Saha Zaman Tüneli (Feed Modeli)',
+    title: '5. Saha Zaman Tüneli (Feed Modeli)',
     subtitle: 'Denetimi saat saat akan bir saha yürüyüşü akışına dönüştürür',
     icon: '⏱️',
-    badge: 'Mobil Dostu',
-  },
-  {
-    id: 'splitscreen',
-    title: 'Canlı PDF Stüdyosu (WYSIWYG)',
-    subtitle: 'Solda kontroller, sağda birebir canlı güncellenen resmi A4 sayfası',
-    icon: '📑',
-    badge: 'Çift Ekran',
+    badge: 'Mobil',
   },
   {
     id: 'classic',
@@ -133,23 +111,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [userInitials, setUserInitials] = useState('K')
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false)
   const [isIslandExpanded, setIsIslandExpanded] = useState(false)
-  const [liveTime, setLiveTime] = useState('')
 
   useEffect(() => {
     const saved = localStorage.getItem('isg_design_mode') as DesignMode | null
     if (saved && CONCEPTS.some((c) => c.id === saved)) {
       setMode(saved)
+    } else {
+      setMode('linear')
     }
-
-    const updateClock = () => {
-      const now = new Date()
-      setLiveTime(
-        now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-      )
-    }
-    updateClock()
-    const timer = setInterval(updateClock, 1000)
-    return () => clearInterval(timer)
   }, [])
 
   const changeMode = (newMode: DesignMode) => {
@@ -347,89 +316,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       )}
 
       {/* ========================================================
-          4. TAKTİK KOKPİT (PALANTIR / HUD / SUPERHUMAN)
-          ======================================================== */}
-      {mode === 'cockpit' && (
-        <div className="flex-1 flex flex-col w-full bg-[#07090e] text-zinc-100 pb-24">
-          {/* Tactical Status Telemetry Ticker */}
-          <div className="bg-[#0b0e17] border-b border-amber-500/20 px-4 sm:px-6 py-2 flex items-center justify-between text-[11px] font-mono gap-4 overflow-x-auto">
-            <div className="flex items-center gap-3 shrink-0">
-              <span className="flex items-center gap-1.5 text-amber-400 font-bold">
-                <Radio className="h-3 w-3 animate-pulse text-amber-500" /> CANLI İSG KONSOLU
-              </span>
-              <span className="text-zinc-600">|</span>
-              <span className="text-zinc-400">MEVZUAT: 6331 s. İSGK AKTİF</span>
-            </div>
-            <div className="flex items-center gap-4 text-zinc-400 shrink-0">
-              <span className="flex items-center gap-1 text-emerald-400 font-semibold">
-                <Activity className="h-3 w-3" /> GEMINI VISION 2.5: ÇEVRİMİÇİ
-              </span>
-              <span className="text-zinc-600">|</span>
-              <span className="text-zinc-300 font-semibold">{liveTime}</span>
-            </div>
-          </div>
-
-          {/* Cockpit Nav Header */}
-          <header className="h-14 border-b border-zinc-800 bg-[#0d101b]/80 backdrop-blur-xl px-4 sm:px-6 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-7 w-7 rounded bg-amber-500 text-black font-extrabold flex items-center justify-center text-xs">
-                ⚡
-              </div>
-              <span className="font-bold text-sm tracking-wide text-zinc-100 font-mono">
-                SAHA_RADAR://{pathname.replace('/dashboard', '').replace('/', '') || 'GENEL'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-lg">
-              {navItems.map((item) => {
-                const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`))
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`px-3 py-1 rounded text-xs font-mono transition-all ${
-                      isActive ? 'bg-amber-500 text-black font-bold' : 'text-zinc-400 hover:text-white'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                )
-              })}
-            </div>
-          </header>
-
-          <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">{children}</main>
-
-          {/* Bottom Floating Command HUD */}
-          <nav aria-label="Taktik Komuta Çubuğu" className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 bg-[#0e121f]/95 border border-amber-500/40 rounded-2xl px-3 py-2 shadow-2xl backdrop-blur-2xl flex items-center gap-3">
-            <span className="text-[10px] font-mono text-amber-400 font-bold uppercase pl-2 pr-1 border-r border-zinc-800">
-              HUD
-            </span>
-            <Button asChild size="sm" className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs h-8 gap-1.5 shadow-md">
-              <Link href="/dashboard/isg-denetim">
-                <Plus className="h-3.5 w-3.5" /> + Fotoğraf / Denetim
-              </Link>
-            </Button>
-            <Button asChild size="sm" variant="outline" className="border-zinc-700 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 text-xs h-8">
-              <Link href="/dashboard/reports">
-                <FileText className="h-3.5 w-3.5 mr-1" /> Arşiv
-              </Link>
-            </Button>
-            <Button asChild size="sm" variant="outline" className="border-zinc-700 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 text-xs h-8">
-              <Link href="/dashboard/stats">
-                <Activity className="h-3.5 w-3.5 mr-1" /> Metrikler
-              </Link>
-            </Button>
-          </nav>
-        </div>
-      )}
-
-      {/* ========================================================
-          5. DYNAMIC ISLAND (APPLE VISIONOS / ZERO-CHROME)
+          4. DYNAMIC ISLAND (APPLE VISIONOS / ZERO-CHROME)
           ======================================================== */}
       {mode === 'island' && (
         <div className="flex-1 flex flex-col w-full relative pt-16">
-          {/* Floating Expandable Dynamic Island Pill */}
           <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300">
             <div
               className={`bg-zinc-950/90 text-white border border-zinc-700/80 rounded-full shadow-2xl backdrop-blur-2xl transition-all duration-300 overflow-hidden ${
@@ -438,7 +328,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               onClick={() => !isIslandExpanded && setIsIslandExpanded(true)}
             >
               {!isIslandExpanded ? (
-                // Compact Pill State
                 <div className="flex items-center gap-3 text-xs select-none">
                   <div className="h-5 w-5 rounded-full bg-amber-500 text-black flex items-center justify-center font-extrabold text-[10px]">
                     ⚡
@@ -452,7 +341,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   <ChevronDown className="h-3.5 w-3.5 text-zinc-400 ml-1" />
                 </div>
               ) : (
-                // Expanded Island State
                 <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
                     <div className="flex items-center gap-2">
@@ -495,7 +383,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       )}
 
       {/* ========================================================
-          6. SAHA ZAMAN TÜNELİ (FEED & TIMELINE MODELİ)
+          5. SAHA ZAMAN TÜNELİ (FEED & TIMELINE MODELİ)
           ======================================================== */}
       {mode === 'timeline' && (
         <div className="flex-1 flex flex-col w-full bg-muted/10">
@@ -512,7 +400,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </header>
 
           <div className="flex-1 flex max-w-6xl w-full mx-auto p-4 sm:p-6 gap-6">
-            {/* Timeline Stream Left Rail */}
             <aside aria-label="Denetim Aşamaları" className="w-52 shrink-0 hidden md:flex flex-col gap-3 pt-2">
               <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 Denetim Aşamaları
@@ -533,105 +420,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               </div>
             </aside>
 
-            {/* Main Feed Content */}
             <main className="flex-1 min-w-0">{children}</main>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================
-          7. CANLI PDF STÜDYOSU (SPLIT-SCREEN WYSIWYG)
-          ======================================================== */}
-      {mode === 'splitscreen' && (
-        <div className="flex-1 flex flex-col w-full bg-muted/20">
-          <header className="sticky top-0 z-40 h-14 bg-background/90 backdrop-blur-xl border-b border-border px-4 sm:px-8 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <Split className="h-5 w-5 text-amber-600" />
-              <span className="font-bold text-sm">Canlı Belge Stüdyosu</span>
-              <Badge variant="outline" className="text-[10px] font-mono">WYSIWYG Çift Ekran</Badge>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button asChild size="sm" variant="outline" className="h-8 text-xs font-medium">
-                <Link href="/dashboard">Panel</Link>
-              </Button>
-              <Button asChild size="sm" className="h-8 text-xs font-semibold bg-primary text-primary-foreground">
-                <Link href="/dashboard/isg-denetim">Denetim</Link>
-              </Button>
-            </div>
-          </header>
-
-          <div className="flex-1 grid lg:grid-cols-12 gap-6 p-4 sm:p-6 max-w-7xl w-full mx-auto">
-            {/* Left Column: Form & Work Area */}
-            <main className="lg:col-span-7 flex flex-col gap-4">
-              {children}
-            </main>
-
-            {/* Right Column: Live A4 PDF Sheet Preview */}
-            <aside aria-label="Canlı Resmi Tutanak Önizlemesi" className="lg:col-span-5 hidden lg:flex flex-col gap-3 sticky top-20 self-start">
-              <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground px-1">
-                <span className="flex items-center gap-1.5">
-                  <FileText className="h-3.5 w-3.5 text-amber-600" /> Canlı Resmi Tutanak Önizlemesi
-                </span>
-                <span className="text-[10px] font-mono text-emerald-600 font-bold">● A4 Baskıya Hazır</span>
-              </div>
-
-              {/* Scaled-down realistic A4 Paper sheet */}
-              <div className="bg-card border-2 border-border/90 rounded-xl p-5 shadow-xl text-[11px] space-y-3.5 select-none transition-all">
-                {/* Paper Header */}
-                <div className="border-b-2 border-primary/20 pb-2 text-center">
-                  <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-                    T.C. ÇALIŞMA VE SOSYAL GÜVENLİK BAKANLIĞI
-                  </div>
-                  <div className="text-xs font-extrabold text-foreground mt-0.5">
-                    İŞ SAĞLIĞI VE GÜVENLİĞİ SAHA DENETİM TUTANAĞI
-                  </div>
-                  <div className="text-[9px] font-mono text-muted-foreground mt-0.5">
-                    6331 Sayılı Kanun Uyarınca Resmî Tespit Formu
-                  </div>
-                </div>
-
-                {/* Metadata Grid */}
-                <div className="grid grid-cols-2 gap-1.5 bg-muted/40 p-2 rounded border border-border text-[10px]">
-                  <div>Şantiye: <strong>Bölen Otomotiv</strong></div>
-                  <div>Tarih: <strong>{new Date().toLocaleDateString('tr-TR')}</strong></div>
-                  <div>Denetçi: <strong>{userName}</strong></div>
-                  <div>Hava: <strong>Güneşli (45 İşçi)</strong></div>
-                </div>
-
-                {/* Simulated Findings Table */}
-                <div className="space-y-1">
-                  <div className="font-bold text-[10px] text-foreground flex justify-between">
-                    <span>Tespit Edilen Uygunsuzluklar</span>
-                    <span className="text-amber-600">DÖF Tablosu</span>
-                  </div>
-                  <div className="border rounded divide-y text-[9.5px]">
-                    <div className="p-1.5 bg-red-500/5 flex justify-between items-center">
-                      <span>#1 Cephe İskelesi Yaşam Hattı</span>
-                      <span className="font-bold text-red-600">YÜKSEK RİSK</span>
-                    </div>
-                    <div className="p-1.5 bg-amber-500/5 flex justify-between items-center">
-                      <span>#2 Elektrik Panosu Yalıtkan Paspas</span>
-                      <span className="font-bold text-amber-600">ORTA RİSK</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Simulated Dual Signature Blocks */}
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t text-[9px] text-center">
-                  <div className="border border-dashed p-1.5 rounded">
-                    <div className="font-bold">İSG UZMANI</div>
-                    <div className="text-muted-foreground mt-0.5">{userName}</div>
-                    <div className="text-[8px] text-emerald-600 mt-2 font-mono">✓ DİJİTAL KAŞE</div>
-                  </div>
-                  <div className="border border-dashed p-1.5 rounded">
-                    <div className="font-bold">ŞANTİYE YETKİLİSİ</div>
-                    <div className="text-muted-foreground mt-0.5">Tebellüğ Eden</div>
-                    <div className="text-[8px] text-muted-foreground mt-2 font-mono">İmza Alanı</div>
-                  </div>
-                </div>
-              </div>
-            </aside>
           </div>
         </div>
       )}
@@ -652,15 +441,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       )}
 
       {/* ========================================================
-          PERSISTENT MODERN FLOATING CONCEPT SELECTOR
+          PERSISTENT FLOATING CONCEPT SELECTOR
           ======================================================== */}
       <aside aria-label="Tasarım Konsepti Menüsü" className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2">
-        {/* Expanded Drawer Popup */}
         {isSwitcherOpen && (
           <div className="bg-zinc-950/95 text-zinc-100 border border-zinc-700/90 rounded-2xl p-3 shadow-2xl backdrop-blur-2xl w-[90vw] max-w-sm flex flex-col gap-1.5 animate-in fade-in slide-in-from-bottom-3 duration-200">
             <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
               <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5" /> Canlı Tasarım Laboratuvarı
+                <Sparkles className="h-3.5 w-3.5" /> Canlı Tasarım Seçenekleri
               </span>
               <button
                 onClick={() => setIsSwitcherOpen(false)}
@@ -711,13 +499,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        {/* Trigger Pill Button */}
         <button
           onClick={() => setIsSwitcherOpen(!isSwitcherOpen)}
           className="bg-zinc-950/90 hover:bg-zinc-900 text-zinc-100 border border-zinc-700/80 hover:border-amber-500/70 rounded-full px-4 py-2.5 shadow-2xl backdrop-blur-xl flex items-center gap-2.5 text-xs font-semibold transition-all group cursor-pointer"
         >
           <span className="text-base group-hover:scale-110 transition-transform">{currentConcept.icon}</span>
-          <span className="font-bold text-white">Tasarım: {currentConcept.title}</span>
+          <span className="font-bold text-white">{currentConcept.title}</span>
           <ChevronUp className={`h-3.5 w-3.5 text-amber-400 transition-transform ${isSwitcherOpen ? 'rotate-180' : ''}`} />
         </button>
       </aside>
