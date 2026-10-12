@@ -27,8 +27,8 @@ export async function POST(req: NextRequest) {
 
     // Kullanıcının profilini, API Key'ini ve Plan bilgisini çek
     const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-    const userPlan = ((profile?.plan as PlanType) || 'free') in PLAN_LIMITS ? (profile?.plan as PlanType) : 'free'
-    const planConfig = PLAN_LIMITS[userPlan]
+    const userPlan = (profile?.plan && profile.plan in PLAN_LIMITS) ? (profile.plan as PlanType) : 'free'
+    const planConfig = PLAN_LIMITS[userPlan] || PLAN_LIMITS.free
 
     const limiter = await checkRateLimit(`upload:${user.id}`, planConfig.limit, planConfig.window)
     if (!limiter.success) {
