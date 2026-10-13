@@ -210,8 +210,12 @@ export default function StatsPage() {
       }
     }
 
-    const trend = (current: number, previous: number) =>
-      previous === 0 ? (current > 0 ? 100 : 0) : Math.round(((current - previous) / previous) * 100)
+    const reportsTrend =
+      reportsPrevMonth > 0
+        ? Math.round(((reportsThisMonth - reportsPrevMonth) / reportsPrevMonth) * 100)
+        : reportsThisMonth > 0
+        ? 100
+        : undefined
 
     return {
       totalReports: rows.length,
@@ -221,7 +225,7 @@ export default function StatsPage() {
       overdue,
       reportsThisMonth,
       reportsPrevMonth,
-      reportsTrend: trend(reportsThisMonth, reportsPrevMonth),
+      reportsTrend,
       reportsLast30Days,
       findingsLast30Days,
       thirtyDaysData: [...dailyMap.values()].map((entry) => ({
@@ -293,18 +297,18 @@ export default function StatsPage() {
           icon={FileText}
           label="Toplam Rapor"
           value={stats.totalReports}
-          unit="rapor"
           note="Arşivlenmiş tüm denetimler"
         />
         <KpiCard
           icon={Calendar}
           label="Bu Ay Oluşturulan"
           value={stats.reportsThisMonth}
-          unit="rapor"
           note={
             stats.reportsPrevMonth > 0
               ? `Geçen ay ${stats.reportsPrevMonth} rapor oluşturuldu`
-              : 'Geçen aya kıyasla ilk denetimler'
+              : stats.reportsThisMonth > 0
+              ? 'Geçen aya kıyasla ilk denetimler'
+              : 'Bu ay henüz denetim yapılmadı'
           }
           trend={stats.reportsTrend}
           trendGood="up"
@@ -313,7 +317,6 @@ export default function StatsPage() {
           icon={stats.openFindings > 0 ? AlertTriangle : CheckCircle2}
           label="Açık DÖF"
           value={stats.openFindings}
-          unit={stats.openFindings > 0 ? 'bulgu' : undefined}
           note={
             stats.overdue > 0
               ? `${stats.overdue} aksiyonun süresi geçti`
