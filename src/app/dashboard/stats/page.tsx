@@ -17,7 +17,6 @@ import {
   CheckCircle2,
   FileText,
   Lightbulb,
-  Sparkles,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react'
@@ -82,6 +81,7 @@ function KpiCard({
   icon: Icon,
   label,
   value,
+  unit,
   note,
   tone = 'default',
   trend,
@@ -90,6 +90,7 @@ function KpiCard({
   icon: LucideIcon
   label: string
   value: string | number
+  unit?: string
   note: string
   tone?: 'default' | 'warning' | 'danger' | 'success'
   trend?: number
@@ -105,7 +106,10 @@ function KpiCard({
       </div>
       <div>
         <p className="stats-kpi-label">{label}</p>
-        <p className="stats-kpi-value">{value}</p>
+        <p className="stats-kpi-value">
+          <span>{value}</span>
+          {unit ? <span className="stats-kpi-unit">{unit}</span> : null}
+        </p>
         <p className="stats-kpi-note">{note}</p>
       </div>
     </article>
@@ -209,30 +213,6 @@ export default function StatsPage() {
     const trend = (current: number, previous: number) =>
       previous === 0 ? (current > 0 ? 100 : 0) : Math.round(((current - previous) / previous) * 100)
 
-    const diff = reportsThisMonth - reportsPrevMonth
-    let insightText = ''
-    let insightSub = ''
-
-    if (reportsPrevMonth === 0 && reportsThisMonth === 0) {
-      insightText = 'Bu ay henüz yeni bir denetim raporu oluşturmadın.'
-    } else if (reportsPrevMonth === 0 && reportsThisMonth > 0) {
-      insightText = `Bu ay ilk ${reportsThisMonth} denetim raporunu oluşturdun.`
-    } else if (diff > 0) {
-      insightText = `Bu ay geçen aya göre ${diff} rapor fazla oluşturdun.`
-    } else if (diff < 0) {
-      insightText = `Bu ay geçen aya göre ${Math.abs(diff)} rapor daha az oluşturdun.`
-    } else {
-      insightText = `Bu ay geçen ayla aynı sayıda (${reportsThisMonth} rapor) oluşturdun.`
-    }
-
-    if (open > 0) {
-      insightSub = overdue > 0
-        ? `${open} açık DÖF bulunuyor (${overdue} termin aşımı).`
-        : `${open} açık DÖF aksiyon bekliyor.`
-    } else if (totalFindings > 0) {
-      insightSub = 'Tüm düzeltici faaliyetler kapatıldı.'
-    }
-
     return {
       totalReports: rows.length,
       totalFindings,
@@ -244,8 +224,6 @@ export default function StatsPage() {
       reportsTrend: trend(reportsThisMonth, reportsPrevMonth),
       reportsLast30Days,
       findingsLast30Days,
-      insightText,
-      insightSub,
       thirtyDaysData: [...dailyMap.values()].map((entry) => ({
         name: entry.label,
         rapor: entry.rapor,
@@ -294,6 +272,8 @@ export default function StatsPage() {
     )
   }
 
+  const hasRecentActivity = stats.reportsLast30Days > 0 || stats.findingsLast30Days > 0
+
   return (
     <div className="stats-dashboard">
       <header className="stats-head">
@@ -307,31 +287,20 @@ export default function StatsPage() {
         </Link>
       </header>
 
-      {/* Kısa İçgörü */}
-      <div className="stats-insight-banner">
-        <div className="stats-insight-icon">
-          <Sparkles size={18} />
-        </div>
-        <div className="stats-insight-text">
-          <p>
-            <strong>{stats.insightText}</strong>
-            {stats.insightSub ? <span>{stats.insightSub}</span> : null}
-          </p>
-        </div>
-      </div>
-
-      {/* 3 Karar Odaklı KPI Kartı */}
+      {/* 3 Temel Metrik Kartı */}
       <section className="stats-kpis" aria-label="Özet metrikler">
         <KpiCard
           icon={FileText}
           label="Toplam Rapor"
           value={stats.totalReports}
-          note="Arşivlenmiş tüm saha denetimleri"
+          unit="rapor"
+          note="Arşivlenmiş tüm denetimler"
         />
         <KpiCard
           icon={Calendar}
           label="Bu Ay Oluşturulan"
-          value={`${stats.reportsThisMonth} Rapor`}
+          value={stats.reportsThisMonth}
+          unit="rapor"
           note={
             stats.reportsPrevMonth > 0
               ? `Geçen ay ${stats.reportsPrevMonth} rapor oluşturuldu`
@@ -344,9 +313,10 @@ export default function StatsPage() {
           icon={stats.openFindings > 0 ? AlertTriangle : CheckCircle2}
           label="Açık DÖF"
           value={stats.openFindings}
+          unit={stats.openFindings > 0 ? 'bulgu' : undefined}
           note={
             stats.overdue > 0
-              ? `${stats.overdue} aksiyonun termin süresi aşıldı`
+              ? `${stats.overdue} aksiyonun süresi geçti`
               : stats.openFindings > 0
               ? 'Takip bekleyen açık bulgu'
               : 'Tüm düzeltici faaliyetler kapalı'
@@ -355,75 +325,94 @@ export default function StatsPage() {
         />
       </section>
 
-      {/* Son 30 Gün Rapor Trendi - Tek Grafik */}
+      {/* Son 30 Gün Rapor Trendi - Tek Grafik veya Kompakt Boş Durum */}
       <article className="stats-panel">
         <header className="stats-panel-head">
           <div>
             <span className="stats-panel-kicker">SON 30 GÜN</span>
             <h2>Raporlama trendi</h2>
-            <p className="stats-panel-insight">
-              Son 30 günde toplam <strong>{stats.reportsLast30Days}</strong> rapor ve <strong>{stats.findingsLast30Days}</strong> bulgu kaydedildi.
-            </p>
+            {hasRecentActivity ? (
+              <p className="stats-panel-insight">
+                Son 30 günde toplam <strong>{stats.reportsLast30Days}</strong> rapor ve <strong>{stats.findingsLast30Days}</strong> bulgu kaydedildi.
+              </p>
+            ) : null}
           </div>
-          <div className="stats-legend">
-            <span>
-              <i style={{ background: '#23603d' }} /> Rapor
-            </span>
-            <span>
-              <i style={{ background: '#d8a522' }} /> Bulgu
-            </span>
-          </div>
+          {hasRecentActivity ? (
+            <div className="stats-legend">
+              <span>
+                <i style={{ background: '#23603d' }} /> Rapor
+              </span>
+              <span>
+                <i style={{ background: '#d8a522' }} /> Bulgu
+              </span>
+            </div>
+          ) : null}
         </header>
 
-        <div className="stats-chart">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={stats.thirtyDaysData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="statsRapor" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#23603d" stopOpacity={0.32} />
-                  <stop offset="100%" stopColor="#23603d" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="statsBulgu" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#d8a522" stopOpacity={0.32} />
-                  <stop offset="100%" stopColor="#d8a522" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--redesign-line)" />
-              <XAxis
-                dataKey="name"
-                axisLine={false}
-                tickLine={false}
-                interval={4}
-                tick={{ fill: '#8b998f', fontSize: 11 }}
-                dy={8}
-              />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                allowDecimals={false}
-                width={36}
-                tick={{ fill: '#8b998f', fontSize: 11 }}
-              />
-              <Tooltip content={<StatsTooltip />} cursor={{ stroke: 'var(--redesign-line)', strokeWidth: 1 }} />
-              <Area
-                type="monotone"
-                dataKey="rapor"
-                name="Rapor"
-                stroke="#23603d"
-                strokeWidth={2.5}
-                fill="url(#statsRapor)"
-              />
-              <Area
-                type="monotone"
-                dataKey="bulgu"
-                name="Bulgu"
-                stroke="#d8a522"
-                strokeWidth={2.5}
-                fill="url(#statsBulgu)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        {hasRecentActivity ? (
+          <div className="stats-chart">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={stats.thirtyDaysData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="statsRapor" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#23603d" stopOpacity={0.32} />
+                    <stop offset="100%" stopColor="#23603d" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="statsBulgu" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#d8a522" stopOpacity={0.32} />
+                    <stop offset="100%" stopColor="#d8a522" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--redesign-line)" />
+                <XAxis
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  interval={4}
+                  tick={{ fill: '#8b998f', fontSize: 11 }}
+                  dy={8}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={false}
+                  width={36}
+                  tick={{ fill: '#8b998f', fontSize: 11 }}
+                />
+                <Tooltip content={<StatsTooltip />} cursor={{ stroke: 'var(--redesign-line)', strokeWidth: 1 }} />
+                <Area
+                  type="monotone"
+                  dataKey="rapor"
+                  name="Rapor"
+                  stroke="#23603d"
+                  strokeWidth={2.5}
+                  fill="url(#statsRapor)"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="bulgu"
+                  name="Bulgu"
+                  stroke="#d8a522"
+                  strokeWidth={2.5}
+                  fill="url(#statsBulgu)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="stats-chart-empty">
+            <div className="stats-chart-empty-icon">
+              <TrendingUp size={20} />
+            </div>
+            <h3>Son 30 günde aktivite yok</h3>
+            <p>Yeni bir denetim oluşturduğunda trend burada görünecek.</p>
+            <Button asChild size="sm" className="stats-chart-empty-btn">
+              <Link href="/dashboard/isg-denetim">
+                Yeni denetim başlat <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          </div>
+        )}
       </article>
     </div>
   )
