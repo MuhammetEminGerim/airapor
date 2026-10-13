@@ -24,11 +24,49 @@ interface DashboardReport {
   isg_data?: ISGReportData | null
 }
 
+const CACHE_KEY_REPORTS = 'isg_cache_recent_reports'
+const CACHE_KEY_DOF = 'isg_cache_open_dof'
+const CACHE_KEY_USER = 'isg_cache_user_name'
+
 export default function DashboardPage() {
-  const [openDof, setOpenDof] = useState(0)
-  const [recentReports, setRecentReports] = useState<DashboardReport[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [userName, setUserName] = useState('Kullanıcı')
+  // Stale-While-Revalidate (Anında Render Önbelleği)
+  const [openDof, setOpenDof] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem(CACHE_KEY_DOF)
+        if (cached !== null) return Number(cached)
+      } catch {}
+    }
+    return 0
+  })
+
+  const [recentReports, setRecentReports] = useState<DashboardReport[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem(CACHE_KEY_REPORTS)
+        if (cached) return JSON.parse(cached)
+      } catch {}
+    }
+    return []
+  })
+
+  const [userName, setUserName] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem(CACHE_KEY_USER)
+        if (cached) return cached
+      } catch {}
+    }
+    return 'Kullanıcı'
+  })
+
+  // Eğer önbellekten rapor geldiyse bekleme animasyonuna gerek yok, anında göster
+  const [isLoading, setIsLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !sessionStorage.getItem(CACHE_KEY_REPORTS)
+    }
+    return true
+  })
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,33 +81,46 @@ export default function DashboardPage() {
           return
         }
 
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', user.id)
-          .single()
+        // Paralel İstek (Promise.all): Profil ve Raporları aynı anda çekerek süreyi yarıya indiriyoruz
+        const [profileRes, reportsRes] = await Promise.all([
+          supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', user.id)
+            .maybeSingle(),
+          supabase
+            .from('reports')
+            .select('id, title, type, created_at, status, isg_data')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(4), // Sadece son 3-4 raporu çekerek veri aktarım boyutunu hafifletiyoruz
+        ])
 
-        if (!profileError) setUserName(profile?.full_name || 'Kullanıcı')
-        timer.mark('profile-ready', { hasProfile: !profileError })
+        if (profileRes.data?.full_name) {
+          setUserName(profileRes.data.full_name)
+          sessionStorage.setItem(CACHE_KEY_USER, profileRes.data.full_name)
+        }
 
-        const { data: reports, error: reportsError } = await supabase
-          .from('reports')
-          .select('id, title, type, created_at, status, isg_data')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(8)
-
-        if (reportsError) toast.error('Raporlar yüklenirken bir hata oluştu.')
-        else {
-          const loadedReports = (reports || []) as DashboardReport[]
-          const openDof = loadedReports.reduce(
-            (total, report) => total + (report.isg_data?.findings?.filter((finding) => finding.status === 'open').length ?? 0),
+        if (reportsRes.error) {
+          toast.error('Raporlar yüklenirken bir hata oluştu.')
+        } else {
+          const loadedReports = (reportsRes.data || []) as DashboardReport[]
+          const computedOpenDof = loadedReports.reduce(
+            (total, report) =>
+              total +
+              (report.isg_data?.findings?.filter((finding) => finding.status === 'open').length ?? 0),
             0,
           )
-          setOpenDof(openDof)
+
+          setOpenDof(computedOpenDof)
           setRecentReports(loadedReports)
+
+          // Bir sonraki yenilemede 0 ms gecikmeyle anında açılması için önbelleğe al
+          sessionStorage.setItem(CACHE_KEY_REPORTS, JSON.stringify(loadedReports))
+          sessionStorage.setItem(CACHE_KEY_DOF, String(computedOpenDof))
         }
-        timer.mark('reports-ready', { reports: reports?.length ?? 0, hasError: Boolean(reportsError) })
+
+        timer.mark('reports-ready', { reports: reportsRes.data?.length ?? 0 })
       } catch {
         toast.error('Panel verileri alınamadı.')
         timer.mark('fetch-error')
@@ -132,8 +183,19 @@ export default function DashboardPage() {
           </div>
           <Link href="/dashboard/reports">Tümünü gör <ArrowRight size={14} /></Link>
         </div>
-        {isLoading ? (
-          <div className="dashboard-report-loading"><span /><span /><span /></div>
+
+        {isLoading && recentReports.length === 0 ? (
+          <div className="p-4 space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 animate-pulse">
+                <div className="w-8 h-8 rounded-lg bg-muted shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3.5 bg-muted rounded w-2/5" />
+                  <div className="h-2.5 bg-muted/60 rounded w-1/4" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : recentReports.length ? (
           <div className="dashboard-redesign-report-list">
             {recentReports.slice(0, 3).map((report) => {
